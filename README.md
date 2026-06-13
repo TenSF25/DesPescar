@@ -1,6 +1,6 @@
 # 🐧 DesPescar - Guía de Desarrollo Interna 🚀
 
-Este es el repositorio central (Monorepo) de DesPescar. Acá abajo están los comandos exactos y las reglas técnicas que tenemos que seguir los 9 desarrolladores y 2 PMs para no romper nada.
+Este es el repositorio central (Monorepo) de DesPescar. Acá abajo están los comandos exactos y las reglas técnicas que tenemos que seguir el equipo para no romper nada.
 
 ---
 
@@ -18,7 +18,7 @@ Antes de clonar, asegurate de tener instalado:
 ### 1. Clonar el proyecto y pararse en la raíz
 
 ```bash
-git clone [https://github.com/TenSF25/DesPescar.git](https://github.com/TenSF25/DesPescar.git)
+git clone https://github.com/TenSF25/DesPescar.git
 cd despescar
 ```
 
