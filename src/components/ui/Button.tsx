@@ -13,7 +13,7 @@ export const Button = ({ variant = 'primary', className, children, ...props }: B
         variant === 'primary' &&
           'border-primary text-primary hover:bg-primary border hover:text-white',
         variant === 'secondary' &&
-          'bg-secondary border border-slate-500 text-white hover:bg-slate-800',
+          'border-secondary text-secondary hover:bg-secondary border hover:text-white',
         variant === 'danger' && 'bg-alert text-white hover:bg-[#93000a]',
         className,
       )}

@@ -5,31 +5,35 @@ import { RegisterPage } from '../features/auth/pages/RegisterPage';
 import { ReservationsPage } from '../features/bookings/pages/ReservationsPage';
 import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage';
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
+import { MainLayout } from '../components/layout/MainLayout';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/booking',
-    element: <BookingLayout />,
+    element: <MainLayout />,
     children: [
+      { path: '/', element: <HomePage /> },
       {
-        path: 'reservation',
-        element: <ReservationsPage />,
+        path: '/login',
+        element: <LoginPage />,
       },
       {
-        path: 'seats',
-        element: <SeatSelectionPage />,
+        path: '/register',
+        element: <RegisterPage />,
+      },
+      {
+        path: '/booking',
+        element: <BookingLayout />,
+        children: [
+          {
+            path: 'reservation',
+            element: <ReservationsPage />,
+          },
+          {
+            path: 'seats',
+            element: <SeatSelectionPage />,
+          },
+        ],
       },
     ],
   },
