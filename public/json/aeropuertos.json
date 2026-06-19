@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "nombre": "Aeropuerto Internacional Ministro Pistarini",
+    "codigo_iata": "EZE",
+    "ciudad": "Buenos Aires",
+    "pais": "Argentina",
+    "coordenadas": {
+      "latitud": -34.8222,
+      "longitud": -58.5358
+    },
+    "activo": true,
+    "aerolineas_principales": ["Aerolíneas Argentinas", "LATAM", "Flybondi"]
+  },
+  {
+    "id": 2,
+    "nombre": "Aeropuerto Internacional Benito Juárez",
+    "codigo_iata": "MEX",
+    "ciudad": "Ciudad de México",
+    "pais": "México",
+    "coordenadas": {
+      "latitud": 19.4363,
+      "longitud": -99.0721
+    },
+    "activo": true,
+    "aerolineas_principales": ["Aeroméxico", "Volaris", "Viva Aerobus"]
+  },
+  {
+    "id": 3,
+    "nombre": "Aeropuerto Adolfo Suárez Madrid-Barajas",
+    "codigo_iata": "MAD",
+    "ciudad": "Madrid",
+    "pais": "España",
+    "coordenadas": {
+      "latitud": 40.4918,
+      "longitud": -3.5694
+    },
+    "activo": true,
+    "aerolineas_principales": ["Iberia", "Air Europa", "Ryanair"]
+  },
+  {
+    "id": 4,
+    "nombre": "Aeropuerto Internacional John F. Kennedy",
+    "codigo_iata": "JFK",
+    "ciudad": "Nueva York",
+    "pais": "Estados Unidos",
+    "coordenadas": {
+      "latitud": 40.6398,
+      "longitud": -73.7781
+    },
+    "activo": true,
+    "aerolineas_principales": ["Delta", "American Airlines", "JetBlue"]
+  },
+  {
+    "id": 5,
+    "nombre": "Aeropuerto Internacional El Dorado",
+    "codigo_iata": "BOG",
+    "ciudad": "Bogotá",
+    "pais": "Colombia",
+    "coordenadas": {
+      "latitud": 4.7016,
+      "longitud": -74.1469
+    },
+    "activo": false,
+    "aerolineas_principales": ["Avianca", "LATAM", "Wingo"]
+  }
+]
