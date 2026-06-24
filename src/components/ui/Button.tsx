@@ -9,7 +9,7 @@ export const Button = ({ variant = 'primary', className, children, ...props }: B
   return (
     <button
       className={cn(
-        'w-full cursor-pointer rounded-[10px] p-2 font-bold transition-all duration-200 active:scale-95',
+        'flex w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-[10px] p-2 font-bold transition-all duration-200 active:scale-95',
         variant === 'primary' &&
           'border-primary text-primary hover:bg-primary border hover:text-white',
         variant === 'secondary' &&
