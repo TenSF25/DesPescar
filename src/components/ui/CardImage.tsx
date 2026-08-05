@@ -19,17 +19,23 @@ export const CardImage = ({
     return (
       <div
         className={cn(
-          `mx-auto flex w-full max-w-110 min-w-77.25 cursor-pointer flex-col rounded-2xl border border-black/17 bg-white shadow-[4px_4px_30px_-4px_rgba(0,0,0,0.25)] transition-all duration-400 hover:scale-105`,
+          `group relative mx-auto flex w-full max-w-110 min-w-77.25 cursor-pointer flex-col overflow-hidden rounded-2xl border border-black/17 bg-white shadow-[4px_4px_30px_-4px_rgba(0,0,0,0.25)] transition-all duration-400 hover:-translate-y-3`,
         )}
         {...props}
       >
-        <img src={imageUrl} className="h-54 w-full rounded-t-2xl" alt="" />
+        <div className="relative h-54">
+          <img
+            src={imageUrl}
+            className="absolute inset-0 h-54 w-full rounded-t-2xl transition-transform duration-600 ease-out group-hover:scale-110"
+            alt=""
+          />
+        </div>
         <div className="flex flex-col gap-2 p-6">
           <div className="flex min-h-16 flex-row items-center justify-between">
             <h2 className="text-secondary text-2xl font-semibold">{country}</h2>
-            <div className="flex flex-col items-center">
-              <span className="text-center text-[12px] font-semibold text-[#44474E]/32 line-through">
-                Desde {formatCurrency(priceOffer ? priceOffer : 0)}
+            <div className="items-right flex flex-col">
+              <span className="text-right text-[16px] font-semibold text-[#44474E]/32 line-through">
+                {formatCurrency(priceOffer ? priceOffer : 0)}
               </span>
               <h2 className="text-secondary text-2xl font-medium">
                 {formatCurrency(price ? price : 0)}
@@ -65,12 +71,6 @@ export const CardImage = ({
         className={cn(
           'group relative flex h-full w-full cursor-pointer overflow-hidden rounded-2xl p-6 text-white',
         )}
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
       >
         <img
           src={imageUrl}
