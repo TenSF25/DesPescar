@@ -1,3 +1,10 @@
+import { FormComponent } from '../components/FormLogin';
+import { LayoutSection } from '../components/LayoutSection';
+
 export const LoginPage = () => {
-  return <main>Login</main>;
+  return (
+    <LayoutSection>
+      <FormComponent />
+    </LayoutSection>
+  );
 };
