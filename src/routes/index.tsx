@@ -6,6 +6,7 @@ import { ReservationsPage } from '../features/bookings/pages/ReservationsPage';
 import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage';
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
+import { ResultsPage } from '../features/flights/pages/ResultsPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ export const router = createBrowserRouter([
       {
         path: '/register',
         element: <RegisterPage />,
+      },
+      {
+        path: '/results',
+        element: <ResultsPage />,
       },
       {
         path: '/booking',
