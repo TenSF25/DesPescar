@@ -7,6 +7,7 @@ import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage'
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
 import { ResultsPage } from '../features/flights/pages/ResultsPage';
+import { FlightDetailsPage } from '../features/flights-details/pages/FlightDetailsPage';
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
       {
         path: '/results',
         element: <ResultsPage />,
+      },
+      {
+        path: '/flight-details',
+        element: <FlightDetailsPage />,
       },
       {
         path: '/booking',
