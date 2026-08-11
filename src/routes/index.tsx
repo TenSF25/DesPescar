@@ -6,6 +6,8 @@ import { ReservationsPage } from '../features/bookings/pages/ReservationsPage';
 import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage';
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
+import { ReservationsLayout } from '../features/reservations/layouts/ReservationsLayout';
+import { MyReservationsPage } from '../features/reservations/pages/MyReservationsPage';
 
 export const router = createBrowserRouter([
   {
@@ -36,5 +38,10 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: '/my-reservations',
+    element: <ReservationsLayout />,
+    children: [{ index: true, element: <MyReservationsPage /> }],
   },
 ]);
