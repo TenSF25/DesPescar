@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTicket,
@@ -11,6 +12,39 @@ import {
   faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons';
 export const FlightDetailsPage = () => {
+  const navigate = useNavigate();
+
+  const handleDownload = () => {
+    const content = `
+    COMPROBANTE DE RESERVA
+    
+    Reserva: ABC123
+    Ruta: BUE - MEX
+    Fecha: 15 de octubre de 2026
+    Horario: 10:30 - 16:55
+    Pasajeros: Juan Diaz, Azul Yedro
+    Total: $1.200,00
+    `;
+
+    const archivo = new Blob([content], { type: 'text/plain' });
+
+    const url = URL.createObjectURL(archivo);
+
+    const link = document.createElement('a');
+
+    link.href = url;
+
+    link.download = 'comprobante-reserva.txt';
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSupport = () => {
+    window.location.href = 'mailto:soporte@despescar.com';
+  };
+
   return (
     <div>
       <header></header>
@@ -22,12 +56,15 @@ export const FlightDetailsPage = () => {
               <FontAwesomeIcon icon={faTableColumns} className="w-4" />
               <span>Dashboard</span>
             </div>
-            <div className="flex items-center gap-3 rounded-lg bg-orange-500 px-4 py-3 text-white">
+            <button
+              onClick={() => navigate('/booking/reservation')}
+              className="flex items-center gap-3 rounded-lg bg-orange-500 px-4 py-3 text-white"
+            >
               <span>
                 <FontAwesomeIcon icon={faTicket} className="w-4" />
               </span>
               <span>Mis reservas</span>
-            </div>
+            </button>
             <div className="rounded-lg px-4 py-3">
               <FontAwesomeIcon icon={faUser} className="w-4" />
               <span>Mis datos</span>
@@ -46,15 +83,18 @@ export const FlightDetailsPage = () => {
           </div>
         </aside>
 
-        <main className="lex-1 bg-gray-50 p-8">
+        <main className="flex-1 bg-gray-50 p-8">
           <div className="mx-auto max-w-6xl">
-            <div className="flex items-center gap-2 font-medium text-blue-950">
+            <button
+              onClick={() => navigate('/booking/reservation')}
+              className="flex items-center gap-2 font-medium text-blue-950"
+            >
               <span>←</span>
               <span>Volver a mis reservas</span>
-            </div>
+            </button>
             {/* TARJETA SUPERIOR */}
             <div className="mt-6 rounded-xl border bg-white p-6">
-              <div className="flex items-center justify-between gap-6">
+              <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="rounded-md bg-blue-950 px-3 py-2 text-sm font-bold text-white">
                   PRÓXIMO VIAJE
                 </div>
@@ -83,7 +123,10 @@ export const FlightDetailsPage = () => {
                   </div>
                 </div>
 
-                <button className="flex items-center gap-2 rounded-lg border border-blue-950 px-5 py-3 font-semibold text-blue-950">
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-2 rounded-lg border border-blue-950 px-5 py-3 font-semibold text-blue-950"
+                >
                   <FontAwesomeIcon icon={faDownload} className="w-4" />
                   <span>Descargar comprobante</span>
                 </button>
@@ -220,7 +263,10 @@ export const FlightDetailsPage = () => {
                     Estamos para asistirte en lo que necesites.
                   </p>
 
-                  <button className="mt-5 flex items-center gap-2 rounded-lg border border-blue-950 px-5 py-3 font-medium text-blue-950">
+                  <button
+                    onClick={handleSupport}
+                    className="mt-5 flex items-center gap-2 rounded-lg border border-blue-950 px-5 py-3 font-medium text-blue-950"
+                  >
                     <FontAwesomeIcon icon={faHeadset} className="w-4" />
                     <span>Contactar soporte</span>
                   </button>
