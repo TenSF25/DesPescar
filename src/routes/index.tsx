@@ -6,8 +6,12 @@ import { ReservationsPage } from '../features/bookings/pages/ReservationsPage';
 import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage';
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
+<<<<<<< HEAD
 import { ReservationsLayout } from '../features/reservations/layouts/ReservationsLayout';
 import { MyReservationsPage } from '../features/reservations/pages/MyReservationsPage';
+=======
+import { ResultsPage } from '../features/flights/pages/ResultsPage';
+>>>>>>> c129cbc2a5960ec6182f322c500202a8c2db6183
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +26,10 @@ export const router = createBrowserRouter([
       {
         path: '/register',
         element: <RegisterPage />,
+      },
+      {
+        path: '/results',
+        element: <ResultsPage />,
       },
       {
         path: '/booking',
