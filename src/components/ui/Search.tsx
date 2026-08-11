@@ -1,9 +1,11 @@
 import type { HTMLAttributes } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSearchFly } from '../../hooks/useSearchFly';
 import { cn } from '../../utils/cn';
 import { Button } from './Button';
 
 export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
+  const navigate = useNavigate();
   const {
     setOrigen,
     setDestino,
@@ -172,7 +174,10 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
             <span>Flexibilidad de Fechas</span>
           </label>
         </div>
-        <Button className="bg-primary text-white lg:w-60">
+        <Button
+          className="bg-primary text-white lg:w-60"
+          onClick={() => navigate('/vuelos/resultados')}
+        >
           <span className="material-symbols-outlined">search</span> Buscar Vuelos
         </Button>
       </div>
