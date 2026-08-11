@@ -15,7 +15,7 @@ export const useLogin = () => {
     const password = formData.get('password');
 
     if ('t@gmail.com' === email && '123' === password) {
-      navigate('/');
+      navigate('/my-reservations');
 
       return {
         error: null,
