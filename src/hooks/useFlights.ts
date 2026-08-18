@@ -4,12 +4,17 @@ import type { Escala, Vuelo } from '../features/flights/flights.types';
 type Orden = 'mejor' | 'precio_asc' | 'precio_desc' | 'duracion';
 export type EquipajeFiltro = 'Todos' | 'mano' | 'bodega';
 
+interface RutaBuscada {
+  origenCodigo?: string;
+  destinoCodigo?: string;
+}
+
 const horaAMinutos = (hora: string) => {
   const [h, m] = hora.split(':').map(Number);
   return h * 60 + m;
 };
 
-export const useFlights = () => {
+export const useFlights = (ruta?: RutaBuscada) => {
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<string>('');
   const [escalaFiltro, setEscalaFiltro] = useState<Escala | 'Todos'>('Todos');
@@ -22,34 +27,51 @@ export const useFlights = () => {
   useEffect(() => {
     fetch('/json/vuelos.json')
       .then((res) => res.json())
-      .then((datos: Vuelo[]) => {
-        setVuelos(datos);
-        if (datos.length > 0) setFechaSeleccionada(datos[0].fecha);
-      })
+      .then((datos: Vuelo[]) => setVuelos(datos))
       .catch((e) => console.log(e));
   }, []);
 
+  const vuelosDeRuta = useMemo(() => {
+    if (!ruta?.origenCodigo && !ruta?.destinoCodigo) return vuelos;
+    return vuelos.filter((v) => {
+      const coincideOrigen = !ruta.origenCodigo || v.origenCodigo === ruta.origenCodigo;
+      const coincideDestino = !ruta.destinoCodigo || v.destinoCodigo === ruta.destinoCodigo;
+      return coincideOrigen && coincideDestino;
+    });
+  }, [vuelos, ruta?.origenCodigo, ruta?.destinoCodigo]);
+
   const fechasDisponibles = useMemo(() => {
     const mapa = new Map<string, number>();
-    vuelos.forEach((v) => {
+    vuelosDeRuta.forEach((v) => {
       const actual = mapa.get(v.fecha);
       if (actual === undefined || v.precio < actual) mapa.set(v.fecha, v.precio);
     });
     return Array.from(mapa.entries())
       .map(([fecha, precioDesde]) => ({ fecha, precioDesde }))
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
-  }, [vuelos]);
+  }, [vuelosDeRuta]);
+
+  useEffect(() => {
+    if (fechasDisponibles.length === 0) {
+      setFechaSeleccionada('');
+      return;
+    }
+    const fechaSigueSiendoValida = fechasDisponibles.some((f) => f.fecha === fechaSeleccionada);
+    if (!fechaSigueSiendoValida) {
+      setFechaSeleccionada(fechasDisponibles[0].fecha);
+    }
+  }, [fechasDisponibles]);
 
   const aerolineasDisponibles = useMemo(() => {
     const mapa = new Map<string, number>();
-    vuelos
+    vuelosDeRuta
       .filter((v) => v.fecha === fechaSeleccionada)
       .forEach((v) => {
         const actual = mapa.get(v.aerolinea);
         if (actual === undefined || v.precio < actual) mapa.set(v.aerolinea, v.precio);
       });
     return Array.from(mapa.entries()).map(([nombre, precioDesde]) => ({ nombre, precioDesde }));
-  }, [vuelos, fechaSeleccionada]);
+  }, [vuelosDeRuta, fechaSeleccionada]);
 
   const toggleAerolinea = (nombre: string) => {
     setAerolineasFiltro((prev) =>
@@ -58,7 +80,7 @@ export const useFlights = () => {
   };
 
   const vuelosFiltrados = useMemo(() => {
-    let lista = vuelos.filter((v) => v.fecha === fechaSeleccionada);
+    let lista = vuelosDeRuta.filter((v) => v.fecha === fechaSeleccionada);
 
     if (escalaFiltro !== 'Todos') {
       lista = lista.filter((v) => v.escalas === escalaFiltro);
@@ -97,7 +119,7 @@ export const useFlights = () => {
 
     return listaOrdenada;
   }, [
-    vuelos,
+    vuelosDeRuta,
     fechaSeleccionada,
     escalaFiltro,
     aerolineasFiltro,

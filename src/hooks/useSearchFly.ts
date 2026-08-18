@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAeropuerto } from './useAeropuerto';
+import type { Aeropuerto } from '../types/Interfaces';
 
 export const useSearchFly = () => {
   const { aeropuertos } = useAeropuerto();
@@ -9,9 +10,11 @@ export const useSearchFly = () => {
 
   const [origenInput, setOrigen] = useState('');
   const [origenSelect, setOrigenSelect] = useState(false);
+  const [origenSeleccionado, setOrigenSeleccionado] = useState<Aeropuerto | null>(null);
 
   const [destinoInput, setDestino] = useState('');
   const [destinoSelect, setDestinoSelect] = useState(false);
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState<Aeropuerto | null>(null);
 
   const origen = aeropuertos.filter((aero) => {
     const busqueda = origenInput.toLowerCase();
@@ -32,6 +35,18 @@ export const useSearchFly = () => {
       aero.codigo_iata.toLocaleLowerCase().includes(busqueda)
     );
   });
+
+  const seleccionarOrigen = (aero: Aeropuerto) => {
+    setOrigen(aero.nombre);
+    setOrigenSeleccionado(aero);
+    setOrigenSelect(true);
+  };
+
+  const seleccionarDestino = (aero: Aeropuerto) => {
+    setDestino(aero.nombre);
+    setDestinoSeleccionado(aero);
+    setDestinoSelect(true);
+  };
 
   useEffect(() => {
     const clickExterno = (e: MouseEvent) => {
@@ -61,6 +76,10 @@ export const useSearchFly = () => {
     origenInput,
     destinoSelect,
     destinoInput,
+    origenSeleccionado,
+    destinoSeleccionado,
+    seleccionarOrigen,
+    seleccionarDestino,
     contenedorOrigenRef,
     contenedorDestinoRef,
   };

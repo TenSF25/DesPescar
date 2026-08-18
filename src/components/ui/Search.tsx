@@ -17,6 +17,10 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
     setDestinoSelect,
     origen,
     destino,
+    origenSeleccionado,
+    destinoSeleccionado,
+    seleccionarOrigen,
+    seleccionarDestino,
     contenedorDestinoRef,
     contenedorOrigenRef,
   } = useSearchFly();
@@ -59,10 +63,7 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
               {origen.map((aero) => (
                 <li
                   className="cursor-pointer border-t border-white/5 p-3 text-sm transition-colors hover:bg-white/10"
-                  onClick={() => {
-                    setOrigen(aero.nombre);
-                    setOrigenSelect(true);
-                  }}
+                  onClick={() => seleccionarOrigen(aero)}
                   key={aero.id}
                 >
                   {aero.nombre}
@@ -102,10 +103,7 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
               {destino.map((aero) => (
                 <li
                   className="cursor-pointer border-t border-white/5 p-3 text-sm transition-colors hover:bg-white/10"
-                  onClick={() => {
-                    setDestino(aero.nombre);
-                    setDestinoSelect(true);
-                  }}
+                  onClick={() => seleccionarDestino(aero)}
                   key={aero.id}
                 >
                   {aero.nombre}
@@ -176,7 +174,11 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
         </div>
         <Button
           className="bg-primary text-white lg:w-60"
-          onClick={() => navigate('/vuelos/resultados')}
+          onClick={() =>
+            navigate('/vuelos/resultados', {
+              state: { origen: origenSeleccionado, destino: destinoSeleccionado },
+            })
+          }
         >
           <span className="material-symbols-outlined">search</span> Buscar Vuelos
         </Button>

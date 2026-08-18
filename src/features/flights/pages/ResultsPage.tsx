@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Section } from '../../../components/ui/Section';
 import { useFlights } from '../../../hooks/useFlights';
 import { DateTabs } from '../components/Results/DateTabs';
@@ -6,9 +6,19 @@ import { FlightFilters } from '../components/Results/FlightFilters';
 import { FlightList } from '../components/Results/FlightList';
 import { ScheduleHeader } from '../components/Results/ScheduleHeader';
 import type { Vuelo } from '../flights.types';
+import type { Aeropuerto } from '../../../types/Interfaces';
+
+interface ResultsLocationState {
+  origen: Aeropuerto | null;
+  destino: Aeropuerto | null;
+}
 
 export const ResultsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { origen: origenBuscado, destino: destinoBuscado } =
+    (location.state as ResultsLocationState) ?? { origen: null, destino: null };
+
   const {
     fechasDisponibles,
     fechaSeleccionada,
@@ -27,7 +37,10 @@ export const ResultsPage = () => {
     orden,
     setOrden,
     vuelosFiltrados,
-  } = useFlights();
+  } = useFlights({
+    origenCodigo: origenBuscado?.codigo_iata,
+    destinoCodigo: destinoBuscado?.codigo_iata,
+  });
 
   const primerVuelo = vuelosFiltrados[0];
 
@@ -46,10 +59,10 @@ export const ResultsPage = () => {
   return (
     <div className="flex w-full flex-col gap-6 bg-[#F5F6FA] pb-16">
       <ScheduleHeader
-        origenCiudad={primerVuelo?.origenCiudad ?? 'Buenos Aires'}
-        origenCodigo={primerVuelo?.origenCodigo ?? 'BUE'}
-        destinoCiudad={primerVuelo?.destinoCiudad ?? 'México'}
-        destinoCodigo={primerVuelo?.destinoCodigo ?? 'MEX'}
+        origenCiudad={origenBuscado?.ciudad ?? primerVuelo?.origenCiudad ?? 'Buenos Aires'}
+        origenCodigo={origenBuscado?.codigo_iata ?? primerVuelo?.origenCodigo ?? 'EZE'}
+        destinoCiudad={destinoBuscado?.ciudad ?? primerVuelo?.destinoCiudad ?? 'Ciudad de México'}
+        destinoCodigo={destinoBuscado?.codigo_iata ?? primerVuelo?.destinoCodigo ?? 'MEX'}
         fecha={fechaSeleccionada}
         pasajeros={2}
       />
