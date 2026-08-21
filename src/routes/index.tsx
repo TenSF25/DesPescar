@@ -7,6 +7,9 @@ import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage'
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
 import { ResultsPage } from '../features/flights/pages/ResultsPage';
+import { AccountLayout } from '../components/layout/AccountLayout';
+import { CancelFlightPage } from '../features/bookings/pages/CancelFlightPage';
+import { AccountPlaceholderPage } from '../features/bookings/pages/AccountPlaceholderPage';
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +28,20 @@ export const router = createBrowserRouter([
       {
         path: '/results',
         element: <ResultsPage />,
+      },
+      {
+        path: '/cuenta',
+        element: <AccountLayout />,
+        children: [
+          { index: true, element: <AccountPlaceholderPage /> },
+          { path: 'reservas', element: <AccountPlaceholderPage /> },
+          { path: 'datos', element: <AccountPlaceholderPage /> },
+          { path: 'ajustes', element: <AccountPlaceholderPage /> },
+          {
+            path: 'reservas/:reservationId/cancelar',
+            element: <CancelFlightPage />,
+          },
+        ],
       },
       {
         path: '/booking',
