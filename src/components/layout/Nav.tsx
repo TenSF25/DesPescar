@@ -8,7 +8,7 @@ export const Nav = () => {
 
   return (
     <>
-      <header className="w-full border-b-1 border-black/20">
+      <header className="fixed z-30 mb-4 w-full border-b border-black/20 bg-white">
         <nav className="flex w-full flex-row items-center justify-between gap-3 p-4 pr-8 pl-8">
           <Link to="/">
             <h3 className="text-secondary text-3xl font-bold tracking-widest">DESPESCAR</h3>

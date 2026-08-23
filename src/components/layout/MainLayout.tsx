@@ -6,7 +6,7 @@ export const MainLayout = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <Nav />
-      <main className="grow">
+      <main className="mt-17.74 grow">
         <Outlet />
       </main>
       <Footer />
