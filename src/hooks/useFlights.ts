@@ -7,6 +7,7 @@ export type EquipajeFiltro = 'Todos' | 'mano' | 'bodega';
 interface RutaBuscada {
   origenCodigo?: string;
   destinoCodigo?: string;
+  fechaInicial?: string;
 }
 
 const horaAMinutos = (hora: string) => {
@@ -38,7 +39,7 @@ export const useFlights = (ruta?: RutaBuscada) => {
       const coincideDestino = !ruta.destinoCodigo || v.destinoCodigo === ruta.destinoCodigo;
       return coincideOrigen && coincideDestino;
     });
-  }, [vuelos, ruta?.origenCodigo, ruta?.destinoCodigo]);
+  }, [vuelos, ruta]);
 
   const fechasDisponibles = useMemo(() => {
     const mapa = new Map<string, number>();
@@ -56,11 +57,19 @@ export const useFlights = (ruta?: RutaBuscada) => {
       setFechaSeleccionada('');
       return;
     }
-    const fechaSigueSiendoValida = fechasDisponibles.some((f) => f.fecha === fechaSeleccionada);
-    if (!fechaSigueSiendoValida) {
+
+    const fechaPedida = ruta?.fechaInicial;
+    const fechaPedidaValida = fechaPedida && fechasDisponibles.some((f) => f.fecha === fechaPedida);
+    if (fechaPedidaValida) {
+      setFechaSeleccionada(fechaPedida);
+      return;
+    }
+
+    const fechaActualSigueValida = fechasDisponibles.some((f) => f.fecha === fechaSeleccionada);
+    if (!fechaActualSigueValida) {
       setFechaSeleccionada(fechasDisponibles[0].fecha);
     }
-  }, [fechasDisponibles]);
+  }, [fechasDisponibles, ruta]);
 
   const aerolineasDisponibles = useMemo(() => {
     const mapa = new Map<string, number>();

@@ -1,9 +1,11 @@
+import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Section } from '../../../components/ui/Section';
 import { useFlights } from '../../../hooks/useFlights';
 import { DateTabs } from '../components/Results/DateTabs';
 import { FlightFilters } from '../components/Results/FlightFilters';
 import { FlightList } from '../components/Results/FlightList';
+import { ModifySearchModal } from '../components/Results/ModifySearchModal';
 import { ScheduleHeader } from '../components/Results/ScheduleHeader';
 import type { Vuelo } from '../flights.types';
 import type { Aeropuerto } from '../../../types/Interfaces';
@@ -11,13 +13,34 @@ import type { Aeropuerto } from '../../../types/Interfaces';
 interface ResultsLocationState {
   origen: Aeropuerto | null;
   destino: Aeropuerto | null;
+  fecha?: string;
+  pasajeros?: number;
 }
 
 export const ResultsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { origen: origenBuscado, destino: destinoBuscado } =
-    (location.state as ResultsLocationState) ?? { origen: null, destino: null };
+  const {
+    origen: origenInicial,
+    destino: destinoInicial,
+    fecha: fechaInicial,
+    pasajeros: pasajerosInicial,
+  } = (location.state as ResultsLocationState) ?? { origen: null, destino: null };
+
+  const [origenBuscado, setOrigenBuscado] = useState<Aeropuerto | null>(origenInicial);
+  const [destinoBuscado, setDestinoBuscado] = useState<Aeropuerto | null>(destinoInicial);
+  const [fechaBuscada, setFechaBuscada] = useState<string>(fechaInicial ?? '');
+  const [pasajeros, setPasajeros] = useState(pasajerosInicial ?? 2);
+  const [modalAbierto, setModalAbierto] = useState(false);
+
+  const ruta = useMemo(
+    () => ({
+      origenCodigo: origenBuscado?.codigo_iata,
+      destinoCodigo: destinoBuscado?.codigo_iata,
+      fechaInicial: fechaBuscada || undefined,
+    }),
+    [origenBuscado?.codigo_iata, destinoBuscado?.codigo_iata, fechaBuscada],
+  );
 
   const {
     fechasDisponibles,
@@ -37,10 +60,7 @@ export const ResultsPage = () => {
     orden,
     setOrden,
     vuelosFiltrados,
-  } = useFlights({
-    origenCodigo: origenBuscado?.codigo_iata,
-    destinoCodigo: destinoBuscado?.codigo_iata,
-  });
+  } = useFlights(ruta);
 
   const primerVuelo = vuelosFiltrados[0];
 
@@ -56,6 +76,19 @@ export const ResultsPage = () => {
     setHorarioMax(23 * 60 + 59);
   };
 
+  const handleModificarBusqueda = (valores: {
+    origen: Aeropuerto | null;
+    destino: Aeropuerto | null;
+    fecha: string;
+    pasajeros: number;
+  }) => {
+    setOrigenBuscado(valores.origen);
+    setDestinoBuscado(valores.destino);
+    setFechaBuscada(valores.fecha);
+    setPasajeros(valores.pasajeros);
+    setModalAbierto(false);
+  };
+
   return (
     <div className="flex w-full flex-col gap-6 bg-[#F5F6FA] pb-16">
       <ScheduleHeader
@@ -64,7 +97,8 @@ export const ResultsPage = () => {
         destinoCiudad={destinoBuscado?.ciudad ?? primerVuelo?.destinoCiudad ?? 'Ciudad de México'}
         destinoCodigo={destinoBuscado?.codigo_iata ?? primerVuelo?.destinoCodigo ?? 'MEX'}
         fecha={fechaSeleccionada}
-        pasajeros={2}
+        pasajeros={pasajeros}
+        onModificar={() => setModalAbierto(true)}
       />
 
       <Section>
@@ -101,6 +135,19 @@ export const ResultsPage = () => {
           </div>
         </div>
       </Section>
+
+      {modalAbierto && (
+        <ModifySearchModal
+          valoresIniciales={{
+            origen: origenBuscado,
+            destino: destinoBuscado,
+            fecha: fechaBuscada,
+            pasajeros,
+          }}
+          onCerrar={() => setModalAbierto(false)}
+          onBuscar={handleModificarBusqueda}
+        />
+      )}
     </div>
   );
 };

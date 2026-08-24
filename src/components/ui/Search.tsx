@@ -21,6 +21,10 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
     destinoSeleccionado,
     seleccionarOrigen,
     seleccionarDestino,
+    fecha,
+    setFecha,
+    pasajeros,
+    setPasajeros,
     contenedorDestinoRef,
     contenedorOrigenRef,
   } = useSearchFly();
@@ -123,11 +127,10 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
           <div className="flex w-full flex-row items-center rounded-xl border border-white/10 bg-black/15 p-3 text-white/70 focus-within:border-white/30">
             <span className="material-symbols-outlined text-[20px]">calendar_today</span>
             <input
-              type="text"
-              name=""
-              id=""
-              placeholder="Ida y vuelta"
-              className="w-full bg-transparent p-1 pl-3 font-semibold text-white outline-none placeholder:text-white/40"
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              className="w-full bg-transparent p-1 pl-3 font-semibold text-white [color-scheme:dark] outline-none placeholder:text-white/40"
             />
           </div>
         </div>
@@ -139,15 +142,27 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
           >
             Pasajeros
           </label>
-          <div className="flex w-full flex-row items-center rounded-xl border border-white/10 bg-black/15 p-3 text-white/70 focus-within:border-white/30">
-            <span className="material-symbols-outlined text-[20px]">person</span>
-            <input
-              type="text"
-              name=""
-              id=""
-              placeholder="1 Adulto"
-              className="w-full bg-transparent p-1 pl-3 font-semibold text-white outline-none placeholder:text-white/40"
-            />
+          <div className="flex w-full flex-row items-center justify-between rounded-xl border border-white/10 bg-black/15 p-3 text-white/70 focus-within:border-white/30">
+            <span className="flex items-center gap-2 font-semibold text-white">
+              <span className="material-symbols-outlined text-[20px]">person</span>
+              {pasajeros} {pasajeros === 1 ? 'Pasajero' : 'Pasajeros'}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPasajeros(Math.max(1, pasajeros - 1))}
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white/30 text-white"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                onClick={() => setPasajeros(Math.min(9, pasajeros + 1))}
+                className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white/30 text-white"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -176,7 +191,7 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
           className="bg-primary text-white lg:w-60"
           onClick={() =>
             navigate('/vuelos/resultados', {
-              state: { origen: origenSeleccionado, destino: destinoSeleccionado },
+              state: { origen: origenSeleccionado, destino: destinoSeleccionado, fecha, pasajeros },
             })
           }
         >

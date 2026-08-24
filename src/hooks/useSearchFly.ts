@@ -2,19 +2,33 @@ import { useState, useEffect, useRef } from 'react';
 import { useAeropuerto } from './useAeropuerto';
 import type { Aeropuerto } from '../types/Interfaces';
 
-export const useSearchFly = () => {
+interface ValoresIniciales {
+  origen?: Aeropuerto | null;
+  destino?: Aeropuerto | null;
+  fecha?: string;
+  pasajeros?: number;
+}
+
+export const useSearchFly = (valoresIniciales?: ValoresIniciales) => {
   const { aeropuertos } = useAeropuerto();
 
   const contenedorOrigenRef = useRef<HTMLDivElement>(null);
   const contenedorDestinoRef = useRef<HTMLDivElement>(null);
 
-  const [origenInput, setOrigen] = useState('');
-  const [origenSelect, setOrigenSelect] = useState(false);
-  const [origenSeleccionado, setOrigenSeleccionado] = useState<Aeropuerto | null>(null);
+  const [origenInput, setOrigen] = useState(valoresIniciales?.origen?.nombre ?? '');
+  const [origenSelect, setOrigenSelect] = useState(Boolean(valoresIniciales?.origen));
+  const [origenSeleccionado, setOrigenSeleccionado] = useState<Aeropuerto | null>(
+    valoresIniciales?.origen ?? null,
+  );
 
-  const [destinoInput, setDestino] = useState('');
-  const [destinoSelect, setDestinoSelect] = useState(false);
-  const [destinoSeleccionado, setDestinoSeleccionado] = useState<Aeropuerto | null>(null);
+  const [destinoInput, setDestino] = useState(valoresIniciales?.destino?.nombre ?? '');
+  const [destinoSelect, setDestinoSelect] = useState(Boolean(valoresIniciales?.destino));
+  const [destinoSeleccionado, setDestinoSeleccionado] = useState<Aeropuerto | null>(
+    valoresIniciales?.destino ?? null,
+  );
+
+  const [fecha, setFecha] = useState(valoresIniciales?.fecha ?? '');
+  const [pasajeros, setPasajeros] = useState(valoresIniciales?.pasajeros ?? 1);
 
   const origen = aeropuertos.filter((aero) => {
     const busqueda = origenInput.toLowerCase();
@@ -80,6 +94,10 @@ export const useSearchFly = () => {
     destinoSeleccionado,
     seleccionarOrigen,
     seleccionarDestino,
+    fecha,
+    setFecha,
+    pasajeros,
+    setPasajeros,
     contenedorOrigenRef,
     contenedorDestinoRef,
   };

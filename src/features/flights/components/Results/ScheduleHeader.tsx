@@ -7,6 +7,7 @@ interface ScheduleHeaderProps {
   destinoCodigo: string;
   fecha: string;
   pasajeros: number;
+  onModificar: () => void;
 }
 
 const formatearFecha = (fechaISO: string) => {
@@ -26,6 +27,7 @@ export const ScheduleHeader = ({
   destinoCodigo,
   fecha,
   pasajeros,
+  onModificar,
 }: ScheduleHeaderProps) => {
   return (
     <div className="bg-secondary flex w-full flex-col gap-6 rounded-b-2xl p-6 text-white lg:flex-row lg:items-center lg:justify-between">
@@ -56,7 +58,7 @@ export const ScheduleHeader = ({
         </div>
       </div>
 
-      <Button variant="primary" className="w-auto px-6 text-white lg:w-fit">
+      <Button variant="primary" className="w-auto px-6 text-white lg:w-fit" onClick={onModificar}>
         <span className="material-symbols-outlined text-[18px]">edit</span>
         Modificar búsqueda
       </Button>
