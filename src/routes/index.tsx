@@ -42,12 +42,11 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: '/my-reservations',
+        element: <ReservationsLayout />,
+        children: [{ index: true, element: <MyReservationsPage /> }],
+      },
     ],
   },
-  {
-    path: '/my-reservations',
-    element: <ReservationsLayout />,
-    children: [{ index: true, element: <MyReservationsPage /> }],
-  },
 ]);
-
