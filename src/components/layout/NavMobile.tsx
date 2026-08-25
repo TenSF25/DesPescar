@@ -1,10 +1,12 @@
+import { Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 
 interface NavMobile {
   open: boolean;
+  authenticated?: boolean;
 }
 
-export const NavMobile = ({ open }: NavMobile) => {
+export const NavMobile = ({ open, authenticated = false }: NavMobile) => {
   return (
     <>
       {open && (
@@ -20,12 +22,14 @@ export const NavMobile = ({ open }: NavMobile) => {
               OFERTAS
             </li>
           </ul>
-          <Button
-            variant="primary"
-            className="flex w-full justify-center rounded-none text-[14px] md:hidden"
-          >
-            INICIAR SESIÓN
-          </Button>
+          <Link to={authenticated ? '/' : '/login'}>
+            <Button
+              variant="primary"
+              className="flex w-full justify-center rounded-none text-[14px] md:hidden"
+            >
+              {authenticated ? 'CERRAR SESIÓN' : 'INICIAR SESIÓN'}
+            </Button>
+          </Link>
         </div>
       )}
     </>

@@ -1,17 +1,13 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
-import { TopNav } from '../components/TopNav';
 
 export const ReservationsLayout = () => {
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <TopNav />
-      <div className="flex pt-15">
-        <Sidebar />
-        <main className="ml-66 w-full max-w-275 px-9 py-7">
-          <Outlet />
-        </main>
-      </div>
+    <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-6 bg-gray-100 px-4 py-6 sm:px-6 lg:flex-row lg:items-start lg:px-9 lg:py-8">
+      <Sidebar />
+      <main className="min-w-0 flex-1">
+        <Outlet />
+      </main>
     </div>
   );
 };

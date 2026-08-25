@@ -3,7 +3,12 @@ import { Button } from '../ui/Button';
 import { useNav } from './hooks/useNav';
 import { NavMobile } from './NavMobile';
 
-export const Nav = () => {
+interface NavProps {
+  /** true muestra "CERRAR SESIÓN" en vez de "INICIAR SESIÓN". Por defecto false (comportamiento actual). */
+  authenticated?: boolean;
+}
+
+export const Nav = ({ authenticated = false }: NavProps) => {
   const { isOpen, toggleMenu } = useNav();
 
   return (
@@ -24,9 +29,9 @@ export const Nav = () => {
               OFERTAS
             </li>
           </ul>
-          <Link to="login">
+          <Link to={authenticated ? '/' : '/login'}>
             <Button variant="secondary" className="hidden w-40 justify-center text-[14px] md:flex">
-              INICIAR SESIÓN
+              {authenticated ? 'CERRAR SESIÓN' : 'INICIAR SESIÓN'}
             </Button>
           </Link>
           <div className="flex cursor-pointer justify-center md:hidden" onClick={toggleMenu}>
@@ -35,7 +40,7 @@ export const Nav = () => {
         </nav>
       </header>
 
-      <NavMobile open={isOpen} />
+      <NavMobile open={isOpen} authenticated={authenticated} />
     </>
   );
 };
