@@ -130,7 +130,7 @@ export const Search = ({ className }: HTMLAttributes<HTMLDivElement>) => {
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
-              className="w-full bg-transparent p-1 pl-3 font-semibold text-white [color-scheme:dark] outline-none placeholder:text-white/40"
+              className="w-full bg-transparent p-1 pl-3 font-semibold text-white scheme-dark outline-none placeholder:text-white/40"
             />
           </div>
         </div>
