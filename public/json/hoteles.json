@@ -1,0 +1,346 @@
+[
+  {
+    "id": 1,
+    "nombre": "Hotel Mediterráneo Barcelona",
+    "ciudad": "Barcelona",
+    "pais": "España",
+    "estrellas": 5,
+    "precioPorNoche": 120,
+    "imageUrl": "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9",
+    "tipo": "Resort All-Inclusive",
+    "servicios": [
+      "wifi",
+      "piscina",
+      "spa",
+      "restaurante",
+      "gimnasio",
+      "estacionamiento",
+      "bar",
+      "room_service"
+    ],
+    "direccion": "Passeig de Gràcia, 132, 08008 Barcelona, España",
+    "calificacion": 4.5,
+    "cantidadResenas": 328,
+    "descripcion": "Ubicado en el corazón de Barcelona, el Hotel Mediterráneo combina la elegancia histórica de la arquitectura catalana con el confort contemporáneo más vanguardista. A solo pasos del Paseo de Gracia, nuestros huéspedes disfrutan de fácil acceso a las mejores boutiques de diseñadores internacionales, restaurantes galardonados con estrellas Michelin y las obras maestras de Antoni Gaudí.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9",
+      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c",
+      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7",
+      "https://images.unsplash.com/photo-1611892440504-42a792e24d32",
+      "https://images.unsplash.com/photo-1540541338287-41700207dee6"
+    ],
+    "notaUbicacion": "A 10 min de la Sagrada Familia",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Habitación Estándar",
+        "descripcion": "Cama Queen Size, vista a la ciudad, escritorio de trabajo y baño privado.",
+        "precioPorNoche": 120,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1611892440504-42a792e24d32"
+      },
+      {
+        "id": 2,
+        "nombre": "Suite Junior",
+        "descripcion": "Cama King Size, sala de estar independiente, balcón privado y tina de hidromasaje.",
+        "precioPorNoche": 220,
+        "capacidad": 3,
+        "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427"
+      },
+      {
+        "id": 3,
+        "nombre": "Suite Premium",
+        "descripcion": "Vista panorámica al mar mediterráneo, servicio de mayordomo, terraza y bar privado.",
+        "precioPorNoche": 380,
+        "capacidad": 4,
+        "imageUrl": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Susana Gómez",
+        "fecha": "Hace 2 días",
+        "calificacion": 5,
+        "comentario": "Ubicación ideal, el desayuno buffet es fabuloso y el trato del personal insuperable. Totalmente recomendado."
+      },
+      {
+        "id": 2,
+        "nombre": "Pablo Molina",
+        "fecha": "Hace 1 semana",
+        "calificacion": 4.5,
+        "comentario": "Muy buena experiencia general. La habitación Suite Junior es comodísima y las vistas al Paseo de Gracia son inmejorables."
+      }
+    ],
+    "precioOriginal": 150
+  },
+  {
+    "id": 2,
+    "nombre": "Grand Resort Cancún",
+    "ciudad": "Cancún",
+    "pais": "México",
+    "estrellas": 5,
+    "precioPorNoche": 210,
+    "imageUrl": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+    "tipo": "Resort All-Inclusive",
+    "servicios": [
+      "wifi",
+      "piscina",
+      "spa",
+      "restaurante",
+      "bar"
+    ],
+    "direccion": "Blvd. Kukulcan Km 14, Zona Hotelera, 77500 Cancún, México",
+    "calificacion": 4.7,
+    "cantidadResenas": 512,
+    "descripcion": "Frente a las aguas turquesa del Caribe mexicano, el Grand Resort Cancún ofrece una experiencia all-inclusive de lujo con acceso directo a la playa, múltiples piscinas y gastronomía internacional.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+      "https://images.unsplash.com/photo-1582719508461-905c673771fd",
+      "https://images.unsplash.com/photo-1520277739336-7bf67edfa768",
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9"
+    ],
+    "notaUbicacion": "A 5 min de la playa Delfines",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Habitación Vista Jardín",
+        "descripcion": "Cama Queen Size, balcón privado y todo incluido.",
+        "precioPorNoche": 210,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1571896349842-33c89424de2d"
+      },
+      {
+        "id": 2,
+        "nombre": "Suite Frente al Mar",
+        "descripcion": "Vista directa al Caribe, jacuzzi privado y servicio de mayordomo.",
+        "precioPorNoche": 340,
+        "capacidad": 4,
+        "imageUrl": "https://images.unsplash.com/photo-1582719508461-905c673771fd"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Marina Torres",
+        "fecha": "Hace 3 días",
+        "calificacion": 5,
+        "comentario": "El todo incluido superó nuestras expectativas, la playa privada es espectacular."
+      }
+    ],
+    "precioOriginal": 280
+  },
+  {
+    "id": 3,
+    "nombre": "Shinjuku Pearl Hotel",
+    "ciudad": "Tokio",
+    "pais": "Japón",
+    "estrellas": 4,
+    "precioPorNoche": 180,
+    "imageUrl": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf",
+    "tipo": "Negocios",
+    "servicios": [
+      "wifi",
+      "gimnasio",
+      "restaurante",
+      "estacionamiento"
+    ],
+    "direccion": "3-25-5 Shinjuku, Shinjuku City, Tokio, Japón",
+    "calificacion": 4.3,
+    "cantidadResenas": 214,
+    "descripcion": "En pleno distrito de Shinjuku, este hotel de negocios combina eficiencia japonesa y diseño minimalista, ideal para viajeros que buscan conectividad total con la ciudad.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf",
+      "https://images.unsplash.com/photo-1503899036084-c55cdd92da26",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+      "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8e",
+      "https://images.unsplash.com/photo-1611892440504-42a792e24d32"
+    ],
+    "notaUbicacion": "A 3 min de la estación Shinjuku",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Habitación Individual",
+        "descripcion": "Cama individual, escritorio de trabajo y wifi de alta velocidad.",
+        "precioPorNoche": 180,
+        "capacidad": 1,
+        "imageUrl": "https://images.unsplash.com/photo-1611892440504-42a792e24d32"
+      },
+      {
+        "id": 2,
+        "nombre": "Habitación Doble Deluxe",
+        "descripcion": "Dos camas individuales, vista a la ciudad y minibar.",
+        "precioPorNoche": 240,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Kenji Watanabe",
+        "fecha": "Hace 5 días",
+        "calificacion": 4,
+        "comentario": "Ubicación inmejorable para moverse por Tokio, habitaciones compactas pero muy funcionales."
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "nombre": "Hotel Imperial Roma",
+    "ciudad": "Roma",
+    "pais": "Italia",
+    "estrellas": 4,
+    "precioPorNoche": 150,
+    "imageUrl": "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b",
+    "tipo": "Boutique",
+    "servicios": [
+      "wifi",
+      "desayuno",
+      "bar"
+    ],
+    "direccion": "Via Veneto, 45, 00187 Roma, Italia",
+    "calificacion": 4.4,
+    "cantidadResenas": 187,
+    "descripcion": "Un boutique hotel de época en pleno centro histórico de Roma, a pasos de la Fontana di Trevi, con habitaciones decoradas al estilo clásico italiano.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b",
+      "https://images.unsplash.com/photo-1533619043865-12027a9c0f47",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427",
+      "https://images.unsplash.com/photo-1611892440504-42a792e24d32",
+      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c"
+    ],
+    "notaUbicacion": "A 8 min de la Fontana di Trevi",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Habitación Clásica",
+        "descripcion": "Decoración de época, cama matrimonial y baño de mármol.",
+        "precioPorNoche": 150,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Lucía Fernández",
+        "fecha": "Hace 4 días",
+        "calificacion": 4.5,
+        "comentario": "Encanto puro, se siente como viajar en el tiempo pero con todas las comodidades modernas."
+      }
+    ],
+    "precioOriginal": 200
+  },
+  {
+    "id": 5,
+    "nombre": "Palermo Soho Suites",
+    "ciudad": "Buenos Aires",
+    "pais": "Argentina",
+    "estrellas": 4,
+    "precioPorNoche": 95,
+    "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427",
+    "tipo": "Apartamentos",
+    "servicios": [
+      "wifi",
+      "gimnasio"
+    ],
+    "direccion": "Av. Costa Rica 5678, Palermo Soho, C1414 CABA, Argentina",
+    "calificacion": 4.2,
+    "cantidadResenas": 96,
+    "descripcion": "Apartamentos con estilo en el corazón de Palermo Soho, rodeados de bares de diseño, ferias de moda y la mejor gastronomía porteña.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427",
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37",
+      "https://images.unsplash.com/photo-1584132967334-10e028bd69f7"
+    ],
+    "notaUbicacion": "A 5 min de Plaza Serrano",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Loft 1 Ambiente",
+        "descripcion": "Cocina integrada, cama Queen Size y balcón.",
+        "precioPorNoche": 95,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
+      },
+      {
+        "id": 2,
+        "nombre": "Apartamento 2 Ambientes",
+        "descripcion": "Living independiente, cocina completa y balcón terraza.",
+        "precioPorNoche": 140,
+        "capacidad": 4,
+        "imageUrl": "https://images.unsplash.com/photo-1615529182904-14819c35db37"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Martín Suárez",
+        "fecha": "Hace 1 semana",
+        "calificacion": 4,
+        "comentario": "Excelente zona, muy cerca de todo. El apartamento estaba impecable."
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "nombre": "Miami Ocean Sun",
+    "ciudad": "Miami",
+    "pais": "USA",
+    "estrellas": 5,
+    "precioPorNoche": 250,
+    "imageUrl": "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8e",
+    "tipo": "Resort All-Inclusive",
+    "servicios": [
+      "wifi",
+      "piscina",
+      "spa",
+      "desayuno",
+      "bar",
+      "estacionamiento"
+    ],
+    "direccion": "1500 Ocean Drive, Miami Beach, FL 33139, USA",
+    "calificacion": 4.6,
+    "cantidadResenas": 401,
+    "descripcion": "Frente al mar en South Beach, el Miami Ocean Sun combina el glamour art déco de Ocean Drive con piscinas infinitas y vida nocturna a pasos del hotel.",
+    "galeria": [
+      "https://images.unsplash.com/photo-1590073242678-70ee3fc28f8e",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+      "https://images.unsplash.com/photo-1582719508461-905c673771fd",
+      "https://images.unsplash.com/photo-1520277739336-7bf67edfa768"
+    ],
+    "notaUbicacion": "A 2 min de Ocean Drive",
+    "habitaciones": [
+      {
+        "id": 1,
+        "nombre": "Habitación Vista Ciudad",
+        "descripcion": "Cama King Size, balcón y aire acondicionado.",
+        "precioPorNoche": 250,
+        "capacidad": 2,
+        "imageUrl": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4"
+      },
+      {
+        "id": 2,
+        "nombre": "Suite Frente al Mar",
+        "descripcion": "Vista directa al océano, terraza privada y jacuzzi.",
+        "precioPorNoche": 420,
+        "capacidad": 4,
+        "imageUrl": "https://images.unsplash.com/photo-1582719508461-905c673771fd"
+      }
+    ],
+    "resenas": [
+      {
+        "id": 1,
+        "nombre": "Camila Ríos",
+        "fecha": "Hace 6 días",
+        "calificacion": 5,
+        "comentario": "La vista al mar desde la suite fue increíble, volveríamos sin dudarlo."
+      }
+    ]
+  }
+]

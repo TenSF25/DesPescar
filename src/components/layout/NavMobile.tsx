@@ -1,4 +1,5 @@
-import { Button } from '../ui/Button';
+import { Link } from "react-router-dom";
+import { Button } from "../ui/Button";
 
 interface NavMobile {
   open: boolean;
@@ -10,14 +11,21 @@ export const NavMobile = ({ open }: NavMobile) => {
       {open && (
         <div className="flex flex-col md:hidden">
           <ul className="flex w-full flex-col justify-between border-t text-center">
-            <li className="hover:bg-secondary border-b p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
-              VUELOS
+            <li className="hover:bg-secondary border-b underline-offset-4 hover:font-bold hover:text-white">
+              <Link to="/" className="block p-1 hover:cursor-pointer">
+                VUELOS
+              </Link>
             </li>
             <li className="hover:bg-secondary border-b p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
               INSPIRACIONES
             </li>
             <li className="hover:bg-secondary p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
               OFERTAS
+            </li>
+            <li className="hover:bg-secondary underline-offset-4 hover:font-bold hover:text-white">
+              <Link to="/hotels" className="block p-1 hover:cursor-pointer">
+                HOTELES
+              </Link>
             </li>
           </ul>
           <Button

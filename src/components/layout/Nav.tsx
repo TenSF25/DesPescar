@@ -14,14 +14,27 @@ export const Nav = () => {
             <h3 className="text-secondary text-3xl font-bold tracking-widest">DESPESCAR</h3>
           </Link>
           <ul className="hidden w-100 flex-row justify-between md:flex">
-            <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
-              VUELOS
+            <li>
+              <Link
+                to="/"
+                className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline"
+              >
+                VUELOS
+              </Link>
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
               INSPIRACIONES
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
               OFERTAS
+            </li>
+            <li>
+              <Link
+                to="/hotels"
+                className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline"
+              >
+                HOTELES
+              </Link>
             </li>
           </ul>
           <Link to="login">
