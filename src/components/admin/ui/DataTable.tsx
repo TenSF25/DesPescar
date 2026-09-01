@@ -40,7 +40,7 @@ export function DataTable<T>({
             data.map((row) => (
               <tr
                 key={keyExtractor(row)}
-                className="border-b border-black/5 last:border-0 hover:bg-black/[0.02]"
+                className="border-b border-black/5 last:border-0 hover:bg-black/2"
               >
                 {columns.map((col) => (
                   <td key={col.key} className={cn('px-5 py-4 text-[#1A2B4C]', col.className)}>
