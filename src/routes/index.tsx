@@ -7,6 +7,8 @@ import { SeatSelectionPage } from '../features/bookings/pages/SeatSelectionPage'
 import { BookingLayout } from '../features/bookings/pages/BookingLayout';
 import { MainLayout } from '../components/layout/MainLayout';
 import { ResultsPage } from '../features/flights/pages/ResultsPage';
+import { AdminLayout } from '../components/admin';
+import { AdminDashboardPage } from '../features/admin/pages/AdminDashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +42,19 @@ export const router = createBrowserRouter([
           },
         ],
       },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      { index: true, element: <AdminDashboardPage /> },
+      // Agreguen aca la ruta real del panel de administrador:
+      // { path: 'usuarios', element: <UsersPage /> },
+      // { path: 'vuelos', element: <FlightsManagementPage /> },
+      // { path: 'reportes', element: <ReportsPage /> },
+      // { path: 'reservas', element: <BookingsManagementPage /> },
+      // { path: 'ajustes', element: <SettingsPage /> },
     ],
   },
 ]);
