@@ -24,6 +24,7 @@ export interface Hotel {
   precioPorNoche: number;
   precioOferta?: number;
   precioOriginal?: number; // si existe, se muestra tachado (precio "antes") en tarjetas promo
+  activo?: boolean; // usado en el panel de administrador (Gestión de Hoteles)
   imageUrl: string;
   tipo: 'Boutique' | 'Resort All-Inclusive' | 'Negocios' | 'Apartamentos';
   servicios: string[]; // 'wifi' | 'piscina' | 'desayuno' | 'spa' | 'gimnasio' | 'restaurante' | 'estacionamiento' | 'bar' | 'room_service'

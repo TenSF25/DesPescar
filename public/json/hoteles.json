@@ -72,7 +72,8 @@
         "comentario": "Muy buena experiencia general. La habitación Suite Junior es comodísima y las vistas al Paseo de Gracia son inmejorables."
       }
     ],
-    "precioOriginal": 150
+    "precioOriginal": 150,
+    "activo": true
   },
   {
     "id": 2,
@@ -129,7 +130,8 @@
         "comentario": "El todo incluido superó nuestras expectativas, la playa privada es espectacular."
       }
     ],
-    "precioOriginal": 280
+    "precioOriginal": 280,
+    "activo": true
   },
   {
     "id": 3,
@@ -184,7 +186,8 @@
         "calificacion": 4,
         "comentario": "Ubicación inmejorable para moverse por Tokio, habitaciones compactas pero muy funcionales."
       }
-    ]
+    ],
+    "activo": false
   },
   {
     "id": 4,
@@ -231,7 +234,8 @@
         "comentario": "Encanto puro, se siente como viajar en el tiempo pero con todas las comodidades modernas."
       }
     ],
-    "precioOriginal": 200
+    "precioOriginal": 200,
+    "activo": true
   },
   {
     "id": 5,
@@ -284,7 +288,8 @@
         "calificacion": 4,
         "comentario": "Excelente zona, muy cerca de todo. El apartamento estaba impecable."
       }
-    ]
+    ],
+    "activo": true
   },
   {
     "id": 6,
@@ -341,6 +346,7 @@
         "calificacion": 5,
         "comentario": "La vista al mar desde la suite fue increíble, volveríamos sin dudarlo."
       }
-    ]
+    ],
+    "activo": true
   }
 ]
