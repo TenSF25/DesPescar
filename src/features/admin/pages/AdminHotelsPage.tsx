@@ -5,6 +5,7 @@ import {
   StatCard,
   ChartCard,
   DonutChart,
+  LineChart,
   ActivityListItem,
   SearchFilterBar,
   Select,
@@ -20,6 +21,29 @@ import type { Hotel, ReservaHotel } from '../../hotels/hotels.types';
 const ITEMS_POR_PAGINA = 5;
 
 const TIPOS_HOTEL = ['Boutique', 'Resort All-Inclusive', 'Negocios', 'Apartamentos'];
+
+const MESES_CORTOS = [
+  'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+  'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+];
+
+/** Agrupa las reservas por mes-año y cuenta cuántas hubo en cada uno, en orden cronológico. */
+const calcularReservasPorMes = (reservas: ReservaHotel[]) => {
+  const conteo = new Map<string, number>(); // clave "2026-04" -> cantidad
+
+  reservas.forEach((r) => {
+    const [anio, mes] = r.fechaInicio.split('-');
+    const clave = `${anio}-${mes}`;
+    conteo.set(clave, (conteo.get(clave) ?? 0) + 1);
+  });
+
+  return Array.from(conteo.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([clave, value]) => {
+      const [anio, mes] = clave.split('-');
+      return { label: `${MESES_CORTOS[Number(mes) - 1]} ${anio.slice(2)}`, value };
+    });
+};
 
 const COLORES_TIPO: Record<string, string> = {
   Boutique: '#1f3051',
@@ -97,6 +121,9 @@ export const AdminHotelsPage = () => {
     value: hoteles.filter((h) => h.tipo === tipo).length,
     color: COLORES_TIPO[tipo],
   })).filter((d) => d.value > 0);
+
+  // Serie de reservas por mes, para el gráfico de línea
+  const reservasPorMes = useMemo(() => calcularReservasPorMes(reservas), [reservas]);
 
   const columns: TableColumn<Hotel>[] = [
     {
@@ -197,34 +224,38 @@ export const AdminHotelsPage = () => {
         />
       </div>
 
-      {/* Gráfico + actividad reciente */}
+      {/* Gráficos + actividad reciente */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-1">
+        <div className="min-w-0 lg:col-span-2">
+          <ChartCard title="Reservas por mes">
+            <LineChart data={reservasPorMes} />
+          </ChartCard>
+        </div>
+
+        <div className="min-w-0 lg:col-span-1">
           <ChartCard title="Hoteles por tipo">
             <DonutChart data={distribucionTipo} />
           </ChartCard>
         </div>
-
-        <div className="lg:col-span-2">
-          <ChartCard title="Actividad reciente">
-            <div className="flex flex-col gap-4">
-              {actividadReciente.map((r) => {
-                const info = ACTIVIDAD_INFO[r.estado];
-                return (
-                  <ActivityListItem
-                    key={r.id}
-                    icon={info.icon}
-                    iconClassName={info.iconClassName}
-                    title={info.titulo}
-                    subtitle={`${r.hotelNombre} · ${r.codigoConfirmacion}`}
-                    time={r.fechaInicio}
-                  />
-                );
-              })}
-            </div>
-          </ChartCard>
-        </div>
       </div>
+
+      <ChartCard title="Actividad reciente">
+        <div className="flex flex-col gap-4">
+          {actividadReciente.map((r) => {
+            const info = ACTIVIDAD_INFO[r.estado];
+            return (
+              <ActivityListItem
+                key={r.id}
+                icon={info.icon}
+                iconClassName={info.iconClassName}
+                title={info.titulo}
+                subtitle={`${r.hotelNombre} · ${r.codigoConfirmacion}`}
+                time={r.fechaInicio}
+              />
+            );
+          })}
+        </div>
+      </ChartCard>
 
       {/* Tabla */}
       <div className="flex flex-col gap-4">
