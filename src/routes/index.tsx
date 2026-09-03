@@ -12,6 +12,8 @@ import { HotelDetailPage } from '../features/hotels/pages/HotelDetailPage';
 import { HotelBookingPage } from '../features/hotels/pages/HotelBookingPage';
 import { MisReservasPage } from '../features/hotels/pages/MisReservasPage';
 import { HotelCancelPage } from '../features/hotels/pages/HotelCancelPage';
+import { AdminLayout } from '../components/admin';
+import { AdminDashboardPage } from '../features/admin/pages/AdminDashboardPage';
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +67,19 @@ export const router = createBrowserRouter([
           },
         ],
       },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      { index: true, element: <AdminDashboardPage /> },
+      // Agreguen aca la ruta real del panel de administrador:
+      // { path: 'usuarios', element: <UsersPage /> },
+      // { path: 'vuelos', element: <FlightsManagementPage /> },
+      // { path: 'reportes', element: <ReportsPage /> },
+      // { path: 'reservas', element: <BookingsManagementPage /> },
+      // { path: 'ajustes', element: <SettingsPage /> },
     ],
   },
 ]);
