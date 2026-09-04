@@ -180,7 +180,7 @@ export const AdminHotelsPage = () => {
       render: (h) => (
         <ActionsMenu
           onView={() => navigate(`/hotels/${h.id}`)}
-          onEdit={() => {}}
+          onEdit={() => navigate(`/admin/hoteles/${h.id}`)}
           onMore={() => {}}
         />
       ),

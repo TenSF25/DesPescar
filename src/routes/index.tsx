@@ -15,6 +15,7 @@ import { HotelCancelPage } from '../features/hotels/pages/HotelCancelPage';
 import { AdminLayout } from '../components/admin';
 import { AdminDashboardPage } from '../features/admin/pages/AdminDashboardPage';
 import { AdminHotelsPage } from '../features/admin/pages/AdminHotelsPage';
+import { AdminHotelEditPage } from '../features/admin/pages/AdminHotelEditPage';
 
 export const router = createBrowserRouter([
   {
@@ -76,6 +77,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: 'hoteles', element: <AdminHotelsPage /> },
+      { path: 'hoteles/:id', element: <AdminHotelEditPage /> },
       // Agreguen aca la ruta real del panel de administrador:
       // { path: 'usuarios', element: <UsersPage /> },
       // { path: 'vuelos', element: <FlightsManagementPage /> },
