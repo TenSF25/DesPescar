@@ -1,3 +1,4 @@
+import { UserProfilePage } from '../features/users/pages/UserProfilePage';
 import { createBrowserRouter } from 'react-router-dom';
 import { HomePage } from '../features/flights/pages/HomePage';
 import { LoginPage } from '../features/auth/pages/LoginPage';
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: '/flight-details',
         element: <FlightDetailsPage />,
+      },
+      {
+        path: '/mis-datos',
+        element: <UserProfilePage />,
       },
       {
         path: '/booking',
