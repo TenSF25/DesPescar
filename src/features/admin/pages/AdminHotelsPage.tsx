@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   PageHeader,
   StatCard,
@@ -200,7 +201,16 @@ export const AdminHotelsPage = () => {
       <PageHeader
         title={`Mi Hotel: ${hotel.nombre}`}
         description="Administra la información, disponibilidad y huéspedes de tu hotel."
-        actions={<Badge tone={form.activo ? 'success' : 'danger'}>{form.activo ? 'Activo' : 'Inactivo'}</Badge>}
+        actions={
+          <div className="flex items-center gap-3">
+            <Badge tone={form.activo ? 'success' : 'danger'}>{form.activo ? 'Activo' : 'Inactivo'}</Badge>
+            <Link to="/admin/hoteles/reportes">
+              <Button variant="secondary" className="w-auto">
+                Ver Reportes
+              </Button>
+            </Link>
+          </div>
+        }
       />
 
       {/* KPIs */}
