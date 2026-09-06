@@ -8,7 +8,9 @@ import { NavLink } from 'react-router-dom';
  * un dueño de hotel realmente necesita (sin "Gestión de vuelos", por ejemplo).
  */
 const hotelAdminNavItems = [
-  { label: 'Mi Hotel', path: '/admin/hoteles', icon: 'hotel', end: true },
+  { label: 'Usuarios', path: '/admin/hoteles/usuarios', icon: 'person', end: false },
+  { label: 'Gestión de Mi Hotel', path: '/admin/hoteles', icon: 'hotel', end: true },
+  { label: 'Reservas', path: '/admin/hoteles/reservas', icon: 'confirmation_number', end: false },
   { label: 'Reportes', path: '/admin/hoteles/reportes', icon: 'bar_chart', end: false },
 ];
 
@@ -27,6 +29,9 @@ export const HotelAdminSidebar = () => {
         </div>
 
         <nav className="flex flex-col gap-1">
+          <span className="px-3 pt-2 pb-1 text-xs font-bold tracking-widest text-white/50">
+            DASHBOARD
+          </span>
           {hotelAdminNavItems.map((item) => (
             <NavLink
               key={item.path}
@@ -42,6 +47,22 @@ export const HotelAdminSidebar = () => {
               {item.label}
             </NavLink>
           ))}
+
+          {/* "Ajustes" es responsabilidad de Lucía (F6 del backlog: tab de Ajustes
+              generalizado para los 3 dashboards). Lo dejamos visible para que se vea
+              dónde va a vivir, pero sin NavLink -> no navega a ningún lado todavía. */}
+          <div
+            className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-white/30"
+            title="Pendiente: lo integra Lucía (componente compartido para los 3 dashboards)"
+          >
+            <span className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[20px]">settings</span>
+              Ajustes
+            </span>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] tracking-wide">
+              PRÓXIMAMENTE
+            </span>
+          </div>
         </nav>
       </div>
 

@@ -17,6 +17,8 @@ import { AdminDashboardPage } from '../features/admin/pages/AdminDashboardPage';
 import { HotelAdminLayout } from '../features/admin/layout/HotelAdminLayout';
 import { AdminHotelsPage } from '../features/admin/pages/AdminHotelsPage';
 import { AdminHotelReportsPage } from '../features/admin/pages/AdminHotelReportsPage';
+import { AdminHotelGuestsPage } from '../features/admin/pages/AdminHotelGuestsPage';
+import { AdminHotelReservationsPage } from '../features/admin/pages/AdminHotelReservationsPage';
 
 export const router = createBrowserRouter([
   {
@@ -90,6 +92,8 @@ export const router = createBrowserRouter([
     element: <HotelAdminLayout />,
     children: [
       { index: true, element: <AdminHotelsPage /> },
+      { path: 'usuarios', element: <AdminHotelGuestsPage /> },
+      { path: 'reservas', element: <AdminHotelReservationsPage /> },
       { path: 'reportes', element: <AdminHotelReportsPage /> },
     ],
   },

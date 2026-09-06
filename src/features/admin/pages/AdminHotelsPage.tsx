@@ -7,18 +7,13 @@ import {
   DonutChart,
   LineChart,
   ActivityListItem,
-  SearchFilterBar,
   Select,
-  DataTable,
   Badge,
-  ActionsMenu,
-  type TableColumn,
 } from '../../../components/admin';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { TIPOS_HOTEL } from '../../hotels/hooks/useHotelFilters';
-import { useHotelGuests, type HotelGuest } from '../hooks/useHotelGuests';
 import type { Hotel, ReservaHotel } from '../../hotels/hotels.types';
 
 // TODO: cuando exista login real, este id sale de la sesión del usuario logueado
@@ -96,10 +91,6 @@ export const AdminHotelsPage = () => {
   const [disponibilidad, setDisponibilidad] = useState<Record<number, boolean>>({});
   const [guardado, setGuardado] = useState(false);
 
-  const { huespedes, loading: loadingHuespedes, toggleEstado } = useHotelGuests(MI_HOTEL_ID);
-  const [searchHuesped, setSearchHuesped] = useState('');
-  const [estadoHuespedFiltro, setEstadoHuespedFiltro] = useState('todos');
-
   useEffect(() => {
     Promise.all([
       fetch('/json/hoteles.json').then((res) => res.json()),
@@ -142,44 +133,6 @@ export const AdminHotelsPage = () => {
     .filter((r) => r.estado !== 'cancelado')
     .reduce((sum, r) => sum + r.precioTotal, 0);
 
-  const huespedesFiltrados = huespedes.filter((h) => {
-    const coincideBusqueda =
-      searchHuesped.trim() === '' ||
-      h.nombre.toLowerCase().includes(searchHuesped.toLowerCase()) ||
-      h.email.toLowerCase().includes(searchHuesped.toLowerCase());
-    const coincideEstado = estadoHuespedFiltro === 'todos' || h.estado === estadoHuespedFiltro;
-    return coincideBusqueda && coincideEstado;
-  });
-
-  const columnsHuespedes: TableColumn<HotelGuest>[] = [
-    {
-      key: 'nombre',
-      header: 'Huésped',
-      render: (h) => (
-        <div className="flex flex-col">
-          <span className="font-semibold">{h.nombre}</span>
-          <span className="text-xs text-[#44474E]">{h.email}</span>
-        </div>
-      ),
-    },
-    { key: 'telefono', header: 'Teléfono', render: (h) => h.telefono },
-    { key: 'reservas', header: 'Reservas', render: (h) => h.reservasRealizadas },
-    {
-      key: 'estado',
-      header: 'Estado',
-      render: (h) => (
-        <Badge tone={h.estado === 'activo' ? 'success' : 'danger'}>
-          {h.estado === 'activo' ? 'Activo' : 'Bloqueado'}
-        </Badge>
-      ),
-    },
-    {
-      key: 'acciones',
-      header: 'Acciones',
-      render: (h) => <ActionsMenu onMore={() => toggleEstado(h.id)} />,
-    },
-  ];
-
   if (loading || !hotel || !form) {
     return <p className="p-6">Cargando...</p>;
   }
@@ -199,8 +152,8 @@ export const AdminHotelsPage = () => {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={`Mi Hotel: ${hotel.nombre}`}
-        description="Administra la información, disponibilidad y huéspedes de tu hotel."
+        title={`Gestión de Mi Hotel: ${hotel.nombre}`}
+        description="Administra la información y disponibilidad de tu hotel."
         actions={
           <div className="flex items-center gap-3">
             <Badge tone={form.activo ? 'success' : 'danger'}>{form.activo ? 'Activo' : 'Inactivo'}</Badge>
@@ -218,7 +171,7 @@ export const AdminHotelsPage = () => {
         <StatCard icon="confirmation_number" iconClassName="bg-primary/10 text-primary" label="Reservas totales" value={reservas.length} />
         <StatCard icon="event_available" iconClassName="bg-blue-100 text-blue-600" label="Reservas activas" value={reservas.filter((r) => r.estado !== 'cancelado').length} />
         <StatCard icon="payments" iconClassName="bg-orange-100 text-orange-600" label="Ingresos totales" value={formatCurrency(ingresosTotales)} />
-        <StatCard icon="group" iconClassName="bg-green-100 text-green-600" label="Huéspedes registrados" value={huespedes.length} />
+        <StatCard icon="hotel" iconClassName="bg-green-100 text-green-600" label="Habitaciones" value={hotel.habitaciones?.length ?? 0} />
       </div>
 
       {/* Gráficos */}
@@ -337,43 +290,6 @@ export const AdminHotelsPage = () => {
         <Button variant="primary" className="bg-primary text-white sm:ml-auto" onClick={guardarCambios}>
           Guardar cambios
         </Button>
-      </div>
-
-      {/* Huéspedes de mi hotel */}
-      <div className="flex flex-col gap-4">
-        <PageHeader title="Huéspedes de mi hotel" description="Cuentas de huéspedes que reservaron en tu hotel." />
-
-        <SearchFilterBar
-          searchValue={searchHuesped}
-          onSearchChange={setSearchHuesped}
-          placeholder="Buscar por nombre o email..."
-        >
-          <Select
-            value={estadoHuespedFiltro}
-            onChange={(e) => setEstadoHuespedFiltro(e.target.value)}
-            containerClassName="w-full md:w-40"
-          >
-            <option value="todos">Todos los estados</option>
-            <option value="activo">Activo</option>
-            <option value="bloqueado">Bloqueado</option>
-          </Select>
-        </SearchFilterBar>
-
-        {loadingHuespedes ? (
-          <p className="p-6 text-center text-[#44474E]">Cargando huéspedes...</p>
-        ) : (
-          <DataTable
-            columns={columnsHuespedes}
-            data={huespedesFiltrados}
-            keyExtractor={(h) => h.id}
-            emptyMessage="No encontramos huéspedes con esos filtros."
-          />
-        )}
-
-        <p className="text-xs text-[#44474E]">
-          Nota: sin backend todavía, dar de alta/baja a un huésped solo cambia el estado en
-          memoria — se pierde al recargar la página.
-        </p>
       </div>
     </div>
   );
