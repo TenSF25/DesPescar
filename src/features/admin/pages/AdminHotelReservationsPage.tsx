@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PageHeader, SearchFilterBar, Select, DataTable, Badge, ActionsMenu, type TableColumn } from '../../../components/admin';
+import { PageHeader, SearchFilterBar, Select, DataTable, Badge, ActionsMenu, type TableColumn, type ActionsMenuAction } from '../../../components/admin';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import type { ReservaHotel, EstadoReserva } from '../../hotels/hotels.types';
 
@@ -67,16 +67,30 @@ export const AdminHotelReservationsPage = () => {
     {
       key: 'acciones',
       header: 'Acciones',
-      render: (r) => (
-        <ActionsMenu
-          onEdit={
-            r.estado === 'proximo' ? () => cambiarEstado(r.id, 'completado') : undefined
-          }
-          onMore={
-            r.estado !== 'cancelado' ? () => cambiarEstado(r.id, 'cancelado') : undefined
-          }
-        />
-      ),
+      render: (r) => {
+        const acciones: ActionsMenuAction[] = [];
+        if (r.estado === 'proximo') {
+          acciones.push({
+            label: 'Marcar como completada',
+            icon: 'task_alt',
+            onClick: () => cambiarEstado(r.id, 'completado'),
+          });
+        }
+        if (r.estado !== 'cancelado') {
+          acciones.push({
+            label: 'Cancelar reserva',
+            icon: 'cancel',
+            tone: 'danger',
+            onClick: () => cambiarEstado(r.id, 'cancelado'),
+          });
+        }
+        acciones.push({
+          label: 'Contactar huésped',
+          icon: 'mail',
+          onClick: () => window.open(`mailto:${r.contactEmail}`),
+        });
+        return <ActionsMenu menuActions={acciones} />;
+      },
     },
   ];
 
@@ -117,8 +131,8 @@ export const AdminHotelReservationsPage = () => {
 
       <p className="text-xs text-[#44474E]">
         Nota: sin backend todavía, marcar como completada/cancelada solo cambia el estado en
-        memoria — se pierde al recargar la página. El ícono de lápiz marca "Completada", el de
-        más opciones (⋮) marca "Cancelada".
+        memoria — se pierde al recargar la página. "Contactar huésped" sí es 100% real: abre tu
+        cliente de email con el destinatario ya cargado.
       </p>
     </div>
   );

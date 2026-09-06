@@ -44,7 +44,16 @@ export const AdminHotelGuestsPage = () => {
     {
       key: 'acciones',
       header: 'Acciones',
-      render: (h) => <ActionsMenu onMore={() => toggleEstado(h.id)} />,
+      render: (h) => (
+        <ActionsMenu
+          menuActions={[
+            h.estado === 'activo'
+              ? { label: 'Bloquear cuenta', icon: 'block', tone: 'danger', onClick: () => toggleEstado(h.id) }
+              : { label: 'Reactivar cuenta', icon: 'check_circle', onClick: () => toggleEstado(h.id) },
+            { label: 'Enviar email', icon: 'mail', onClick: () => window.open(`mailto:${h.email}`) },
+          ]}
+        />
+      ),
     },
   ];
 
