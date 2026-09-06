@@ -143,7 +143,7 @@ export const AdminHotelsPage = () => {
   };
 
   const guardarCambios = () => {
-    // Sin backend todavía: simula el guardado en la UI, no persiste en ningún lado.
+    // Sin backend: simula el guardado en la UI, no se mantiene en ningun lugar
     setGuardado(true);
   };
 
@@ -284,7 +284,7 @@ export const AdminHotelsPage = () => {
         {guardado && (
           <p className="flex items-center gap-1 text-sm font-semibold text-green-700">
             <span className="material-symbols-outlined text-[18px]">check_circle</span>
-            Cambios guardados (simulado, sin backend todavía)
+            Cambios guardados (simulado xd)
           </p>
         )}
         <Button variant="primary" className="bg-primary text-white sm:ml-auto" onClick={guardarCambios}>
