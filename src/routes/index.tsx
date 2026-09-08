@@ -11,6 +11,7 @@ import { RequireRole } from '../features/auth/components/RequireRole';
 import { AdminLayout } from '../components/admin';
 import { AdminDashboardPage } from '../features/admin/pages/AdminDashboardPage';
 import { UsersPage } from '../features/admin/pages/UsersPage';
+import { adminGeneralNavItems } from '../features/admin/adminGeneral.nav';
 
 export const router = createBrowserRouter([
   {
@@ -50,7 +51,7 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: (
       <RequireRole allow={['GENERAL_ADMIN']}>
-        <AdminLayout />
+        <AdminLayout navItems={adminGeneralNavItems} />
       </RequireRole>
     ),
     children: [
