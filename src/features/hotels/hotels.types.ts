@@ -68,6 +68,8 @@ export interface ReservaHotel {
   precioTotal: number;
   codigoConfirmacion: string;
   contactEmail: string;
+  huespedNombre?: string; // opcional: las reservas viejas del mock no lo tienen
+  huespedTelefono?: string;
 }
 
 export type MotivoCancelacion =

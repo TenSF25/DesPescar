@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, SearchFilterBar, Select, DataTable, Badge, ActionsMenu, type TableColumn, type ActionsMenuAction } from '../../../components/admin';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { getMiHotelId, getReservasLocales } from '../../../utils/hotelLocalStore';
 import type { ReservaHotel, EstadoReserva } from '../../hotels/hotels.types';
-
-const MI_HOTEL_ID = 1;
 
 const ESTADO_LABEL: Record<EstadoReserva, string> = {
   proximo: 'Próxima',
@@ -24,9 +23,13 @@ export const AdminHotelReservationsPage = () => {
   const [estadoFiltro, setEstadoFiltro] = useState('todos');
 
   useEffect(() => {
+    const miHotelId = getMiHotelId();
     fetch('/json/reservas-hotel.json')
       .then((res) => res.json())
-      .then((data: ReservaHotel[]) => setReservas(data.filter((r) => r.hotelId === MI_HOTEL_ID)))
+      .then((data: ReservaHotel[]) => {
+        const todas = [...data, ...getReservasLocales()];
+        setReservas(todas.filter((r) => r.hotelId === miHotelId));
+      })
       .catch((e) => console.log(e))
       .finally(() => setLoading(false));
   }, []);

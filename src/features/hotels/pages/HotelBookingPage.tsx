@@ -4,6 +4,7 @@ import { Section } from '../../../components/ui/Section';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { guardarReservaLocal } from '../../../utils/hotelLocalStore';
 import { useHotelDetail } from '../hooks/useHotelDetail';
 
 interface DatosHuesped {
@@ -211,8 +212,27 @@ export const HotelBookingPage = () => {
     }
 
     setMensajeError(null);
-    // Sin backend todavía: solo simula la confirmación en la UI.
-    // Acá va a ir la llamada real (axios/react-query) cuando se conecte la API.
+
+    // Guarda la reserva de verdad (en localStorage, sin backend todavía) —
+    // esto es lo que hace que el panel de administración del hotel la vea reflejada.
+    guardarReservaLocal({
+      hotelId: hotel.id,
+      hotelNombre: hotel.nombre,
+      ciudad: hotel.ciudad,
+      pais: hotel.pais,
+      estrellas: hotel.estrellas,
+      imageUrl: hotel.imageUrl,
+      habitacionNombre: habitacion.nombre,
+      fechaInicio: huesped.checkIn,
+      fechaFin: huesped.checkOut,
+      estado: 'proximo',
+      precioTotal: total,
+      codigoConfirmacion: `#RES-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      contactEmail: huesped.email,
+      huespedNombre: `${huesped.nombre} ${huesped.apellido}`.trim(),
+      huespedTelefono: huesped.telefono,
+    });
+
     setReservaConfirmada(true);
   };
 

@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import { PageHeader, StatCard, ChartCard, DonutChart, LineChart, Select } from '../../../components/admin';
 import { Button } from '../../../components/ui/Button';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { getMiHotelId, getHotelesRegistrados, getReservasLocales } from '../../../utils/hotelLocalStore';
 import type { Hotel, ReservaHotel } from '../../hotels/hotels.types';
-
-// TODO: cuando exista login real, sale de la sesión (igual que en AdminHotelsPage).
-const MI_HOTEL_ID = 1;
 
 const MESES_CORTOS = [
   'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
@@ -104,13 +102,16 @@ export const AdminHotelReportsPage = () => {
   const [vista, setVista] = useState<'mes' | 'dia'>('mes');
 
   useEffect(() => {
+    const miHotelId = getMiHotelId();
     Promise.all([
       fetch('/json/hoteles.json').then((res) => res.json()),
       fetch('/json/reservas-hotel.json').then((res) => res.json()),
     ])
-      .then(([hoteles, reservasData]: [Hotel[], ReservaHotel[]]) => {
-        setHotel(hoteles.find((h) => h.id === MI_HOTEL_ID) ?? null);
-        setReservas(reservasData.filter((r) => r.hotelId === MI_HOTEL_ID));
+      .then(([hotelesData, reservasData]: [Hotel[], ReservaHotel[]]) => {
+        const todosLosHoteles = [...hotelesData, ...getHotelesRegistrados()];
+        const todasLasReservas = [...reservasData, ...getReservasLocales()];
+        setHotel(todosLosHoteles.find((h) => h.id === miHotelId) ?? null);
+        setReservas(todasLasReservas.filter((r) => r.hotelId === miHotelId));
       })
       .catch((e) => console.log(e))
       .finally(() => setLoading(false));

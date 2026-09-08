@@ -14,11 +14,8 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { TIPOS_HOTEL } from '../../hotels/hooks/useHotelFilters';
+import { getMiHotelId, getHotelesRegistrados, getReservasLocales } from '../../../utils/hotelLocalStore';
 import type { Hotel, ReservaHotel } from '../../hotels/hotels.types';
-
-// TODO: cuando exista login real, este id sale de la sesión del usuario logueado
-// (la hotelera con la que inició sesión), no de una constante fija.
-const MI_HOTEL_ID = 1;
 
 const MESES_CORTOS = [
   'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
@@ -92,14 +89,17 @@ export const AdminHotelsPage = () => {
   const [guardado, setGuardado] = useState(false);
 
   useEffect(() => {
+    const miHotelId = getMiHotelId();
     Promise.all([
       fetch('/json/hoteles.json').then((res) => res.json()),
       fetch('/json/reservas-hotel.json').then((res) => res.json()),
     ])
-      .then(([hoteles, reservasData]: [Hotel[], ReservaHotel[]]) => {
-        const miHotel = hoteles.find((h) => h.id === MI_HOTEL_ID) ?? null;
+      .then(([hotelesData, reservasData]: [Hotel[], ReservaHotel[]]) => {
+        const todosLosHoteles = [...hotelesData, ...getHotelesRegistrados()];
+        const todasLasReservas = [...reservasData, ...getReservasLocales()];
+        const miHotel = todosLosHoteles.find((h) => h.id === miHotelId) ?? null;
         setHotel(miHotel);
-        setReservas(reservasData.filter((r) => r.hotelId === MI_HOTEL_ID));
+        setReservas(todasLasReservas.filter((r) => r.hotelId === miHotelId));
         if (miHotel) {
           setForm({
             nombre: miHotel.nombre,
@@ -133,8 +133,24 @@ export const AdminHotelsPage = () => {
     .filter((r) => r.estado !== 'cancelado')
     .reduce((sum, r) => sum + r.precioTotal, 0);
 
-  if (loading || !hotel || !form) {
+  if (loading) {
     return <p className="p-6">Cargando...</p>;
+  }
+
+  if (!hotel || !form) {
+    return (
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-black/10 bg-white p-10 text-center">
+        <p className="text-secondary text-lg font-semibold">Todavía no tenés un hotel registrado</p>
+        <p className="text-sm text-[#44474E]">
+          Registrá tu hotel para empezar a gestionar reservas, habitaciones y huéspedes.
+        </p>
+        <Link to="/admin/hoteles/registro">
+          <Button variant="primary" className="bg-primary w-auto text-white">
+            Registrar mi hotel
+          </Button>
+        </Link>
+      </div>
+    );
   }
 
   const actualizar = <K extends keyof FormularioHotel>(campo: K, valor: FormularioHotel[K]) => {
@@ -143,7 +159,7 @@ export const AdminHotelsPage = () => {
   };
 
   const guardarCambios = () => {
-    // Sin backend: simula el guardado en la UI, no se mantiene en ningun lugar
+    // Sin backend todavía: simula el guardado en la UI, no persiste en ningún lado.
     setGuardado(true);
   };
 
@@ -160,6 +176,11 @@ export const AdminHotelsPage = () => {
             <Link to="/admin/hoteles/reportes">
               <Button variant="secondary" className="w-auto">
                 Ver Reportes
+              </Button>
+            </Link>
+            <Link to="/admin/hoteles/registro">
+              <Button variant="secondary" className="w-auto">
+                + Registrar otro hotel
               </Button>
             </Link>
           </div>
@@ -284,7 +305,7 @@ export const AdminHotelsPage = () => {
         {guardado && (
           <p className="flex items-center gap-1 text-sm font-semibold text-green-700">
             <span className="material-symbols-outlined text-[18px]">check_circle</span>
-            Cambios guardados (simulado xd)
+            Cambios guardados (simulado, sin backend todavía)
           </p>
         )}
         <Button variant="primary" className="bg-primary text-white sm:ml-auto" onClick={guardarCambios}>

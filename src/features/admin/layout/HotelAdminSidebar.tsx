@@ -1,12 +1,5 @@
 import { NavLink } from 'react-router-dom';
 
-/**
- * Sidebar exclusivo del panel de "dueño de hotel". A propósito NO reutiliza
- * adminNavItems / AdminSidebar del kit general: ese sidebar es compartido por
- * admin general (Noelia) y aerolíneas (Luciano), y editarlo les rompería su
- * navegación. Acá tenemos nuestra propia lista de ítems, acotada a lo que
- * un dueño de hotel realmente necesita (sin "Gestión de vuelos", por ejemplo).
- */
 const hotelAdminNavItems = [
   { label: 'Usuarios', path: '/admin/hoteles/usuarios', icon: 'person', end: false },
   { label: 'Gestión de Mi Hotel', path: '/admin/hoteles', icon: 'hotel', end: true },
@@ -48,9 +41,7 @@ export const HotelAdminSidebar = () => {
             </NavLink>
           ))}
 
-          {/* "Ajustes" es responsabilidad de Lucía (F6 del backlog: tab de Ajustes
-              generalizado para los 3 dashboards). Lo dejamos visible para que se vea
-              dónde va a vivir, pero sin NavLink -> no navega a ningún lado todavía. */}
+          {/* "Ajustes" va acá */}
           <div
             className="flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-white/30"
             title="Pendiente: lo integra Lucía (componente compartido para los 3 dashboards)"

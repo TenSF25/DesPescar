@@ -1,38 +1,55 @@
 import { useEffect, useState } from 'react';
+import type { ReservaHotel } from '../../hotels/hotels.types';
+import { getReservasLocales, getHuespedesBloqueados, toggleHuespedBloqueado } from '../../../utils/hotelLocalStore';
 
 export interface HotelGuest {
-  id: number;
-  nombre: string;
   email: string;
-  telefono: string;
-  hotelId: number;
+  nombre: string;
+  telefono?: string;
   estado: 'activo' | 'bloqueado';
   reservasRealizadas: number;
-  fechaRegistro: string; // ISO
+  fechaRegistro: string; // fecha de su primera reserva
 }
 
 export const useHotelGuests = (hotelId: number) => {
   const [huespedes, setHuespedes] = useState<HotelGuest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bloqueados, setBloqueados] = useState<string[]>(getHuespedesBloqueados());
 
   useEffect(() => {
-    fetch('/json/huespedes-hotel.json')
+    fetch('/json/reservas-hotel.json')
       .then((res) => res.json())
-      .then((data: HotelGuest[]) => setHuespedes(data))
+      .then((estaticas: ReservaHotel[]) => {
+        const locales = getReservasLocales();
+        const todas = [...estaticas, ...locales].filter((r) => r.hotelId === hotelId);
+
+        const porEmail = new Map<string, HotelGuest>();
+        todas.forEach((r) => {
+          const existente = porEmail.get(r.contactEmail);
+          if (existente) {
+            existente.reservasRealizadas += 1;
+            if (r.fechaInicio < existente.fechaRegistro) existente.fechaRegistro = r.fechaInicio;
+          } else {
+            porEmail.set(r.contactEmail, {
+              email: r.contactEmail,
+              nombre: r.huespedNombre || r.contactEmail.split('@')[0],
+              telefono: r.huespedTelefono,
+              estado: bloqueados.includes(r.contactEmail) ? 'bloqueado' : 'activo',
+              reservasRealizadas: 1,
+              fechaRegistro: r.fechaInicio,
+            });
+          }
+        });
+
+        setHuespedes(Array.from(porEmail.values()));
+      })
       .catch((e) => console.log(e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [hotelId, bloqueados]);
 
-  // Sin backend todavía: alta/baja solo en memoria.
-  const toggleEstado = (id: number) => {
-    setHuespedes((prev) =>
-      prev.map((h) =>
-        h.id === id ? { ...h, estado: h.estado === 'activo' ? 'bloqueado' : 'activo' } : h,
-      ),
-    );
+  const toggleEstado = (email: string) => {
+    setBloqueados(toggleHuespedBloqueado(email));
   };
 
-  const huespedesDelHotel = huespedes.filter((h) => h.hotelId === hotelId);
-
-  return { huespedes: huespedesDelHotel, loading, toggleEstado };
+  return { huespedes, loading, toggleEstado };
 };

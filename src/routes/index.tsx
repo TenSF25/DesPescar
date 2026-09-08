@@ -19,6 +19,7 @@ import { AdminHotelsPage } from '../features/admin/pages/AdminHotelsPage';
 import { AdminHotelReportsPage } from '../features/admin/pages/AdminHotelReportsPage';
 import { AdminHotelGuestsPage } from '../features/admin/pages/AdminHotelGuestsPage';
 import { AdminHotelReservationsPage } from '../features/admin/pages/AdminHotelReservationsPage';
+import { AdminHotelOnboardingPage } from '../features/admin/pages/AdminHotelOnboardingPage';
 
 export const router = createBrowserRouter([
   {
@@ -95,6 +96,7 @@ export const router = createBrowserRouter([
       { path: 'usuarios', element: <AdminHotelGuestsPage /> },
       { path: 'reservas', element: <AdminHotelReservationsPage /> },
       { path: 'reportes', element: <AdminHotelReportsPage /> },
+      { path: 'registro', element: <AdminHotelOnboardingPage /> },
     ],
   },
 ]);

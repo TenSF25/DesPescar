@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Hotel } from '../hotels.types';
+import { getHotelesRegistrados } from '../../../utils/hotelLocalStore';
 
 interface HotelesState {
   hoteles: Hotel[];
@@ -15,10 +16,10 @@ export const useHotelDetail = () => {
   useEffect(() => {
     fetch('/json/hoteles.json')
       .then((res) => res.json())
-      .then((hoteles: Hotel[]) => setDatos({ hoteles, cargado: true }))
+      .then((hoteles: Hotel[]) => setDatos({ hoteles: [...hoteles, ...getHotelesRegistrados()], cargado: true }))
       .catch((e) => {
         console.log(e);
-        setDatos({ hoteles: [], cargado: true });
+        setDatos({ hoteles: getHotelesRegistrados(), cargado: true });
       });
   }, []);
 

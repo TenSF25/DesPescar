@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { PageHeader, SearchFilterBar, Select, DataTable, Badge, ActionsMenu, type TableColumn } from '../../../components/admin';
 import { useHotelGuests, type HotelGuest } from '../hooks/useHotelGuests';
-
-const MI_HOTEL_ID = 1;
+import { getMiHotelId } from '../../../utils/hotelLocalStore';
 
 export const AdminHotelGuestsPage = () => {
-  const { huespedes, loading, toggleEstado } = useHotelGuests(MI_HOTEL_ID);
+  const { huespedes, loading, toggleEstado } = useHotelGuests(getMiHotelId());
   const [search, setSearch] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState('todos');
 
@@ -48,8 +47,8 @@ export const AdminHotelGuestsPage = () => {
         <ActionsMenu
           menuActions={[
             h.estado === 'activo'
-              ? { label: 'Bloquear cuenta', icon: 'block', tone: 'danger', onClick: () => toggleEstado(h.id) }
-              : { label: 'Reactivar cuenta', icon: 'check_circle', onClick: () => toggleEstado(h.id) },
+              ? { label: 'Bloquear cuenta', icon: 'block', tone: 'danger', onClick: () => toggleEstado(h.email) }
+              : { label: 'Reactivar cuenta', icon: 'check_circle', onClick: () => toggleEstado(h.email) },
             { label: 'Enviar email', icon: 'mail', onClick: () => window.open(`mailto:${h.email}`) },
           ]}
         />
@@ -86,7 +85,7 @@ export const AdminHotelGuestsPage = () => {
         <DataTable
           columns={columns}
           data={huespedesFiltrados}
-          keyExtractor={(h) => h.id}
+          keyExtractor={(h) => h.email}
           emptyMessage="No encontramos huéspedes con esos filtros."
         />
       )}
