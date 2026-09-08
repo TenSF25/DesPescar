@@ -2,8 +2,21 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../../../utils/cn';
 import { adminNavItems } from './adminNav.config';
 import { useAuthStore } from '../../../features/auth/store/useAuthStore';
+import type { AdminNavItem } from '../admin.types';
 
-export const AdminSidebar = () => {
+interface AdminSidebarProps {
+  /**
+   * Ítems del menú lateral. Opcional: si no se pasa nada, usa
+   * `adminNavItems` (el menú del admin general) para no romper a nadie
+   * que ya use <AdminSidebar /> sin props.
+   *
+   * Cada dashboard (aerolínea, hotel, admin general) le pasa su propia
+   * lista, así se reutiliza el mismo componente sin tocarlo.
+   */
+  items?: AdminNavItem[];
+}
+
+export const AdminSidebar = ({ items = adminNavItems }: AdminSidebarProps) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
 
@@ -30,7 +43,7 @@ export const AdminSidebar = () => {
         </div>
 
         <nav className="flex flex-col gap-1">
-          {adminNavItems.map((item) => (
+          {items.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
