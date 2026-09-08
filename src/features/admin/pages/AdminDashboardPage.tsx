@@ -24,7 +24,7 @@ export const AdminDashboardPage = () => {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Dashboard"
+        title="Panel general"
         description="Resumen general de la plataforma y actividad de hoy."
       />
 
