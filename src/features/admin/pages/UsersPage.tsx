@@ -25,7 +25,10 @@ interface CuentaPlataforma {
   nombre: string;
   email: string;
   tipo: TipoCuenta;
-  fechaAlta: string;
+  /** ISO (YYYY-MM-DD) para poder ordenar cronológicamente de verdad. */
+  fechaAltaISO: string;
+  /** ISO datetime, para calcular "hace X" y poder ordenar. */
+  ultimaActividadISO: string;
   estado: EstadoCuenta;
 }
 
@@ -35,7 +38,8 @@ const cuentasIniciales: CuentaPlataforma[] = [
     nombre: 'Aerolíneas del Sur',
     email: 'contacto@aerolineasdelsur.com',
     tipo: 'Aerolínea',
-    fechaAlta: '05 Sep 2026',
+    fechaAltaISO: '2026-09-05',
+    ultimaActividadISO: '2026-09-07T09:40:00',
     estado: 'Pendiente',
   },
   {
@@ -43,7 +47,8 @@ const cuentasIniciales: CuentaPlataforma[] = [
     nombre: 'Hotel Costanera',
     email: 'reservas@hotelcostanera.com',
     tipo: 'Hotel',
-    fechaAlta: '04 Sep 2026',
+    fechaAltaISO: '2026-09-04',
+    ultimaActividadISO: '2026-09-07T07:50:00',
     estado: 'Activo',
   },
   {
@@ -51,7 +56,8 @@ const cuentasIniciales: CuentaPlataforma[] = [
     nombre: 'Martina Suárez',
     email: 'martina.suarez@email.com',
     tipo: 'Cliente',
-    fechaAlta: '04 Sep 2026',
+    fechaAltaISO: '2026-09-04',
+    ultimaActividadISO: '2026-09-06T21:10:00',
     estado: 'Activo',
   },
   {
@@ -59,7 +65,8 @@ const cuentasIniciales: CuentaPlataforma[] = [
     nombre: 'Vuela Andes',
     email: 'admin@vuelaandes.com',
     tipo: 'Aerolínea',
-    fechaAlta: '02 Sep 2026',
+    fechaAltaISO: '2026-08-20',
+    ultimaActividadISO: '2026-09-07T08:15:00',
     estado: 'Suspendido',
   },
   {
@@ -67,7 +74,8 @@ const cuentasIniciales: CuentaPlataforma[] = [
     nombre: 'Hotel Bahía Norte',
     email: 'info@hotelbahianorte.com',
     tipo: 'Hotel',
-    fechaAlta: '01 Sep 2026',
+    fechaAltaISO: '2026-09-01',
+    ultimaActividadISO: '2026-09-05T12:00:00',
     estado: 'Pendiente',
   },
 ];
@@ -89,6 +97,24 @@ const filtroToTipo: Record<string, TipoCuenta | null> = {
   aerolinea: 'Aerolínea',
   hotel: 'Hotel',
   cliente: 'Cliente',
+};
+
+const formatFecha = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+
+const formatRelativo = (iso: string) => {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutos = Math.round(diffMs / 60000);
+  if (minutos < 1) return 'Recién';
+  if (minutos < 60) return `Hace ${minutos} min`;
+  const horas = Math.round(minutos / 60);
+  if (horas < 24) return `Hace ${horas} h`;
+  const dias = Math.round(horas / 24);
+  return `Hace ${dias} d`;
 };
 
 /** Botón de texto chico, propio de esta tabla (alta/baja no es un ícono genérico). */
@@ -153,8 +179,16 @@ export const UsersPage = () => {
       render: (c) => <Badge tone={tipoTone[c.tipo]}>{c.tipo}</Badge>,
     },
     {
-      key: 'fechaAlta',
+      key: 'fechaAltaISO',
       header: 'Fecha de alta',
+      sortable: true,
+      render: (c) => formatFecha(c.fechaAltaISO),
+    },
+    {
+      key: 'ultimaActividadISO',
+      header: 'Última actividad',
+      sortable: true,
+      render: (c) => formatRelativo(c.ultimaActividadISO),
     },
     {
       key: 'estado',
