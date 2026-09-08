@@ -18,7 +18,11 @@ export interface TableColumn<T> {
   header: string;
   className?: string;
   render?: (row: T) => ReactNode;
+  /** Si es true, el header es clickeable y ordena la tabla por esta columna. */
+  sortable?: boolean;
 }
+
+export type SortDirection = 'asc' | 'desc';
 
 /** Dato individual para <DonutChart /> */
 export interface DonutChartDatum {
