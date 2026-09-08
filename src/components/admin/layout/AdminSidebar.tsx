@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../../../utils/cn';
 import { adminNavItems } from './adminNav.config';
 import { useAuthStore } from '../../../features/auth/store/useAuthStore';
