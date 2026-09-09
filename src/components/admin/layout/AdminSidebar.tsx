@@ -15,22 +15,31 @@ export const AdminSidebar = () => {
         </div>
 
         <nav className="flex flex-col gap-1">
-          {adminNavItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/admin'}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white',
-                  isActive && 'bg-primary text-white hover:bg-primary',
-                )
-              }
-            >
-              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              {item.label}
-            </NavLink>
-          ))}
+          {adminNavItems.map((item) =>
+            item.type === 'title' ? (
+              <div
+                key={item.label}
+                className="flex cursor-default items-center gap-3 px-3 py-2.5 text-sm font-semibold text-white/40"
+              >
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                {item.label}
+              </div>
+            ) : (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white',
+                    isActive && 'bg-primary text-white hover:bg-primary',
+                  )
+                }
+              >
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                {item.label}
+              </NavLink>
+            ),
+          )}
         </nav>
       </div>
 

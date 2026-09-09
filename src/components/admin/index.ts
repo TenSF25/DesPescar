@@ -19,6 +19,8 @@ export * from './ui/DonutChart';
 export * from './ui/LineChart';
 export * from './ui/ProgressListItem';
 export * from './ui/ActivityListItem';
+export * from './ui/Modal';
+export * from './ui/ConfirmDialog';
 
 // Types
 export * from './admin.types';

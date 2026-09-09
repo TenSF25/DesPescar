@@ -1,11 +1,21 @@
 import type { ReactNode } from 'react';
 
 /** Item de navegación del sidebar de administrador */
-export interface AdminNavItem {
+export interface AdminNavLink {
+  type: 'link';
   label: string;
   path: string;
   icon: string; // nombre del ícono de Material Symbols
 }
+
+/** Título de sección del sidebar, no navegable */
+export interface AdminNavTitle {
+  type: 'title';
+  label: string;
+  icon: string;
+}
+
+export type AdminNavEntry = AdminNavTitle | AdminNavLink;
 
 export type TrendDirection = 'up' | 'down';
 
