@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faPlane, faGear, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faPlane, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 export const UserSidebar = () => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export const UserSidebar = () => {
           className="flex w-full items-center gap-3 rounded-lg bg-orange-500 px-4 py-3 text-left text-sm text-white shadow-md"
         >
           <FontAwesomeIcon icon={faUser} className="w-4" />
-          <span>Mi perfil</span>
+          <span>Mis datos</span>
         </button>
 
         <button
@@ -24,14 +24,6 @@ export const UserSidebar = () => {
         >
           <FontAwesomeIcon icon={faPlane} className="w-4" />
           <span>Mis vuelos</span>
-        </button>
-
-        <button
-          type="button"
-          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm text-gray-700"
-        >
-          <FontAwesomeIcon icon={faGear} className="w-4" />
-          <span>Ajustes</span>
         </button>
       </div>
 
