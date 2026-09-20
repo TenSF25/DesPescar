@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { HomePage } from '../features/flights/pages/HomePage';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { RegisterPage } from '../features/auth/pages/RegisterPage';
@@ -10,6 +10,11 @@ import { ResultsPage } from '../features/flights/pages/ResultsPage';
 import { AccountLayout } from '../components/layout/AccountLayout';
 import { CancelFlightPage } from '../features/bookings/pages/CancelFlightPage';
 import { AccountPlaceholderPage } from '../features/bookings/pages/AccountPlaceholderPage';
+import { AdminLayout } from '../components/admin';
+import { UsersPage } from '../features/admin-airline/users/pages/UsersPage';
+import { FlightsManagementPage } from '../features/admin-airline/flights/pages/FlightsManagementPage';
+import { BookingsManagementPage } from '../features/admin-airline/bookings/pages/BookingsManagementPage';
+import { ReportsPage } from '../features/admin-airline/reports/pages/ReportsPage';
 
 export const router = createBrowserRouter([
   {
@@ -57,6 +62,21 @@ export const router = createBrowserRouter([
           },
         ],
       },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      // "Dashboard" es solo un título de sección en el sidebar (no una
+      // página), por eso /admin redirige a la primera sección real.
+      { index: true, element: <Navigate to="/admin/usuarios" replace /> },
+      { path: 'usuarios', element: <UsersPage /> },
+      { path: 'vuelos', element: <FlightsManagementPage /> },
+      { path: 'reservas', element: <BookingsManagementPage /> },
+      { path: 'reportes', element: <ReportsPage /> },
+      // 👇 Ajustes todavía no tiene página propia:
+      // { path: 'ajustes', element: <SettingsPage /> },
     ],
   },
 ]);
