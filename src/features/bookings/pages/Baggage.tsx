@@ -1,0 +1,122 @@
+import { SectionContainer } from '@/components/ui/SectionContainer';
+import { BaggageCard } from '../components/BaggageCard';
+import { Button } from '@/components/ui/Button';
+import { formatDate } from '@/utils/formatDate';
+import { useBaggage } from '../hooks/useBaggage';
+import type { Fare } from '@/features/flights/flights.types';
+
+export const Baggage = () => {
+  const {
+    flight,
+    flightDepartureId,
+    flightReturnId,
+    hasReturn,
+    activeFareId,
+    priceTotal,
+    passengers,
+    handleCardSelect,
+    handleNextStep,
+  } = useBaggage();
+
+  return (
+    <SectionContainer>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3 text-3xl text-[#323439]">
+            <h2 className="font-medium">{flight?.originAirport.city} </h2>
+            <span className="material-symbols-outlined">sync_alt</span>
+            <h2 className="font-semibold">{flight?.destinationAirport.city}</h2>
+          </div>
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
+            <p className="text-center">{hasReturn ? 'Ida y vuelta' : 'Ida'}</p>
+            <span className="flex h-1.25 w-1.25 items-center justify-center rounded-full bg-gray-500 text-center" />
+            <p className="flex items-center">
+              <span className="material-symbols-outlined text-[22px]!">person</span> {passengers}
+            </p>
+          </div>
+        </div>
+        <div className="border-primary/40 flex max-h-17.5 items-center justify-between rounded-lg border p-2">
+          <div className="flex h-full items-center divide-x divide-gray-300 font-medium">
+            <div className="flex items-center gap-2 px-3">
+              <img
+                src={flightDepartureId?.airline.logoUrl}
+                alt={flightDepartureId?.airline.name}
+                className="w-12"
+              />
+              <h3>IDA</h3>
+              <div className="flex font-semibold text-[#72777F]">
+                <h3>{flightDepartureId?.originAirport.code}</h3>
+                <span>-</span>
+                <h3>{flightDepartureId?.destinationAirport.code}</h3>
+              </div>
+              <h4 className="text-md font-normal">
+                {formatDate(flightDepartureId?.departureTime || '')}
+              </h4>
+            </div>
+            <div className="flex items-center gap-2 px-3">
+              <img
+                src={flightReturnId?.airline.logoUrl}
+                alt={flightReturnId?.airline.name}
+                className="w-12"
+              />
+              <h3>VUELTA</h3>
+              <div className="flex font-semibold text-[#72777F]">
+                <h3>{flightReturnId?.originAirport.code}</h3>
+                <span>-</span>
+                <h3>{flightReturnId?.destinationAirport.code}</h3>
+              </div>
+              <h4 className="text-md font-normal">
+                {formatDate(flightReturnId?.departureTime || '')}
+              </h4>
+            </div>
+          </div>
+          <Button className="max-w-30 rounded-full border-none" variant="secondary">
+            Ver detalle
+          </Button>
+        </div>
+      </div>
+      <div className="flex w-full flex-col justify-between gap-6 text-[#323439]">
+        <div className="flex w-full items-center justify-between text-[#323439]">
+          <h2 className="text-3xl font-semibold">Seleccioná tu tarifa</h2>
+          <p>{flight?.fares?.length} tarifas disponibles</p>
+        </div>
+
+        <div className="flex gap-6">
+          {flight?.fares?.map((tarifa: Fare) => (
+            <BaggageCard
+              key={tarifa.id}
+              name={tarifa.name}
+              type={tarifa.type}
+              price={String(tarifa.price.transparentFinalPrice)}
+              serviciosIncluidos={tarifa.includedServices}
+              isSelect={activeFareId === tarifa.id}
+              onSelect={() => handleCardSelect(tarifa.id)}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 flex w-full justify-center border-t border-[#3234392d]">
+        <div className="flex w-360 items-center justify-between p-4">
+          <h3 className="text-xl font-semibold text-[#323439]">
+            Tu viaje a {flight?.destinationAirport?.city}
+          </h3>
+          <div className="flex items-center gap-12">
+            <div className="flex flex-col">
+              <h5 className="text-xs font-semibold">Precio final</h5>
+              <div className="flex gap-0.5">
+                <span className="material-symbols-outlined text-primary">info</span>
+                <h6 className="flex items-end gap-0.5 text-xl">
+                  <span className="text-sm text-[#323439]">$</span>
+                  {priceTotal}
+                </h6>
+              </div>
+            </div>
+            <Button variant="secondary" className="rounded-full px-5" onClick={handleNextStep}>
+              Continuar
+            </Button>
+          </div>
+        </div>
+      </div>
+    </SectionContainer>
+  );
+};

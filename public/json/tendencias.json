@@ -1,0 +1,38 @@
+[
+  {
+    "id": "TEND-001",
+    "ciudad": "San Carlos de Bariloche",
+    "pais": "Argentina",
+    "iataPrincipal": "BRC",
+    "imagenUrl": "https://assets.despescar.com/destinos/bariloche-invierno.jpg",
+    "precioDesde": {
+      "moneda": "ARS",
+      "monto": 85000.0
+    },
+    "etiquetaPopularidad": "#1 EN INVIERNO"
+  },
+  {
+    "id": "TEND-002",
+    "ciudad": "Miami",
+    "pais": "Estados Unidos",
+    "iataPrincipal": "MIA",
+    "imagenUrl": "https://assets.despescar.com/destinos/miami-beach.jpg",
+    "precioDesde": {
+      "moneda": "USD",
+      "monto": 350.0
+    },
+    "etiquetaPopularidad": "MÁS BUSCADO HOY"
+  },
+  {
+    "id": "TEND-003",
+    "ciudad": "Madrid",
+    "pais": "España",
+    "iataPrincipal": "MAD",
+    "imagenUrl": "https://assets.despescar.com/destinos/madrid-gran-via.jpg",
+    "precioDesde": {
+      "moneda": "USD",
+      "monto": 790.0
+    },
+    "etiquetaPopularidad": "TENDENCIA EUROPEA"
+  }
+]

@@ -1,0 +1,254 @@
+{
+  "metadatos": {
+    "totalResultados": 3,
+    "origen": "EZE",
+    "destino": "BRC",
+    "fechaIda": "2026-10-15",
+    "pasajeros": 2
+  },
+  "vuelos": [
+    {
+      "id": "VUE-8472",
+      "numeroVuelo": "AR-4102",
+      "aerolinea": {
+        "nombre": "Aerolíneas Argentinas",
+        "logoUrl": "https://www.latamairlines.com/content/dam/latamxp/sites/alianzas/aerolineasargentinas-logo-l.png"
+      },
+      "aeronave": "Airbus A320neo",
+      "itinerario": {
+        "salida": {
+          "iata": "EZE",
+          "fechaHora": "2026-10-15T08:30:00-03:00"
+        },
+        "llegada": {
+          "iata": "BRC",
+          "fechaHora": "2026-10-15T10:45:00-03:00"
+        },
+        "duracionMinutos": 135,
+        "tipoVuelo": "DIRECTO"
+      },
+      "escalas": [],
+      "serviciosIncluidos": {
+        "mochilaPersonal": true,
+        "equipajeMano": true,
+        "equipajeBodega": false,
+        "wifi": true,
+        "seleccionAsiento": "CON_CARGO"
+      },
+      "precio": {
+        "moneda": "ARS",
+        "tarifaBase": 85000.0,
+        "impuestosTasas": 15000.0,
+        "precioFinalTransparente": 100000.0
+      },
+      "tarifas": [
+        {
+          "id": "TAR-AR-BASE-1",
+          "nombre": "Base",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": false,
+            "wifi": true,
+            "seleccionAsiento": "CON_CARGO"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 0,
+            "impuestosTasas": 0,
+            "precioFinalTransparente": 0
+          }
+        },
+        {
+          "id": "TAR-AR-FLEX-1",
+          "nombre": "Plus",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": true,
+            "wifi": true,
+            "seleccionAsiento": "GRATUITA"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 115000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 130000.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "VUE-8473",
+      "numeroVuelo": "WJ-4105",
+      "aerolinea": {
+        "nombre": "JetSmart",
+        "logoUrl": "https://images.seeklogo.com/logo-png/40/2/jet-smart-logo-png_seeklogo-406709.png"
+      },
+      "aeronave": "Boeing 737-800",
+      "itinerario": {
+        "salida": {
+          "iata": "EZE",
+          "fechaHora": "2026-10-15T14:00:00-03:00"
+        },
+        "llegada": {
+          "iata": "BRC",
+          "fechaHora": "2026-10-15T19:30:00-03:00"
+        },
+        "duracionMinutos": 330,
+        "tipoVuelo": "CON_ESCALA"
+      },
+      "escalas": [
+        {
+          "iata": "COR",
+          "ciudad": "Córdoba",
+          "duracionEsperaMinutos": 120
+        }
+      ],
+      "serviciosIncluidos": {
+        "mochilaPersonal": true,
+        "equipajeMano": true,
+        "equipajeBodega": false,
+        "wifi": false,
+        "seleccionAsiento": "CON_CARGO"
+      },
+      "precio": {
+        "moneda": "ARS",
+        "tarifaBase": 55000.0,
+        "impuestosTasas": 15000.0,
+        "precioFinalTransparente": 70000.0
+      },
+      "tarifas": [
+        {
+          "id": "TAR-JS-LIGERA-1",
+          "nombre": "Ligera",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": false,
+            "wifi": false,
+            "seleccionAsiento": "CON_CARGO"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 55000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 70000.0
+          }
+        },
+        {
+          "id": "TAR-JS-FULL-1",
+          "nombre": "Pack Full",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": true,
+            "wifi": false,
+            "seleccionAsiento": "GRATUITA"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 70000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 85000.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "VUE-8474",
+      "numeroVuelo": "FO-4115",
+      "aerolinea": {
+        "nombre": "Flybondi",
+        "logoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Flybondi_logo_simple.svg/330px-Flybondi_logo_simple.svg.png"
+      },
+      "aeronave": "Boeing 737-800",
+      "itinerario": {
+        "salida": {
+          "iata": "EZE",
+          "fechaHora": "2026-10-15T16:00:00-03:00"
+        },
+        "llegada": {
+          "iata": "BRC",
+          "fechaHora": "2026-10-15T19:20:00-03:00"
+        },
+        "duracionMinutos": 200,
+        "tipoVuelo": "DIRECTO"
+      },
+      "escalas": [],
+      "serviciosIncluidos": {
+        "mochilaPersonal": true,
+        "equipajeMano": false,
+        "equipajeBodega": false,
+        "wifi": false,
+        "seleccionAsiento": "CON_CARGO"
+      },
+      "precio": {
+        "moneda": "ARS",
+        "tarifaBase": 60000.0,
+        "impuestosTasas": 15000.0,
+        "precioFinalTransparente": 75000.0
+      },
+      "tarifas": [
+        {
+          "id": "TAR-FB-BASIC-1",
+          "nombre": "Basic",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": false,
+            "equipajeBodega": false,
+            "wifi": false,
+            "seleccionAsiento": "CON_CARGO"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 60000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 75000.0
+          }
+        },
+        {
+          "id": "TAR-FB-TRAVEL-1",
+          "nombre": "Travel",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": false,
+            "wifi": false,
+            "seleccionAsiento": "CON_CARGO"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 85000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 100000.0
+          }
+        },
+        {
+          "id": "TAR-FB-PLUS-1",
+          "nombre": "Plus",
+          "tipo": "Cabina Económica",
+          "serviciosIncluidos": {
+            "mochilaPersonal": true,
+            "equipajeMano": true,
+            "equipajeBodega": true,
+            "wifi": false,
+            "seleccionAsiento": "GRATUITA"
+          },
+          "precio": {
+            "moneda": "ARS",
+            "tarifaBase": 110000.0,
+            "impuestosTasas": 15000.0,
+            "precioFinalTransparente": 125000.0
+          }
+        }
+      ]
+    }
+  ]
+}

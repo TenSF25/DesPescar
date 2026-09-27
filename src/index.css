@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import 'tailwindcss';
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: clip;
+}
+
+@theme {
+  --color-primary: #c85300;
+  --colo-bright: #df6a17;
+  --color-primary-transparent: #eb620079;
+  --color-secondary: #1f3051;
+  --color-neutral: #64748b;
+  --color-alert: #ba1a1a;
+  --color-success: #16794c;
+  --font-sans: 'Inter', sans-serif;
+}
+
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: var(--color-secondary);
+  --rdp-background-color: #f8fafc;
+  margin: 0;
+}
+.rdp-day_range_end,
+.rdp-day_range_start {
+  background-color: #00a3e0 !important;
+  color: white !important;
+  border-radius: 9999px !important;
+}
+.rdp-day_range_middle {
+  border-radius: 0 !important;
+}
