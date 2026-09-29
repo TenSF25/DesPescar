@@ -15,6 +15,7 @@ export const Input = ({
   className,
   type = 'text',
   placeholder,
+  error,
   ...propsInput
 }: ComponentInput) => {
   const uniqueID = useId();
@@ -31,10 +32,21 @@ export const Input = ({
       <input
         type={type}
         id={uniqueID}
-        className={cn('w-full rounded-xl border border-black/20 p-2', className)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${uniqueID}-error` : undefined}
+        className={cn(
+          'w-full rounded-xl border border-black/20 p-2',
+          error && 'border-alert',
+          className,
+        )}
         {...propsInput}
         placeholder={placeholder}
       />
+      {error && (
+        <p id={`${uniqueID}-error`} className="text-alert text-[13px]">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

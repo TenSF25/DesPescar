@@ -1,6 +1,8 @@
 interface AdminHeaderProps {
   userName?: string;
   userRole?: string;
+  /** Abre el menú lateral en móvil. */
+  onMenuClick?: () => void;
 }
 
 const getInitials = (name: string) =>
@@ -12,9 +14,25 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-export const AdminHeader = ({ userName = 'Daiana', userRole = 'Administradora' }: AdminHeaderProps) => {
+export const AdminHeader = ({
+  userName = 'Daiana',
+  userRole = 'Administradora',
+  onMenuClick,
+}: AdminHeaderProps) => {
   return (
-    <header className="flex w-full items-center justify-end gap-5 border-b border-black/10 bg-white px-8 py-4">
+    <header className="flex w-full items-center gap-5 border-b border-black/10 bg-white px-4 py-4 sm:px-8">
+      {/* Solo en móvil: el menú lateral está escondido y se abre desde acá. */}
+      <button
+        type="button"
+        onClick={onMenuClick}
+        aria-label="Abrir menú"
+        className="hover:text-secondary mr-auto cursor-pointer text-[#44474E] lg:hidden"
+      >
+        <span className="material-symbols-outlined">menu</span>
+      </button>
+
+      <span className="hidden grow lg:block" />
+
       <button type="button" className="cursor-pointer text-[#44474E] hover:text-secondary">
         <span className="material-symbols-outlined">notifications</span>
       </button>
