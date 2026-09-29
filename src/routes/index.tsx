@@ -15,6 +15,7 @@ import { UsersPage } from '../features/admin-airline/users/pages/UsersPage';
 import { FlightsManagementPage } from '../features/admin-airline/flights/pages/FlightsManagementPage';
 import { BookingsManagementPage } from '../features/admin-airline/bookings/pages/BookingsManagementPage';
 import { ReportsPage } from '../features/admin-airline/reports/pages/ReportsPage';
+import { SettingsPage } from '../features/admin-settings/pages/SettingsPage';
 
 export const router = createBrowserRouter([
   {
@@ -75,8 +76,7 @@ export const router = createBrowserRouter([
       { path: 'vuelos', element: <FlightsManagementPage /> },
       { path: 'reservas', element: <BookingsManagementPage /> },
       { path: 'reportes', element: <ReportsPage /> },
-      // 👇 Ajustes todavía no tiene página propia:
-      // { path: 'ajustes', element: <SettingsPage /> },
+      { path: 'ajustes', element: <SettingsPage /> },
     ],
   },
 ]);
