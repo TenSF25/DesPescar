@@ -8,6 +8,7 @@ export interface SeatsWebSockets {
 }
 
 export interface FareClassDetail {
+  id?: string;
   name: string;
   price: number;
   colorKey: string;
@@ -59,4 +60,19 @@ export interface FlightSeatMapResponse {
   totalSelectedLimit: number;
   fareClasses: Record<string, FareClassDetail>;
   layout: LayoutElement[];
+}
+
+export interface BookingInitResponse {
+  bookingId: number;
+  status: string;
+}
+
+export interface PaymentCreateResponse {
+  id: string;
+  reservationId: number;
+  userId: number;
+  amount: number;
+  currency: string;
+  status: string;
+  checkoutUrl: string | null;
 }

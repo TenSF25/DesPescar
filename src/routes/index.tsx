@@ -1,6 +1,7 @@
 import { FooterLayout } from '@/components/layout/FooterLayout';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PublicRoute } from '@/components/Routes/PublicRoute';
+import { ProtectedRoute } from '@/components/Routes/ProtectedRoute';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { Baggage } from '@/features/bookings/pages/Baggage';
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       },
       {
         path: '/booking',
+        element: <ProtectedRoute />,
         children: [
           {
             path: 'baggage',

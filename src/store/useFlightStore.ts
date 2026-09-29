@@ -7,11 +7,17 @@ interface FlightStoreDate {
   selectedDepartureFare: string | null;
   selectedReturnFare: string | null;
   passengers: number | null;
+  bookingId: number | null;
+  selectedSeats: string[];
+  passengersAssignedBookingId: number | null;
   setSelectedDepartureFlight: (flightId: string | null) => void;
   setSelectedReturnFlight: (flightId: string | null) => void;
   setSelectedDepartureFare: (fare: string | null) => void;
   setSelectedReturnFare: (fare: string | null) => void;
   setPassengers: (passengers: number | null) => void;
+  setBookingId: (bookingId: number | null) => void;
+  setSelectedSeats: (seatIds: string[]) => void;
+  setPassengersAssignedBookingId: (bookingId: number | null) => void;
   clearSearch: () => void;
 }
 
@@ -23,7 +29,16 @@ export const useFlightStore = create<FlightStoreDate>()(
       selectedDepartureFare: null,
       selectedReturnFare: null,
       passengers: null,
-      setSelectedDepartureFlight: (flight) => set({ selectedDepartureFlight: flight }),
+      bookingId: null,
+      selectedSeats: [],
+      passengersAssignedBookingId: null,
+      setSelectedDepartureFlight: (flight) =>
+        set({
+          selectedDepartureFlight: flight,
+          bookingId: null,
+          selectedSeats: [],
+          passengersAssignedBookingId: null,
+        }),
       setSelectedReturnFlight: (flight) => set({ selectedReturnFlight: flight }),
       setSelectedDepartureFare: (fare) => set({ selectedReturnFlight: fare }),
       setSelectedReturnFare: (fare) => set({ selectedReturnFlight: fare }),
@@ -31,6 +46,9 @@ export const useFlightStore = create<FlightStoreDate>()(
         set({
           passengers: passengers,
         }),
+      setBookingId: (bookingId) => set({ bookingId, passengersAssignedBookingId: null }),
+      setSelectedSeats: (seatIds) => set({ selectedSeats: seatIds }),
+      setPassengersAssignedBookingId: (bookingId) => set({ passengersAssignedBookingId: bookingId }),
       clearSearch: () =>
         set({
           selectedDepartureFlight: null,
@@ -38,6 +56,9 @@ export const useFlightStore = create<FlightStoreDate>()(
           selectedDepartureFare: null,
           selectedReturnFare: null,
           passengers: null,
+          bookingId: null,
+          selectedSeats: [],
+          passengersAssignedBookingId: null,
         }),
     }),
     {

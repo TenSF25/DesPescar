@@ -21,6 +21,8 @@ export const useSeats = () => {
   const myUserId = useAuthStore((state) => state.user?.id);
   const departureId = useFlightStore((state) => state.selectedDepartureFlight);
   const passengers = useFlightStore((state) => state.passengers);
+  const selectedSeats = useFlightStore((state) => state.selectedSeats);
+  const setStoredSeats = useFlightStore((state) => state.setSelectedSeats);
 
   const passengersLimit = useMemo(() => {
     if (Array.isArray(passengers)) return Math.max(1, passengers.length);
@@ -29,19 +31,22 @@ export const useSeats = () => {
   }, [passengers]);
 
   const [seatsMap, setSeatsMap] = useState<FlightSeatMapResponse>();
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const selectedSeatsRef = useRef<string[]>([]);
+  const selectedSeatsRef = useRef<string[]>(selectedSeats);
   const hasFetchedInitialRef = useRef(false);
 
   const seatsMapRef = useRef<FlightSeatMapResponse | undefined>(undefined);
 
   const updateSelectedSeats = useCallback((newSeats: string[]) => {
     selectedSeatsRef.current = newSeats;
-    setSelectedSeats(newSeats);
-  }, []);
+    setStoredSeats(newSeats);
+  }, [setStoredSeats]);
+
+  useEffect(() => {
+    selectedSeatsRef.current = selectedSeats;
+  }, [selectedSeats]);
 
   const updateSeatsMapState = (newMap: FlightSeatMapResponse | undefined) => {
     seatsMapRef.current = newMap;
@@ -106,13 +111,9 @@ export const useSeats = () => {
 
         updateSeatsMapState({ ...staticMap, layout: mergedLayout });
 
-        if (!hasFetchedInitialRef.current) {
-          updateSelectedSeats(Array.from(misAsientosPrevios));
-          hasFetchedInitialRef.current = true;
-        } else {
-          const merged = Array.from(new Set([...selectedSeatsRef.current, ...misAsientosPrevios]));
-          updateSelectedSeats(merged);
-        }
+        const merged = Array.from(new Set([...selectedSeatsRef.current, ...misAsientosPrevios]));
+        updateSelectedSeats(merged);
+        hasFetchedInitialRef.current = true;
       } catch {
         setError(`Ha ocurrido un error al obtener los asientos del vuelo con Id: ${departureId}`);
       } finally {

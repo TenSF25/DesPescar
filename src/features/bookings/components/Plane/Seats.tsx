@@ -34,7 +34,7 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
 
   const handleClick = () => {
     if (!isOccupiedByOther && data.displayNumber) {
-      handleSeatClick(data.displayNumber, data.status, data.blockedByUserId);
+      handleSeatClick(data.seatUuid, data.status, data.blockedByUserId);
     }
   };
 

@@ -1,13 +1,14 @@
 import { Seats } from './Seats';
 import { getColorSettings } from './ColorSettings';
-import type { FareClassDetail, SeatItem, SeatsWebSockets } from '../../bookings.types';
+import type { FareClassDetail, LayoutItem } from '../../bookings.types';
 
 interface SeatsRowProps {
   rowNumber: string;
-  items: SeatItem[];
-  ws: SeatsWebSockets;
+  items: LayoutItem[];
   fareClasses: Record<string, FareClassDetail>;
 }
+
+const emptyFareClass: FareClassDetail = { name: '', price: 0, colorKey: '' };
 
 export const SeatsRow = ({ rowNumber, items, fareClasses }: SeatsRowProps) => {
   return (
@@ -18,9 +19,9 @@ export const SeatsRow = ({ rowNumber, items, fareClasses }: SeatsRowProps) => {
 
         return (
           <Seats
-            key={item.seatUuid || idx}
+            key={item.type === 'seat' ? item.seatUuid || idx : `${item.type}-${idx}`}
             data={item}
-            fareClass={fareInfo || fareClasses[item.fareClass]}
+            fareClass={fareInfo || emptyFareClass}
             rowNumber={rowNumber}
             colorStyle={colorStyle}
           />

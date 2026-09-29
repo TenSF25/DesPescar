@@ -91,26 +91,35 @@ export const useFlightId = (id: string) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!id) return;
+
+    let activo = true;
+
     const fetchFlightById = async () => {
       setIsLoading(true);
+      setError('');
 
       try {
         const res = await api.get(`http://localhost:8081/api/flights/${id}`);
-        setFlightById(res.data);
+        if (activo) setFlightById(res.data);
       } catch {
-        setError('Ocurrio un error al buscar el vuelo por ID.');
+        if (activo) setError('Ocurrio un error al buscar el vuelo por ID.');
       } finally {
-        setIsLoading(false);
+        if (activo) setIsLoading(false);
       }
     };
 
     fetchFlightById();
+
+    return () => {
+      activo = false;
+    };
   }, [id]);
 
   return {
-    flightById,
-    error,
-    isLoading,
+    flightById: id ? flightById : undefined,
+    error: id ? error : '',
+    isLoading: id ? isLoading : false,
   };
 };
 

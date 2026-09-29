@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { errorAuth, InterfaceAuth } from '../auth.types';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '@/store/useAuthStore';
-import { api } from '@/config/api';
+import { api, gatewayBaseUrl } from '@/config/api';
 import axios from 'axios';
 
 export const useAuth = () => {
@@ -13,7 +13,7 @@ export const useAuth = () => {
     setErrAuth(undefined);
 
     try {
-      const res = await api.post('http://localhost:8080/auth/register', datos);
+      const res = await api.post(`${gatewayBaseUrl}/api/auth/register`, datos);
       navigate('/login');
       return res.data;
     } catch (err: unknown) {
@@ -25,7 +25,7 @@ export const useAuth = () => {
 
   const currentUser = async () => {
     try {
-      const res = await api.get('http://localhost:8080/users/me');
+      const res = await api.get(`${gatewayBaseUrl}/api/users/me`);
       const dataJson = await res.data;
       return dataJson;
     } catch (err: unknown) {
@@ -38,7 +38,7 @@ export const useAuth = () => {
     setErrAuth(undefined);
 
     try {
-      const res = await api.post('http://localhost:8080/auth/login', datos);
+      const res = await api.post(`${gatewayBaseUrl}/api/auth/login`, datos);
       const tokens = await res.data;
       useAuthStore.setState({ tokens });
       const userData = await currentUser();

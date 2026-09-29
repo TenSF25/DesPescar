@@ -1,6 +1,11 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import axios from 'axios';
 
+export const gatewayBaseUrl = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:8087').replace(
+  /\/$/,
+  '',
+);
+
 export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
@@ -73,7 +78,7 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        const refreshResponse = await axios.post('http://localhost:8080/auth/refresh', {
+        const refreshResponse = await axios.post(`${gatewayBaseUrl}/api/auth/refresh`, {
           refreshToken: tokens.refreshToken,
         });
 

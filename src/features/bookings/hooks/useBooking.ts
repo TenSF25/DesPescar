@@ -1,12 +1,26 @@
 import { useState } from 'react';
-import { api } from '@/config/api';
+import axios from 'axios';
+import { api, gatewayBaseUrl } from '@/config/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useFlightStore } from '@/store/useFlightStore';
-import type { FlightSeatMapResponse } from '../bookings.types';
+import type { BookingInitResponse, PaymentCreateResponse } from '../bookings.types';
 
 export type PassengerFormInput = {
   nombreCompleto: string;
   dniPasaporte: string;
+};
+
+export type PassengerFareDetails = {
+  id: string;
+  name: string;
+  pricePerPassenger: number;
+};
+
+const getRequestErrorMessage = (error: unknown, fallback: string) => {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || error.message || fallback;
+  }
+  return error instanceof Error ? error.message : fallback;
 };
 
 export const useBooking = () => {
@@ -19,9 +33,9 @@ export const useBooking = () => {
     selectedDepartureFlight,
     selectedReturnFlight,
     passengers: passengersLimit,
-    clearSearch,
     selectedDepartureFare,
     selectedReturnFare,
+      setPassengersAssignedBookingId,
   } = useFlightStore();
 
   const getAuthHeaders = () => {
@@ -41,17 +55,28 @@ export const useBooking = () => {
         throw new Error('Faltan datos de sesión, token o vuelo.');
       }
 
+      const flightIds = [selectedDepartureFlight, selectedReturnFlight].filter(
+        (flightId): flightId is string => Boolean(flightId),
+      );
+      const baggageIds = [selectedDepartureFare, selectedReturnFare].filter(
+        (fareId): fareId is string => Boolean(fareId),
+      );
+
+      if (baggageIds.length === 0) {
+        throw new Error('Seleccioná una tarifa antes de continuar.');
+      }
+
       const initPayload = {
         creadorId: myUserId,
-        flightIds: [selectedDepartureFlight, selectedReturnFlight],
+        flightIds,
         cantidadPasajeros: Number(passengersLimit),
         paymentType: 'SINGLE_PAYMENT',
         hotelId: hotelId || null,
-        baggageIds: [selectedDepartureFare, selectedReturnFare],
+        baggageIds,
         packageId: null,
       };
 
-      const initResponse = await api.post(
+      const initResponse = await api.post<BookingInitResponse>(
         'http://localhost:8085/api/bookings/init',
         initPayload,
         getAuthHeaders(),
@@ -64,73 +89,61 @@ export const useBooking = () => {
       }
 
       return { success: true, reservationId };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error inicializando la reserva:', err);
-      setError(err.message || 'Ha ocurrido un error al inicializar la reserva.');
-      return { success: false, error: err.message };
+      const message = getRequestErrorMessage(err, 'Ha ocurrido un error al inicializar la reserva.');
+      setError(message);
+      return { success: false, error: message };
     } finally {
       setIsLoading(false);
     }
   };
 
   const finalizeBookingAndPay = async (
-    reservationId: string,
+    reservationId: number,
     formData: PassengerFormInput[],
     selectedSeats: string[],
-    seatsMap: FlightSeatMapResponse,
+    fareDetails: PassengerFareDetails,
   ) => {
     setIsLoading(true);
     setError(null);
 
     try {
       if (!token) throw new Error('No hay sesión activa.');
+      if (!reservationId || !myUserId) throw new Error('Faltan datos de la reserva o del usuario.');
       if (formData.length !== selectedSeats.length) {
         throw new Error('Debes completar los datos para todos los pasajeros.');
       }
+      if (selectedSeats.length === 0 || !fareDetails.id) {
+        throw new Error('Faltan asientos o una tarifa válida para continuar.');
+      }
 
-      const pasajerosPayload = formData.map((pasajero, index) => {
-        const seatUuid = selectedSeats[index];
-
-        const getFareDetails = (uuid: string) => {
-          let fareClassKey = null;
-          for (const row of seatsMap.layout) {
-            if (row.type === 'row') {
-              const seat = row.items.find((item) => item.type === 'seat' && item.seatUuid === uuid);
-              if (seat && seat.type === 'seat') {
-                fareClassKey = seat.fareClass;
-                break;
-              }
-            }
-          }
-          return fareClassKey ? seatsMap.fareClasses[fareClassKey] : null;
-        };
-
-        const fareData = getFareDetails(seatUuid);
-
-        return {
+      const pasajerosPayload = formData.map((pasajero, index) => ({
           nombreCompleto: pasajero.nombreCompleto,
           dniPasaporte: pasajero.dniPasaporte,
-          asientoIda: seatUuid,
+          asientoIda: selectedSeats[index],
           asientoVuelta: null,
-          tarifaId: fareData?.id,
-          tarifaNombre: fareData?.name,
-          precioTarifa: fareData?.price,
-        };
-      });
+          tarifaId: fareDetails.id,
+          tarifaNombre: fareDetails.name,
+          precioTarifa: fareDetails.pricePerPassenger,
+        }));
 
       // 1. Guardar pasajeros inyectando el token
-      await api.put(
-        `http://localhost:8085/api/bookings/${reservationId}/passengers`,
-        {
-          solicitanteId: myUserId,
-          pasajeros: pasajerosPayload,
-        },
-        getAuthHeaders(),
-      );
+      if (useFlightStore.getState().passengersAssignedBookingId !== reservationId) {
+        await api.put(
+          `http://localhost:8085/api/bookings/${reservationId}/passengers`,
+          {
+            solicitanteId: myUserId,
+            pasajeros: pasajerosPayload,
+          },
+          getAuthHeaders(),
+        );
+        setPassengersAssignedBookingId(reservationId);
+      }
 
-      // 2. Crear Preferencia en MP inyectando el token
-      const paymentResponse = await api.post(
-        'http://localhost:8086/api/payments/create-preference',
+      // El backend obtiene el importe y la moneda desde la reserva.
+      const paymentResponse = await api.post<PaymentCreateResponse>(
+        `${gatewayBaseUrl}/api/payments`,
         {
           reservationId: reservationId,
           userId: myUserId,
@@ -138,15 +151,15 @@ export const useBooking = () => {
         getAuthHeaders(),
       );
 
-      const paymentUrl = paymentResponse.data.initPoint;
+      const paymentUrl = paymentResponse.data.checkoutUrl;
       if (!paymentUrl) throw new Error('No se pudo generar el enlace de pago.');
 
-      clearSearch();
-      return { success: true, paymentUrl };
-    } catch (err: any) {
+      return { success: true, paymentUrl, payment: paymentResponse.data };
+    } catch (err: unknown) {
       console.error('Error finalizando la reserva:', err);
-      setError(err.message || 'Ha ocurrido un error al procesar el pago.');
-      return { success: false, error: err.message };
+      const message = getRequestErrorMessage(err, 'Ha ocurrido un error al procesar el pago.');
+      setError(message);
+      return { success: false, error: message };
     } finally {
       setIsLoading(false);
     }
