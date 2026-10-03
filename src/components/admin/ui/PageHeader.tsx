@@ -13,7 +13,7 @@ export const PageHeader = ({ title, description, actions }: PageHeaderProps) => 
         <h1 className="text-secondary text-2xl font-bold">{title}</h1>
         {description && <p className="text-sm text-[#44474E]">{description}</p>}
       </div>
-      {actions && <div className="flex items-center gap-3">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
     </div>
   );
 };

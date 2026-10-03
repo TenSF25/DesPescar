@@ -10,7 +10,7 @@ export interface ReportsSummary {
 }
 
 export interface SalesByDayDatum {
-  fecha: string; // ej: "01 Oct"
+  fecha: string; // ej: "01 oct"
   ventas: number;
 }
 
@@ -25,14 +25,37 @@ export interface TopDestinationDatum {
   reservas: number;
 }
 
-export type ReportFormat = 'PDF' | 'Excel';
+export type ReportFormat = 'CSV';
 export type ReportType = 'Ventas' | 'Vuelos' | 'Usuarios';
 
-export interface GeneratedReport {
+/** Filtros de la página de reportes. `flightId` es 'todos' o el id de un vuelo. */
+export interface ReportFilters {
+  from: string; // YYYY-MM-DD
+  to: string; // YYYY-MM-DD
+  flightId: string;
+}
+
+export interface ReportsData {
+  summary: ReportsSummary;
+  salesByDay: SalesByDayDatum[];
+  bookingsByOrigin: BookingsByOriginDatum[];
+  topDestinations: TopDestinationDatum[];
+}
+
+export interface ReportFlightOption {
+  id: string;
+  label: string; // ej: "DSC2456 · MAD → MEX"
+}
+
+export interface GeneratedReport extends ReportFilters {
   id: string;
   nombre: string;
   tipo: ReportType;
-  periodo: string;
-  generadoEl: string;
+  generadoEl: string; // ISO datetime
   formato: ReportFormat;
+}
+
+export interface ReportFile {
+  filename: string;
+  content: string;
 }

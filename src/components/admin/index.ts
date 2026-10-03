@@ -22,6 +22,7 @@ export * from './ui/Modal';
 export * from './ui/ConfirmDialog';
 
 export * from './ui/AdminInput';
+export * from './ui/DateRangeFilter';
 
 // Types
 export * from './admin.types';

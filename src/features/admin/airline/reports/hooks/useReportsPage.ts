@@ -1,50 +1,64 @@
 import { useEffect, useState } from 'react';
+import { downloadTextFile } from '@/utils/downloadFile';
 import {
-  exportReport,
-  getBookingsByOrigin,
+  buildReportFile,
+  createReport,
+  deleteReport,
+  getDefaultReportFilters,
   getRecentReports,
-  getReportsSummary,
-  getSalesByDay,
-  getTopDestinations,
+  getReportFlights,
+  getReportsData,
+  getReportsDateLimits,
 } from '../services/reportsService';
 import type {
-  BookingsByOriginDatum,
   GeneratedReport,
-  ReportsSummary,
-  SalesByDayDatum,
-  TopDestinationDatum,
+  ReportFilters,
+  ReportFlightOption,
+  ReportsData,
+  ReportType,
 } from '../admin-reports.types';
 
+const COLLAPSED_REPORTS = 5;
+
 export const useReportsPage = () => {
-  const [summary, setSummary] = useState<ReportsSummary | null>(null);
-  const [salesByDay, setSalesByDay] = useState<SalesByDayDatum[]>([]);
-  const [bookingsByOrigin, setBookingsByOrigin] = useState<BookingsByOriginDatum[]>([]);
-  const [topDestinations, setTopDestinations] = useState<TopDestinationDatum[]>([]);
+  const [filters, setFilters] = useState<ReportFilters>(getDefaultReportFilters);
+  const [reportType, setReportType] = useState<ReportType>('Ventas');
+  const [data, setData] = useState<ReportsData | null>(null);
+  const [flightOptions, setFlightOptions] = useState<ReportFlightOption[]>([]);
   const [recentReports, setRecentReports] = useState<GeneratedReport[]>([]);
+  const [showAllReports, setShowAllReports] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
 
+  // Opciones de vuelo y lista de reportes: se cargan una sola vez.
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStatic = async () => {
+      const [flightsData, reportsData] = await Promise.all([
+        getReportFlights(),
+        getRecentReports(),
+      ]);
+      if (!isMounted) return;
+      setFlightOptions(flightsData);
+      setRecentReports(reportsData);
+    };
+
+    loadStatic();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Indicadores y gráficos: se recalculan cada vez que cambia un filtro.
   useEffect(() => {
     let isMounted = true;
 
     const loadData = async () => {
       setIsLoading(true);
-      const [summaryData, salesData, originData, destinationsData, reportsData] = await Promise.all(
-        [
-          getReportsSummary(),
-          getSalesByDay(),
-          getBookingsByOrigin(),
-          getTopDestinations(),
-          getRecentReports(),
-        ],
-      );
-
+      const result = await getReportsData(filters);
       if (!isMounted) return;
-      setSummary(summaryData);
-      setSalesByDay(salesData);
-      setBookingsByOrigin(originData);
-      setTopDestinations(destinationsData);
-      setRecentReports(reportsData);
+      setData(result);
       setIsLoading(false);
     };
 
@@ -52,25 +66,55 @@ export const useReportsPage = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [filters]);
 
   const handleExportReport = async () => {
     setIsExporting(true);
-    await exportReport();
+    const [report, file] = await Promise.all([
+      createReport(reportType, filters),
+      buildReportFile(reportType, filters),
+    ]);
+    downloadTextFile(file.filename, file.content);
+    setRecentReports((prev) => [report, ...prev]);
     setIsExporting(false);
   };
 
-  const maxDestinationValue = Math.max(1, ...topDestinations.map((d) => d.reservas));
+  const handleDownloadReport = async (report: GeneratedReport) => {
+    const file = await buildReportFile(report.tipo, report);
+    downloadTextFile(file.filename, file.content);
+  };
+
+  const handleDeleteReport = async (id: string) => {
+    await deleteReport(id);
+    setRecentReports((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const visibleReports = showAllReports ? recentReports : recentReports.slice(0, COLLAPSED_REPORTS);
+
+  const maxDestinationValue = Math.max(1, ...(data?.topDestinations ?? []).map((d) => d.reservas));
 
   return {
     isLoading,
-    summary,
-    salesByDay,
-    bookingsByOrigin,
-    topDestinations,
-    maxDestinationValue,
-    recentReports,
     isExporting,
+    dateLimits: getReportsDateLimits(),
+    filters,
+    onRangeChange: (range: { from: string; to: string }) =>
+      setFilters((prev) => ({ ...prev, ...range })),
+    onFlightChange: (flightId: string) => setFilters((prev) => ({ ...prev, flightId })),
+    flightOptions,
+    reportType,
+    onReportTypeChange: setReportType,
+    summary: data?.summary ?? null,
+    salesByDay: data?.salesByDay ?? [],
+    bookingsByOrigin: data?.bookingsByOrigin ?? [],
+    topDestinations: data?.topDestinations ?? [],
+    maxDestinationValue,
+    visibleReports,
+    canToggleReports: recentReports.length > COLLAPSED_REPORTS,
+    showAllReports,
+    toggleShowAllReports: () => setShowAllReports((prev) => !prev),
     handleExportReport,
+    handleDownloadReport,
+    handleDeleteReport,
   };
 };

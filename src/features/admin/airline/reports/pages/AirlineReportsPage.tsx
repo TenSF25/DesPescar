@@ -7,10 +7,12 @@ import {
   ProgressListItem,
   Select,
   DataTable,
+  DateRangeFilter,
   IconCircle,
   ActionsMenu,
   type TableColumn,
 } from '@/components/admin';
+import { format, parseISO } from 'date-fns';
 import { useReportsPage } from '../hooks/useReportsPage';
 import type { GeneratedReport, ReportType } from '../admin-reports.types';
 
@@ -20,17 +22,32 @@ const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
   Usuarios: { icon: 'group', className: 'bg-green-100 text-green-600' },
 };
 
+const formatDay = (iso: string) => format(parseISO(iso), 'dd/MM/yyyy');
+const formatDateTime = (iso: string) => format(new Date(iso), 'dd/MM/yyyy, HH:mm');
+
 export const AirlineReportsPage = () => {
   const {
     isLoading,
+    isExporting,
+    dateLimits,
+    filters,
+    onRangeChange,
+    onFlightChange,
+    flightOptions,
+    reportType,
+    onReportTypeChange,
     summary,
     salesByDay,
     bookingsByOrigin,
     topDestinations,
     maxDestinationValue,
-    recentReports,
-    isExporting,
+    visibleReports,
+    canToggleReports,
+    showAllReports,
+    toggleShowAllReports,
     handleExportReport,
+    handleDownloadReport,
+    handleDeleteReport,
   } = useReportsPage();
 
   const columns: TableColumn<GeneratedReport>[] = [
@@ -49,8 +66,16 @@ export const AirlineReportsPage = () => {
       ),
     },
     { key: 'tipo', header: 'Tipo' },
-    { key: 'periodo', header: 'Período' },
-    { key: 'generadoEl', header: 'Generado el' },
+    {
+      key: 'periodo',
+      header: 'Período',
+      render: (report) => `${formatDay(report.from)} - ${formatDay(report.to)}`,
+    },
+    {
+      key: 'generadoEl',
+      header: 'Generado el',
+      render: (report) => formatDateTime(report.generadoEl),
+    },
     { key: 'formato', header: 'Formato' },
     {
       key: 'accion',
@@ -59,13 +84,13 @@ export const AirlineReportsPage = () => {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={handleExportReport}
+            onClick={() => handleDownloadReport(report)}
             className="text-primary flex cursor-pointer items-center gap-1 text-sm font-semibold hover:underline"
           >
             <span className="material-symbols-outlined text-[18px]">download</span>
             Descargar
           </button>
-          <ActionsMenu onMore={() => console.log('mas opciones', report.id)} />
+          <ActionsMenu onDelete={() => handleDeleteReport(report.id)} />
         </div>
       ),
     },
@@ -78,16 +103,33 @@ export const AirlineReportsPage = () => {
         description="Visualiza estadísticas y métricas clave de la plataforma."
         actions={
           <>
-            {/* Placeholder visual: reemplazar por un date-range picker real */}
-            <button
-              type="button"
-              className="flex cursor-pointer items-center gap-2 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-[#44474E]"
+            <DateRangeFilter
+              value={{ from: filters.from, to: filters.to }}
+              onChange={onRangeChange}
+              min={dateLimits.min}
+              max={dateLimits.max}
+            />
+            <Select
+              value={filters.flightId}
+              onChange={(e) => onFlightChange(e.target.value)}
+              containerClassName="w-52"
             >
-              <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-              01/10/2024 - 15/10/2024
-            </button>
-            <Select defaultValue="todos" containerClassName="w-44">
               <option value="todos">Todos los vuelos</option>
+              {flightOptions.map((flight) => (
+                <option key={flight.id} value={flight.id}>
+                  {flight.label}
+                </option>
+              ))}
+            </Select>
+            <Select
+              value={reportType}
+              onChange={(e) => onReportTypeChange(e.target.value as ReportType)}
+              containerClassName="w-40"
+              aria-label="Tipo de reporte"
+            >
+              <option value="Ventas">Reporte de ventas</option>
+              <option value="Vuelos">Reporte de vuelos</option>
+              <option value="Usuarios">Reporte de usuarios</option>
             </Select>
             <button
               type="button"
@@ -170,17 +212,22 @@ export const AirlineReportsPage = () => {
         <h3 className="text-secondary font-semibold">Reportes generados recientemente</h3>
         <DataTable
           columns={columns}
-          data={recentReports}
+          data={visibleReports}
           keyExtractor={(report) => report.id}
           emptyMessage={isLoading ? 'Cargando reportes...' : 'No hay reportes generados.'}
         />
-        <button
-          type="button"
-          className="text-primary mx-auto flex cursor-pointer items-center gap-1 text-sm font-semibold hover:underline"
-        >
-          Ver todos los reportes
-          <span className="material-symbols-outlined text-[18px]">expand_more</span>
-        </button>
+        {canToggleReports && (
+          <button
+            type="button"
+            onClick={toggleShowAllReports}
+            className="text-primary mx-auto flex cursor-pointer items-center gap-1 text-sm font-semibold hover:underline"
+          >
+            {showAllReports ? 'Ver menos' : 'Ver todos los reportes'}
+            <span className="material-symbols-outlined text-[18px]">
+              {showAllReports ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );
