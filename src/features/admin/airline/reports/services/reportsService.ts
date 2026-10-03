@@ -65,6 +65,8 @@ interface DayRecord {
   iso: string;
   flight: AdminFlight;
   bookings: number;
+  /** Pasajeros con pasaje comprado ese día (≈1.7 por reserva). */
+  passengers: number;
   sales: number;
 }
 
@@ -100,7 +102,13 @@ const flightRecords = (flight: AdminFlight): DayRecord[] => {
     // La primera y la última compra existen por definición: al menos 1 pasaje cada una.
     const isEdge = index === 0 || index === days.length - 1;
     const bookings = isEdge ? Math.max(1, raw) : raw;
-    return { iso, flight, bookings, sales: bookings * flight.precioProm };
+    return {
+      iso,
+      flight,
+      bookings,
+      passengers: Math.round(bookings * 1.7),
+      sales: bookings * flight.precioProm,
+    };
   });
 };
 
@@ -120,7 +128,7 @@ const sum = (records: DayRecord[], pick: (r: DayRecord) => number) =>
 const deltaPct = (current: number, previous: number) =>
   previous === 0 ? 0 : Math.round(((current - previous) / previous) * 1000) / 10;
 
-const passengersOf = (records: DayRecord[]) => Math.round(sum(records, (r) => r.bookings) * 1.7);
+const passengersOf = (records: DayRecord[]) => sum(records, (r) => r.passengers);
 
 const summarize = (records: DayRecord[], flights: AdminFlight[], from: string, to: string) => ({
   ventas: sum(records, (r) => r.sales),
@@ -174,7 +182,12 @@ const buildSingleFlightData = (flight: AdminFlight | undefined): SingleFlightRep
   return {
     scope: 'flight',
     summary,
-    salesByDay: records.map((r) => ({ fecha: shortDate(r.iso), ventas: r.sales })),
+    salesByDay: records.map((r) => ({
+      fecha: shortDate(r.iso),
+      ventas: r.sales,
+      reservas: r.bookings,
+      pasajes: r.passengers,
+    })),
   };
 };
 
@@ -219,12 +232,12 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
   const salesByDay: SalesByDayDatum[] = [];
   for (let i = 0; i < days.length; i += bucketSize) {
     const bucket = new Set(days.slice(i, i + bucketSize).map((d) => format(d, ISO)));
+    const bucketRecords = current.filter((r) => bucket.has(r.iso));
     salesByDay.push({
       fecha: shortDate(format(days[i], ISO)),
-      ventas: sum(
-        current.filter((r) => bucket.has(r.iso)),
-        (r) => r.sales,
-      ),
+      ventas: sum(bucketRecords, (r) => r.sales),
+      reservas: sum(bucketRecords, (r) => r.bookings),
+      pasajes: passengersOf(bucketRecords),
     });
   }
 
@@ -385,12 +398,7 @@ export const buildReportFile = async (
   const days = eachDayOfInterval({ start: parseISO(filters.from), end: parseISO(filters.to) });
   const rows = days.map((day) => [
     format(day, 'dd/MM/yyyy'),
-    Math.round(
-      sum(
-        records.filter((r) => r.iso === format(day, ISO)),
-        (r) => r.bookings,
-      ) * 1.7,
-    ),
+    passengersOf(records.filter((r) => r.iso === format(day, ISO))),
   ]);
   return {
     filename,

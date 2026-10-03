@@ -10,10 +10,11 @@ import {
   DateRangeFilter,
   IconCircle,
   ActionsMenu,
+  SegmentedControl,
   type TableColumn,
 } from '@/components/admin';
 import { format, parseISO } from 'date-fns';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useReportsPage } from '../hooks/useReportsPage';
 import type { GeneratedReport, ReportType } from '../admin-reports.types';
 
@@ -58,6 +59,17 @@ export const AirlineReportsPage = () => {
     handleDownloadReport,
     handleDeleteReport,
   } = useReportsPage();
+
+  const [chartMeasure, setChartMeasure] = useState<'pasajes' | 'ventas'>('pasajes');
+  const [chartView, setChartView] = useState<'acumulado' | 'diario'>('acumulado');
+
+  // Gráfico de un vuelo: pasajes o USD, por día o acumulado desde la primera compra.
+  const flightChartData = salesByDay.reduce<{ label: string; value: number }[]>((points, item) => {
+    const daily = chartMeasure === 'pasajes' ? item.pasajes : item.ventas;
+    const previous = points.length > 0 ? points[points.length - 1].value : 0;
+    points.push({ label: item.fecha, value: chartView === 'acumulado' ? previous + daily : daily });
+    return points;
+  }, []);
 
   const isFlightSelected = filters.flightId !== 'todos';
   const selectedFlightLabel = flightOptions.find((f) => f.id === filters.flightId)?.label;
@@ -211,20 +223,50 @@ export const AirlineReportsPage = () => {
           </div>
 
           <ChartCard
-            title={`Ventas por día${selectedFlightLabel ? ` · ${selectedFlightLabel}` : ''}`}
+            title={`${chartMeasure === 'pasajes' ? 'Pasajes comprados' : 'Ventas (USD)'} · ${
+              chartView === 'acumulado' ? 'acumulado' : 'por día'
+            }${selectedFlightLabel ? ` · ${selectedFlightLabel}` : ''}`}
             action={
               flightPurchases && (
-                <span className="text-xs font-medium text-[#44474E]">
-                  Primera compra: {formatDay(flightPurchases.first)} · Última compra:{' '}
-                  {formatDay(flightPurchases.last)}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <SegmentedControl
+                    aria-label="Medida del gráfico"
+                    value={chartMeasure}
+                    onChange={setChartMeasure}
+                    options={[
+                      { value: 'pasajes', label: 'Pasajes' },
+                      { value: 'ventas', label: 'Ventas (USD)' },
+                    ]}
+                  />
+                  <SegmentedControl
+                    aria-label="Vista del gráfico"
+                    value={chartView}
+                    onChange={setChartView}
+                    options={[
+                      { value: 'acumulado', label: 'Acumulado' },
+                      { value: 'diario', label: 'Por día' },
+                    ]}
+                  />
+                </div>
               )
             }
           >
             {flightPurchases ? (
-              <LineChart
-                data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))}
-              />
+              <>
+                <p className="text-xs font-medium text-[#44474E]">
+                  Primera compra: {formatDay(flightPurchases.first)} · Última compra:{' '}
+                  {formatDay(flightPurchases.last)}
+                </p>
+                <LineChart
+                  data={flightChartData}
+                  valueLabel={chartMeasure === 'pasajes' ? 'Pasajes' : 'Ventas'}
+                  valueFormatter={(value) =>
+                    chartMeasure === 'pasajes'
+                      ? `${value.toLocaleString('es-AR')} pasajes`
+                      : `$${value.toLocaleString('es-AR')}`
+                  }
+                />
+              </>
             ) : (
               <p className="py-10 text-center text-sm text-[#44474E]">
                 Este vuelo todavía no tiene ventas.

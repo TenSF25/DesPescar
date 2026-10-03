@@ -24,6 +24,7 @@ export * from './ui/ConfirmDialog';
 export * from './ui/AdminInput';
 export * from './ui/DateRangeFilter';
 export * from './ui/DetailList';
+export * from './ui/SegmentedControl';
 
 // Types
 export * from './admin.types';

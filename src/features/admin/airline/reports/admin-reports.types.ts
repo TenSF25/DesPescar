@@ -11,7 +11,9 @@ export interface ReportsSummary {
 
 export interface SalesByDayDatum {
   fecha: string; // ej: "01 oct"
-  ventas: number;
+  ventas: number; // USD
+  reservas: number;
+  pasajes: number; // pasajeros con pasaje comprado ese día
 }
 
 export interface BookingsByOriginDatum {
