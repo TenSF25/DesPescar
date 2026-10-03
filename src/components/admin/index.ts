@@ -25,6 +25,9 @@ export * from './ui/AdminInput';
 export * from './ui/DateRangeFilter';
 export * from './ui/DetailList';
 export * from './ui/SegmentedControl';
+export * from './ui/Switch';
+export * from './ui/FilterField';
+export * from './trend';
 
 // Types
 export * from './admin.types';

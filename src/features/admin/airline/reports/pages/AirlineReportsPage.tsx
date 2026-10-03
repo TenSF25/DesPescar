@@ -11,10 +11,12 @@ import {
   IconCircle,
   ActionsMenu,
   SegmentedControl,
+  FilterField,
+  pctTrend,
   type TableColumn,
 } from '@/components/admin';
 import { format, parseISO } from 'date-fns';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useReportsPage } from '../hooks/useReportsPage';
 import type { GeneratedReport, ReportGranularity, ReportType } from '../admin-reports.types';
 
@@ -24,15 +26,6 @@ const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
   Pasajeros: { icon: 'group', className: 'bg-green-100 text-green-600' },
 };
 
-/** Texto y flecha de una variación vs el período anterior (verde si sube, rojo si baja). */
-const pctTrend = (delta: number | undefined, unit: '%' | 'pts' = '%') =>
-  delta === undefined
-    ? {}
-    : {
-        trendValue: `${Math.abs(delta)}${unit === '%' ? '%' : ' pts'} vs periodo anterior`,
-        trendDirection: delta >= 0 ? ('up' as const) : ('down' as const),
-      };
-
 const GRANULARITY_LABEL: Record<ReportGranularity, string> = {
   day: 'día',
   week: 'semana',
@@ -41,13 +34,6 @@ const GRANULARITY_LABEL: Record<ReportGranularity, string> = {
 
 const formatDay = (iso: string) => format(parseISO(iso), 'dd/MM/yyyy');
 const formatDateTime = (iso: string) => format(new Date(iso), 'dd/MM/yyyy, HH:mm');
-
-const FilterField = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="flex flex-col gap-1.5">
-    <span className="text-xs font-semibold tracking-wide text-[#44474E] uppercase">{label}</span>
-    {children}
-  </div>
-);
 
 export const AirlineReportsPage = () => {
   const {

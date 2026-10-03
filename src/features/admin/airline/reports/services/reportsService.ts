@@ -8,6 +8,7 @@ import {
   subDays,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { distributeByHour } from '@/utils/distributeByHour';
 import { mockDelay } from '@/utils/mockDelay';
 import { getFlights } from '../../flights/services/flightsService';
 import type { AdminFlight } from '../../flights/admin-flights.types';
@@ -540,27 +541,6 @@ const dayMetrics = (flights: AdminFlight[], iso: string): DayMetrics => {
       ([ruta, reservas]) => ({ ruta, reservas }),
     ),
   };
-};
-
-/** Reparte `total` reservas en franjas de 3 horas con una curva diurna (suma exacta). */
-const distributeByHour = (total: number) => {
-  const weights = [1, 0.5, 2, 4, 5, 4.5, 6, 3];
-  const weightSum = weights.reduce((a, b) => a + b, 0);
-  const raw = weights.map((w) => (total * w) / weightSum);
-  const counts = raw.map(Math.floor);
-  let remainder = total - counts.reduce((a, b) => a + b, 0);
-  [...raw.keys()]
-    .sort((a, b) => raw[b] - Math.floor(raw[b]) - (raw[a] - Math.floor(raw[a])))
-    .forEach((index) => {
-      if (remainder > 0) {
-        counts[index] += 1;
-        remainder -= 1;
-      }
-    });
-  return counts.map((value, index) => ({
-    label: `${String(index * 3).padStart(2, '0')}h`,
-    value,
-  }));
 };
 
 // TODO(backend): GET reportes/hoy (ventas y reservas de hoy y de ayer, por ruta y por franja horaria)

@@ -25,6 +25,11 @@ import { AirlineDashboardPage } from '@/features/admin/airline/dashboard/pages/A
 import { AirlineBookingsPage } from '@/features/admin/airline/bookings/pages/AirlineBookingsPage';
 import { AirlineFlightsPage } from '@/features/admin/airline/flights/pages/AirlineFlightsPage';
 import { AirlineReportsPage } from '@/features/admin/airline/reports/pages/AirlineReportsPage';
+import { hotelNavItems } from '@/features/admin/hotel/hotel.nav';
+import { HotelDashboardPage } from '@/features/admin/hotel/dashboard/pages/HotelDashboardPage';
+import { HotelManagementPage } from '@/features/admin/hotel/management/pages/HotelManagementPage';
+import { HotelReportsPage } from '@/features/admin/hotel/reports/pages/HotelReportsPage';
+import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages/HotelReservationsPage';
 import { createBrowserRouter } from 'react-router';
 
 export const router = createBrowserRouter([
@@ -132,6 +137,21 @@ export const router = createBrowserRouter([
           { path: 'vuelos', element: <AirlineFlightsPage /> },
           { path: 'reservas', element: <AirlineBookingsPage /> },
           { path: 'reportes', element: <AirlineReportsPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/admin/hotel',
+    element: <ProtectedRoute allow={['HOTEL_ADMIN']} />,
+    children: [
+      {
+        element: <AdminLayout navItems={hotelNavItems} sidebarSubtitle="PANEL DE HOTEL" />,
+        children: [
+          { index: true, element: <HotelDashboardPage /> },
+          { path: 'gestion', element: <HotelManagementPage /> },
+          { path: 'reservas', element: <HotelReservationsPage /> },
+          { path: 'reportes', element: <HotelReportsPage /> },
         ],
       },
     ],
