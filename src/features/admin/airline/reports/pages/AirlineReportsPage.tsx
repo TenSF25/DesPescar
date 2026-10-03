@@ -20,7 +20,7 @@ import type { GeneratedReport, ReportType } from '../admin-reports.types';
 const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
   Ventas: { icon: 'payments', className: 'bg-blue-100 text-blue-600' },
   Vuelos: { icon: 'flight', className: 'bg-purple-100 text-purple-600' },
-  Usuarios: { icon: 'group', className: 'bg-green-100 text-green-600' },
+  Pasajeros: { icon: 'group', className: 'bg-green-100 text-green-600' },
 };
 
 const formatDay = (iso: string) => format(parseISO(iso), 'dd/MM/yyyy');
@@ -57,6 +57,9 @@ export const AirlineReportsPage = () => {
     handleDownloadReport,
     handleDeleteReport,
   } = useReportsPage();
+
+  // Con un solo origen (ej: filtrando por un vuelo) el donut tendría una única porción.
+  const showOriginChart = bookingsByOrigin.length > 1;
 
   const columns: TableColumn<GeneratedReport>[] = [
     {
@@ -108,7 +111,7 @@ export const AirlineReportsPage = () => {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Reportes"
-        description="Visualiza estadísticas y métricas clave de la plataforma."
+        description="Visualiza estadísticas y métricas clave de tu aerolínea."
       />
 
       <div className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-4 lg:flex-row lg:items-end lg:justify-between">
@@ -146,7 +149,7 @@ export const AirlineReportsPage = () => {
             >
               <option value="Ventas">Ventas</option>
               <option value="Vuelos">Vuelos</option>
-              <option value="Usuarios">Usuarios</option>
+              <option value="Pasajeros">Pasajeros</option>
             </Select>
           </FilterField>
           <button
@@ -189,27 +192,31 @@ export const AirlineReportsPage = () => {
         <StatCard
           icon="group"
           iconClassName="bg-orange-100 text-orange-600"
-          label="Usuarios activos"
-          value={summary?.usuariosActivos ?? '—'}
-          trendValue={summary ? `${summary.usuariosDeltaPct}% vs periodo anterior` : undefined}
+          label="Pasajeros transportados"
+          value={summary?.pasajeros ?? '—'}
+          trendValue={summary ? `${summary.pasajerosDeltaPct}% vs periodo anterior` : undefined}
           trendDirection="up"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div
+        className={`grid grid-cols-1 gap-4 ${showOriginChart ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}
+      >
         <ChartCard title="Ventas por día">
           <LineChart data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))} />
         </ChartCard>
 
-        <ChartCard title="Reservas por origen">
-          <DonutChart
-            data={bookingsByOrigin.map((item) => ({
-              label: item.origen,
-              value: item.cantidad,
-              color: item.color,
-            }))}
-          />
-        </ChartCard>
+        {showOriginChart && (
+          <ChartCard title="Reservas por origen">
+            <DonutChart
+              data={bookingsByOrigin.map((item) => ({
+                label: item.origen,
+                value: item.cantidad,
+                color: item.color,
+              }))}
+            />
+          </ChartCard>
+        )}
 
         <ChartCard title="Top destinos">
           <div className="flex flex-col gap-3">

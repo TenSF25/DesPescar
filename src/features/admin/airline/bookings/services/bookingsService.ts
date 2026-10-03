@@ -1,7 +1,8 @@
 import { mockDelay } from '@/utils/mockDelay';
-import type { AdminBooking, BookingStats } from '../admin-bookings.types';
+import type { AdminBooking, BookingStats, BookingStatus } from '../admin-bookings.types';
 
-const MOCK_BOOKINGS: AdminBooking[] = [
+// Array mutable "en memoria": los cambios de estado persisten mientras no se recargue la página.
+let mockBookings: AdminBooking[] = [
   {
     id: 'b1',
     codigo: 'RSV-10432',
@@ -70,11 +71,24 @@ const MOCK_STATS: BookingStats = {
 // TODO(backend): apiRequest<AdminBooking[]>(API_CONFIG.bookingsServiceUrl, '/reservas', { params: { search, estado, page } })
 export const getBookings = async (): Promise<AdminBooking[]> => {
   await mockDelay();
-  return MOCK_BOOKINGS;
+  return mockBookings;
 };
 
 // TODO(backend): apiRequest<BookingStats>(API_CONFIG.bookingsServiceUrl, '/reservas/stats')
 export const getBookingStats = async (): Promise<BookingStats> => {
   await mockDelay();
   return MOCK_STATS;
+};
+
+// TODO(backend): apiRequest<AdminBooking>(API_CONFIG.bookingsServiceUrl, `/reservas/${id}/estado`, { method: 'PATCH', body: { estado } })
+export const updateBookingStatus = async (
+  id: string,
+  estado: BookingStatus,
+): Promise<AdminBooking> => {
+  await mockDelay();
+  const current = mockBookings.find((booking) => booking.id === id);
+  if (!current) throw new Error('Reserva no encontrada');
+  const updated: AdminBooking = { ...current, estado };
+  mockBookings = mockBookings.map((booking) => (booking.id === id ? updated : booking));
+  return updated;
 };

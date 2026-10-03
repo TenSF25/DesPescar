@@ -23,6 +23,7 @@ export * from './ui/ConfirmDialog';
 
 export * from './ui/AdminInput';
 export * from './ui/DateRangeFilter';
+export * from './ui/DetailList';
 
 // Types
 export * from './admin.types';

@@ -85,7 +85,7 @@ const summarize = (records: DayRecord[], todayISO: string) => ({
   ventas: sum(records, (r) => r.sales),
   reservas: sum(records, (r) => r.bookings),
   completados: records.filter((r) => r.bookings > 0 && r.iso < todayISO).length,
-  usuarios: Math.round(sum(records, (r) => r.bookings) * 0.68),
+  pasajeros: Math.round(sum(records, (r) => r.bookings) * 1.7),
 });
 
 const CITY: Record<string, string> = {
@@ -142,8 +142,8 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
     reservasDeltaPct: deltaPct(now.reservas, before.reservas),
     vuelosCompletados: now.completados,
     vuelosDeltaPct: deltaPct(now.completados, before.completados),
-    usuariosActivos: now.usuarios,
-    usuariosDeltaPct: deltaPct(now.usuarios, before.usuarios),
+    pasajeros: now.pasajeros,
+    pasajerosDeltaPct: deltaPct(now.pasajeros, before.pasajeros),
   };
 
   // Ventas agrupadas por día; si el rango es largo, por semana.
@@ -181,14 +181,14 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
 const REPORT_NAMES: Record<ReportType, string> = {
   Ventas: 'Resumen de ventas',
   Vuelos: 'Rendimiento de vuelos',
-  Usuarios: 'Reporte de usuarios',
+  Pasajeros: 'Reporte de pasajeros',
 };
 
 const seedReports = (): GeneratedReport[] => {
   const to = format(subDays(new Date(), 1), ISO);
   const from = format(subDays(new Date(), 15), ISO);
   const today = new Date();
-  return (['Ventas', 'Vuelos', 'Usuarios'] as ReportType[]).map((tipo, i) => ({
+  return (['Ventas', 'Vuelos', 'Pasajeros'] as ReportType[]).map((tipo, i) => ({
     id: `r${i + 1}`,
     nombre: REPORT_NAMES[tipo],
     tipo,
@@ -293,11 +293,11 @@ export const buildReportFile = async (
       sum(
         records.filter((r) => r.iso === format(day, ISO)),
         (r) => r.bookings,
-      ) * 0.68,
+      ) * 1.7,
     ),
   ]);
   return {
     filename,
-    content: [csvRow(['Fecha', 'Usuarios activos']), ...rows.map(csvRow)].join('\n'),
+    content: [csvRow(['Fecha', 'Pasajeros']), ...rows.map(csvRow)].join('\n'),
   };
 };

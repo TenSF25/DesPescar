@@ -5,8 +5,8 @@ export interface AdminFlight {
   numero: string;
   origen: string;
   destino: string;
-  fecha: string; // ej: "15 Oct 2024"
-  hora: string; // ej: "10:30 AM"
+  fecha: string; // YYYY-MM-DD
+  hora: string; // HH:mm
   estado: FlightStatus;
   precioProm: number; // USD
 }
@@ -21,12 +21,13 @@ export interface FlightStats {
   canceladosDeltaPct: number;
 }
 
-/** Datos que pide el formulario de "Agregar nuevo vuelo" */
-export interface NewFlightInput {
+/** Datos del formulario de vuelo (alta y edición). `estado` solo se elige al editar. */
+export interface FlightInput {
   numero: string;
   origen: string;
   destino: string;
   fecha: string;
   hora: string;
   precioProm: number;
+  estado?: FlightStatus;
 }

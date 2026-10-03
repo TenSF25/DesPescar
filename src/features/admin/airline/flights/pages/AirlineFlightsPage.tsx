@@ -9,19 +9,13 @@ import {
   Pagination,
   ConfirmDialog,
   type TableColumn,
-  type BadgeTone,
 } from '@/components/admin';
 import { Button } from '@/components/ui/Button';
 import { useFlightsPage } from '../hooks/useFlightsPage';
-import { AddFlightModal } from '../components/AddFlightModal';
-import type { AdminFlight, FlightStatus } from '../admin-flights.types';
-
-const ESTADO_TONE: Record<FlightStatus, BadgeTone> = {
-  Programado: 'warning',
-  'En curso': 'info',
-  Completado: 'success',
-  Cancelado: 'danger',
-};
+import { FlightFormModal } from '../components/FlightFormModal';
+import { FlightDetailModal } from '../components/FlightDetailModal';
+import { FLIGHT_STATUS_TONE, formatFlightDate } from '../flights.utils';
+import type { AdminFlight } from '../admin-flights.types';
 
 export const AirlineFlightsPage = () => {
   const {
@@ -40,6 +34,14 @@ export const AirlineFlightsPage = () => {
     paginatedFlights,
     totalFiltered,
     pageSize,
+    flightToView,
+    openViewFlight,
+    closeViewFlight,
+    flightToEdit,
+    openEditFlight,
+    closeEditFlight,
+    isUpdating,
+    handleUpdateFlight,
     isAddModalOpen,
     openAddModal,
     closeAddModal,
@@ -56,12 +58,16 @@ export const AirlineFlightsPage = () => {
     { key: 'numero', header: 'Número de vuelo', className: 'font-semibold' },
     { key: 'origen', header: 'Origen' },
     { key: 'destino', header: 'Destino' },
-    { key: 'fecha', header: 'Fecha' },
+    {
+      key: 'fecha',
+      header: 'Fecha',
+      render: (flight) => formatFlightDate(flight.fecha),
+    },
     { key: 'hora', header: 'Hora' },
     {
       key: 'estado',
       header: 'Estado',
-      render: (flight) => <Badge tone={ESTADO_TONE[flight.estado]}>{flight.estado}</Badge>,
+      render: (flight) => <Badge tone={FLIGHT_STATUS_TONE[flight.estado]}>{flight.estado}</Badge>,
     },
     {
       key: 'precioProm',
@@ -73,8 +79,8 @@ export const AirlineFlightsPage = () => {
       header: 'Acciones',
       render: (flight) => (
         <ActionsMenu
-          onView={() => console.log('ver vuelo', flight.id)}
-          onEdit={() => console.log('editar vuelo', flight.id)}
+          onView={() => openViewFlight(flight)}
+          onEdit={() => openEditFlight(flight)}
           onDelete={() => askDeleteFlight(flight)}
         />
       ),
@@ -85,7 +91,7 @@ export const AirlineFlightsPage = () => {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Gestión de Vuelos"
-        description="Administra y monitorea todos los vuelos de la plataforma."
+        description="Administra y monitorea los vuelos de tu aerolínea."
         actions={
           <Button variant="primary" className="w-auto px-4" onClick={openAddModal}>
             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -176,12 +182,24 @@ export const AirlineFlightsPage = () => {
         />
       </div>
 
-      <AddFlightModal
+      <FlightFormModal
+        key="new"
         open={isAddModalOpen}
         onClose={closeAddModal}
         onSubmit={handleCreateFlight}
         isSaving={isSaving}
       />
+
+      <FlightFormModal
+        key={flightToEdit?.id ?? 'edit'}
+        open={flightToEdit !== null}
+        flight={flightToEdit}
+        onClose={closeEditFlight}
+        onSubmit={handleUpdateFlight}
+        isSaving={isUpdating}
+      />
+
+      <FlightDetailModal flight={flightToView} onClose={closeViewFlight} onEdit={openEditFlight} />
 
       <ConfirmDialog
         open={flightToDelete !== null}

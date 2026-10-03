@@ -1,8 +1,36 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createFlight, deleteFlight, getFlights, getFlightStats } from '../services/flightsService';
-import type { AdminFlight, FlightStats, NewFlightInput } from '../admin-flights.types';
+import {
+  createFlight,
+  deleteFlight,
+  getFlights,
+  getFlightStats,
+  updateFlight,
+} from '../services/flightsService';
+import type { AdminFlight, FlightInput, FlightStats, FlightStatus } from '../admin-flights.types';
 
 const PAGE_SIZE = 5;
+
+const STAT_FIELD: Record<FlightStatus, keyof FlightStats> = {
+  Programado: 'programados',
+  'En curso': 'vuelosEnCurso',
+  Completado: 'completados',
+  Cancelado: 'cancelados',
+};
+
+/** Mantiene los contadores de las tarjetas coherentes cuando se crea, edita o elimina un vuelo. */
+const adjustStats = (
+  stats: FlightStats | null,
+  removed?: FlightStatus,
+  added?: FlightStatus,
+): FlightStats | null => {
+  if (!stats) return stats;
+  const next = { ...stats };
+  if (removed) next[STAT_FIELD[removed] as 'programados'] -= 1;
+  if (added) next[STAT_FIELD[added] as 'programados'] += 1;
+  if (added && !removed) next.vuelosTotales += 1;
+  if (removed && !added) next.vuelosTotales -= 1;
+  return next;
+};
 
 export const useFlightsPage = () => {
   const [flights, setFlights] = useState<AdminFlight[]>([]);
@@ -16,6 +44,10 @@ export const useFlightsPage = () => {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [flightToView, setFlightToView] = useState<AdminFlight | null>(null);
+  const [flightToEdit, setFlightToEdit] = useState<AdminFlight | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const [flightToDelete, setFlightToDelete] = useState<AdminFlight | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -75,12 +107,25 @@ export const useFlightsPage = () => {
     setPage(1);
   };
 
-  const handleCreateFlight = async (input: NewFlightInput) => {
+  const handleCreateFlight = async (input: FlightInput) => {
     setIsSaving(true);
     const created = await createFlight(input);
     setFlights((prev) => [created, ...prev]);
+    setStats((prev) => adjustStats(prev, undefined, created.estado));
     setIsSaving(false);
     setIsAddModalOpen(false);
+  };
+
+  const handleUpdateFlight = async (input: FlightInput) => {
+    if (!flightToEdit) return;
+    setIsUpdating(true);
+    const updated = await updateFlight(flightToEdit.id, input);
+    setFlights((prev) => prev.map((f) => (f.id === updated.id ? updated : f)));
+    if (updated.estado !== flightToEdit.estado) {
+      setStats((prev) => adjustStats(prev, flightToEdit.estado, updated.estado));
+    }
+    setIsUpdating(false);
+    setFlightToEdit(null);
   };
 
   const handleConfirmDelete = async () => {
@@ -88,6 +133,7 @@ export const useFlightsPage = () => {
     setIsDeleting(true);
     await deleteFlight(flightToDelete.id);
     setFlights((prev) => prev.filter((f) => f.id !== flightToDelete.id));
+    setStats((prev) => adjustStats(prev, flightToDelete.estado));
     setIsDeleting(false);
     setFlightToDelete(null);
   };
@@ -114,6 +160,18 @@ export const useFlightsPage = () => {
     closeAddModal: () => setIsAddModalOpen(false),
     isSaving,
     handleCreateFlight,
+
+    flightToView,
+    openViewFlight: setFlightToView,
+    closeViewFlight: () => setFlightToView(null),
+    flightToEdit,
+    openEditFlight: (flight: AdminFlight) => {
+      setFlightToView(null);
+      setFlightToEdit(flight);
+    },
+    closeEditFlight: () => setFlightToEdit(null),
+    isUpdating,
+    handleUpdateFlight,
 
     flightToDelete,
     askDeleteFlight: setFlightToDelete,

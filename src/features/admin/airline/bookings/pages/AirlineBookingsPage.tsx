@@ -7,18 +7,15 @@ import {
   Badge,
   ActionsMenu,
   Pagination,
+  ConfirmDialog,
+  type ActionsMenuAction,
   type TableColumn,
-  type BadgeTone,
 } from '@/components/admin';
 import { formatCompactCurrency } from '@/utils/formatCompactCurrency';
 import { useBookingsPage } from '../hooks/useBookingsPage';
-import type { AdminBooking, BookingStatus } from '../admin-bookings.types';
-
-const ESTADO_TONE: Record<BookingStatus, BadgeTone> = {
-  Confirmada: 'success',
-  Pendiente: 'warning',
-  Cancelada: 'danger',
-};
+import type { AdminBooking } from '../admin-bookings.types';
+import { BOOKING_STATUS_TONE } from '../booking.utils';
+import { BookingDetailModal } from '../components/BookingDetailModal';
 
 export const AirlineBookingsPage = () => {
   const {
@@ -34,7 +31,38 @@ export const AirlineBookingsPage = () => {
     paginatedBookings,
     totalFiltered,
     pageSize,
+    bookingToView,
+    openViewBooking,
+    closeViewBooking,
+    bookingToCancel,
+    askCancelBooking,
+    closeCancelBooking,
+    isUpdating,
+    handleConfirmBooking,
+    handleConfirmCancel,
   } = useBookingsPage();
+
+  const menuActionsFor = (booking: AdminBooking): ActionsMenuAction[] => [
+    ...(booking.estado === 'Pendiente'
+      ? [
+          {
+            label: 'Confirmar reserva',
+            icon: 'check_circle',
+            onClick: () => handleConfirmBooking(booking),
+          },
+        ]
+      : []),
+    ...(booking.estado !== 'Cancelada'
+      ? [
+          {
+            label: 'Cancelar reserva',
+            icon: 'cancel',
+            tone: 'danger' as const,
+            onClick: () => askCancelBooking(booking),
+          },
+        ]
+      : []),
+  ];
 
   const columns: TableColumn<AdminBooking>[] = [
     {
@@ -62,7 +90,9 @@ export const AirlineBookingsPage = () => {
     {
       key: 'estado',
       header: 'Estado',
-      render: (booking) => <Badge tone={ESTADO_TONE[booking.estado]}>{booking.estado}</Badge>,
+      render: (booking) => (
+        <Badge tone={BOOKING_STATUS_TONE[booking.estado]}>{booking.estado}</Badge>
+      ),
     },
     {
       key: 'monto',
@@ -74,8 +104,8 @@ export const AirlineBookingsPage = () => {
       header: 'Acciones',
       render: (booking) => (
         <ActionsMenu
-          onView={() => console.log('ver reserva', booking.id)}
-          onMore={() => console.log('mas opciones', booking.id)}
+          onView={() => openViewBooking(booking)}
+          menuActions={menuActionsFor(booking)}
         />
       ),
     },
@@ -85,7 +115,7 @@ export const AirlineBookingsPage = () => {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Reservas"
-        description="Administra las reservas realizadas en la plataforma."
+        description="Administra las reservas de los vuelos de tu aerolínea."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -155,6 +185,23 @@ export const AirlineBookingsPage = () => {
           itemLabel="reservas"
         />
       </div>
+
+      <BookingDetailModal booking={bookingToView} onClose={closeViewBooking} />
+
+      <ConfirmDialog
+        open={bookingToCancel !== null}
+        title="¿Cancelar esta reserva?"
+        description={
+          bookingToCancel
+            ? `La reserva ${bookingToCancel.codigo} de ${bookingToCancel.pasajero} (${bookingToCancel.ruta}) pasará a estado Cancelada.`
+            : undefined
+        }
+        confirmLabel="Cancelar reserva"
+        cancelLabel="Volver"
+        loading={isUpdating}
+        onConfirm={handleConfirmCancel}
+        onCancel={closeCancelBooking}
+      />
     </div>
   );
 };

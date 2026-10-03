@@ -5,8 +5,8 @@ export interface ReportsSummary {
   reservasDeltaPct: number;
   vuelosCompletados: number;
   vuelosDeltaPct: number;
-  usuariosActivos: number;
-  usuariosDeltaPct: number;
+  pasajeros: number;
+  pasajerosDeltaPct: number;
 }
 
 export interface SalesByDayDatum {
@@ -26,7 +26,7 @@ export interface TopDestinationDatum {
 }
 
 export type ReportFormat = 'CSV';
-export type ReportType = 'Ventas' | 'Vuelos' | 'Usuarios';
+export type ReportType = 'Ventas' | 'Vuelos' | 'Pasajeros';
 
 /** Filtros de la página de reportes. `flightId` es 'todos' o el id de un vuelo. */
 export interface ReportFilters {
