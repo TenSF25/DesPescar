@@ -16,6 +16,10 @@ import { Booking } from '@/features/bookings/pages/Booking';
 import { SeatSelection } from '@/features/bookings/pages/SeatSelection';
 import { HomePage } from '@/features/flights/pages/HomePage';
 import { ResultsPage } from '@/features/flights/pages/ResultsPage';
+import { AdminLayout } from '@/components/admin';
+import { generalNavItems } from '@/features/admin/general/general.nav';
+import { GeneralDashboardPage } from '@/features/admin/general/pages/GeneralDashboardPage';
+import { GeneralUsersPage } from '@/features/admin/general/pages/GeneralUsersPage';
 import { createBrowserRouter } from 'react-router';
 
 export const router = createBrowserRouter([
@@ -95,6 +99,19 @@ export const router = createBrowserRouter([
               },
             ],
           },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <ProtectedRoute allow={['SUPER_ADMIN']} />,
+    children: [
+      {
+        element: <AdminLayout navItems={generalNavItems} />,
+        children: [
+          { index: true, element: <GeneralDashboardPage /> },
+          { path: 'usuarios', element: <GeneralUsersPage /> },
         ],
       },
     ],

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api, gatewayBaseUrl } from '@/config/api';
 import axios from 'axios';
+import { getHomeForRole } from '@/features/admin/roles';
 
 export const useAuth = () => {
   const [errorAuth, setErrAuth] = useState<errorAuth>();
@@ -44,7 +45,7 @@ export const useAuth = () => {
       const userData = await currentUser();
       const { login } = useAuthStore.getState();
       login(tokens, userData);
-      navigate('/');
+      navigate(getHomeForRole(userData.role));
       return tokens;
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
