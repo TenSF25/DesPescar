@@ -6,12 +6,12 @@ interface DonutChartProps {
   size?: number;
 }
 
-export const DonutChart = ({ data, size = 170 }: DonutChartProps) => {
+export const DonutChart = ({ data, size = 150 }: DonutChartProps) => {
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   return (
     <div className="@container min-w-0">
-      <div className="flex flex-col items-center gap-4 @sm:flex-row @sm:gap-6">
+      <div className="flex flex-col items-center gap-4 @min-[17rem]:flex-row @min-[17rem]:gap-6">
         <div style={{ width: size, height: size }} className="shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

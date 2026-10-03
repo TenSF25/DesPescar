@@ -258,6 +258,7 @@ export const AirlineReportsPage = () => {
                   {formatDay(flightPurchases.last)}
                 </p>
                 <LineChart
+                  height={300}
                   data={flightChartData}
                   valueLabel={chartMeasure === 'pasajes' ? 'Pasajes' : 'Ventas'}
                   valueFormatter={(value) =>
@@ -311,15 +312,7 @@ export const AirlineReportsPage = () => {
             />
           </div>
 
-          <div
-            className={`grid grid-cols-1 gap-4 ${showOriginChart ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}
-          >
-            <ChartCard title="Ventas por día">
-              <LineChart
-                data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))}
-              />
-            </ChartCard>
-
+          <div className={`grid grid-cols-1 gap-4 ${showOriginChart ? 'lg:grid-cols-2' : ''}`}>
             {showOriginChart && (
               <ChartCard title="Reservas por origen">
                 <DonutChart
@@ -345,6 +338,15 @@ export const AirlineReportsPage = () => {
               </div>
             </ChartCard>
           </div>
+
+          <ChartCard title="Ventas por día">
+            <LineChart
+              height={300}
+              valueLabel="Ventas"
+              valueFormatter={(value) => `$${value.toLocaleString('es-AR')}`}
+              data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))}
+            />
+          </ChartCard>
         </>
       )}
 
