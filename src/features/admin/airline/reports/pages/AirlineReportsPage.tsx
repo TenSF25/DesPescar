@@ -45,6 +45,7 @@ export const AirlineReportsPage = () => {
     reportType,
     onReportTypeChange,
     summary,
+    flightData,
     salesByDay,
     bookingsByOrigin,
     topDestinations,
@@ -57,6 +58,13 @@ export const AirlineReportsPage = () => {
     handleDownloadReport,
     handleDeleteReport,
   } = useReportsPage();
+
+  const isFlightSelected = filters.flightId !== 'todos';
+  const selectedFlightLabel = flightOptions.find((f) => f.id === filters.flightId)?.label;
+  const flightPurchases =
+    flightData?.summary.primeraCompra && flightData.summary.ultimaCompra
+      ? { first: flightData.summary.primeraCompra, last: flightData.summary.ultimaCompra }
+      : null;
 
   // Con un solo origen (ej: filtrando por un vuelo) el donut tendría una única porción.
   const showOriginChart = bookingsByOrigin.length > 1;
@@ -117,12 +125,24 @@ export const AirlineReportsPage = () => {
       <div className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-wrap items-end gap-4">
           <FilterField label="Período">
-            <DateRangeFilter
-              value={{ from: filters.from, to: filters.to }}
-              onChange={onRangeChange}
-              min={dateLimits.min}
-              max={dateLimits.max}
-            />
+            {isFlightSelected ? (
+              <div
+                title="Con un vuelo elegido se muestra todo su ciclo de venta"
+                className="flex items-center gap-2 rounded-xl border border-black/15 bg-black/3 px-3 py-2.5 text-sm text-[#44474E]"
+              >
+                <span className="material-symbols-outlined text-[18px]">event_available</span>
+                {flightPurchases
+                  ? `Compras: ${formatDay(flightPurchases.first)} - ${formatDay(flightPurchases.last)}`
+                  : 'Desde la primera hasta la última compra'}
+              </div>
+            ) : (
+              <DateRangeFilter
+                value={{ from: filters.from, to: filters.to }}
+                onChange={onRangeChange}
+                min={dateLimits.min}
+                max={dateLimits.max}
+              />
+            )}
           </FilterField>
           <FilterField label="Vuelo">
             <Select
@@ -164,73 +184,127 @@ export const AirlineReportsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon="payments"
-          iconClassName="bg-primary/10 text-primary"
-          label="Ventas totales"
-          value={summary ? `$${summary.ventasTotales.toLocaleString('es-AR')}` : '—'}
-          trendValue={summary ? `${summary.ventasDeltaPct}% vs periodo anterior` : undefined}
-          trendDirection="up"
-        />
-        <StatCard
-          icon="confirmation_number"
-          iconClassName="bg-blue-100 text-blue-600"
-          label="Reservas totales"
-          value={summary?.reservasTotales ?? '—'}
-          trendValue={summary ? `${summary.reservasDeltaPct}% vs periodo anterior` : undefined}
-          trendDirection="up"
-        />
-        <StatCard
-          icon="flight"
-          iconClassName="bg-green-100 text-green-600"
-          label="Vuelos completados"
-          value={summary?.vuelosCompletados ?? '—'}
-          trendValue={summary ? `${summary.vuelosDeltaPct}% vs periodo anterior` : undefined}
-          trendDirection="up"
-        />
-        <StatCard
-          icon="group"
-          iconClassName="bg-orange-100 text-orange-600"
-          label="Pasajeros transportados"
-          value={summary?.pasajeros ?? '—'}
-          trendValue={summary ? `${summary.pasajerosDeltaPct}% vs periodo anterior` : undefined}
-          trendDirection="up"
-        />
-      </div>
-
-      <div
-        className={`grid grid-cols-1 gap-4 ${showOriginChart ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}
-      >
-        <ChartCard title="Ventas por día">
-          <LineChart data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))} />
-        </ChartCard>
-
-        {showOriginChart && (
-          <ChartCard title="Reservas por origen">
-            <DonutChart
-              data={bookingsByOrigin.map((item) => ({
-                label: item.origen,
-                value: item.cantidad,
-                color: item.color,
-              }))}
+      {flightData ? (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <StatCard
+              icon="payments"
+              iconClassName="bg-primary/10 text-primary"
+              label="Ventas totales"
+              value={`$${flightData.summary.ventasTotales.toLocaleString('es-AR')}`}
+              caption="Venta de asientos de este vuelo"
             />
-          </ChartCard>
-        )}
-
-        <ChartCard title="Top destinos">
-          <div className="flex flex-col gap-3">
-            {topDestinations.map((item) => (
-              <ProgressListItem
-                key={item.destino}
-                label={item.destino}
-                value={item.reservas}
-                maxValue={maxDestinationValue}
-              />
-            ))}
+            <StatCard
+              icon="confirmation_number"
+              iconClassName="bg-blue-100 text-blue-600"
+              label="Reservas"
+              value={flightData.summary.reservasTotales}
+              caption="Reservas para este vuelo"
+            />
+            <StatCard
+              icon="group"
+              iconClassName="bg-orange-100 text-orange-600"
+              label="Pasajeros transportados"
+              value={flightData.summary.pasajeros}
+              caption="Pasajes comprados en este vuelo"
+            />
           </div>
-        </ChartCard>
-      </div>
+
+          <ChartCard
+            title={`Ventas por día${selectedFlightLabel ? ` · ${selectedFlightLabel}` : ''}`}
+            action={
+              flightPurchases && (
+                <span className="text-xs font-medium text-[#44474E]">
+                  Primera compra: {formatDay(flightPurchases.first)} · Última compra:{' '}
+                  {formatDay(flightPurchases.last)}
+                </span>
+              )
+            }
+          >
+            {flightPurchases ? (
+              <LineChart
+                data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))}
+              />
+            ) : (
+              <p className="py-10 text-center text-sm text-[#44474E]">
+                Este vuelo todavía no tiene ventas.
+              </p>
+            )}
+          </ChartCard>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              icon="payments"
+              iconClassName="bg-primary/10 text-primary"
+              label="Ventas totales"
+              value={summary ? `$${summary.ventasTotales.toLocaleString('es-AR')}` : '—'}
+              trendValue={summary ? `${summary.ventasDeltaPct}% vs periodo anterior` : undefined}
+              trendDirection="up"
+            />
+            <StatCard
+              icon="confirmation_number"
+              iconClassName="bg-blue-100 text-blue-600"
+              label="Reservas totales"
+              value={summary?.reservasTotales ?? '—'}
+              trendValue={summary ? `${summary.reservasDeltaPct}% vs periodo anterior` : undefined}
+              trendDirection="up"
+            />
+            <StatCard
+              icon="flight"
+              iconClassName="bg-green-100 text-green-600"
+              label="Vuelos completados"
+              value={summary?.vuelosCompletados ?? '—'}
+              trendValue={summary ? `${summary.vuelosDeltaPct}% vs periodo anterior` : undefined}
+              trendDirection="up"
+            />
+            <StatCard
+              icon="group"
+              iconClassName="bg-orange-100 text-orange-600"
+              label="Pasajeros transportados"
+              value={summary?.pasajeros ?? '—'}
+              trendValue={summary ? `${summary.pasajerosDeltaPct}% vs periodo anterior` : undefined}
+              trendDirection="up"
+            />
+          </div>
+
+          <div
+            className={`grid grid-cols-1 gap-4 ${showOriginChart ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}
+          >
+            <ChartCard title="Ventas por día">
+              <LineChart
+                data={salesByDay.map((item) => ({ label: item.fecha, value: item.ventas }))}
+              />
+            </ChartCard>
+
+            {showOriginChart && (
+              <ChartCard title="Reservas por origen">
+                <DonutChart
+                  data={bookingsByOrigin.map((item) => ({
+                    label: item.origen,
+                    value: item.cantidad,
+                    color: item.color,
+                  }))}
+                />
+              </ChartCard>
+            )}
+
+            <ChartCard title="Top destinos">
+              <div className="flex flex-col gap-3">
+                {topDestinations.map((item) => (
+                  <ProgressListItem
+                    key={item.destino}
+                    label={item.destino}
+                    value={item.reservas}
+                    maxValue={maxDestinationValue}
+                  />
+                ))}
+              </div>
+            </ChartCard>
+          </div>
+        </>
+      )}
 
       <div className="flex flex-col gap-4">
         <h3 className="text-secondary font-semibold">Reportes generados recientemente</h3>

@@ -91,7 +91,13 @@ export const useReportsPage = () => {
 
   const visibleReports = showAllReports ? recentReports : recentReports.slice(0, COLLAPSED_REPORTS);
 
-  const maxDestinationValue = Math.max(1, ...(data?.topDestinations ?? []).map((d) => d.reservas));
+  const allData = data?.scope === 'all' ? data : null;
+  const flightData = data?.scope === 'flight' ? data : null;
+
+  const maxDestinationValue = Math.max(
+    1,
+    ...(allData?.topDestinations ?? []).map((d) => d.reservas),
+  );
 
   return {
     isLoading,
@@ -104,10 +110,13 @@ export const useReportsPage = () => {
     flightOptions,
     reportType,
     onReportTypeChange: setReportType,
-    summary: data?.summary ?? null,
+    /** Solo cuando se ven todos los vuelos. */
+    summary: allData?.summary ?? null,
+    /** Solo cuando se filtra por un vuelo puntual. */
+    flightData,
     salesByDay: data?.salesByDay ?? [],
-    bookingsByOrigin: data?.bookingsByOrigin ?? [],
-    topDestinations: data?.topDestinations ?? [],
+    bookingsByOrigin: allData?.bookingsByOrigin ?? [],
+    topDestinations: allData?.topDestinations ?? [],
     maxDestinationValue,
     visibleReports,
     canToggleReports: recentReports.length > COLLAPSED_REPORTS,

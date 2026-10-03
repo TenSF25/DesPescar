@@ -1,4 +1,11 @@
-import { differenceInCalendarDays, eachDayOfInterval, format, parseISO, subDays } from 'date-fns';
+import {
+  differenceInCalendarDays,
+  eachDayOfInterval,
+  format,
+  parseISO,
+  startOfDay,
+  subDays,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { mockDelay } from '@/utils/mockDelay';
 import { getFlights } from '../../flights/services/flightsService';
@@ -9,7 +16,10 @@ import type {
   ReportFile,
   ReportFilters,
   ReportFlightOption,
+  AllFlightsReportsData,
+  FlightSalesSummary,
   ReportsData,
+  SingleFlightReportsData,
   ReportsSummary,
   ReportType,
   SalesByDayDatum,
@@ -58,17 +68,46 @@ interface DayRecord {
   sales: number;
 }
 
-const buildRecords = (flights: AdminFlight[], from: string, to: string): DayRecord[] => {
-  const days = eachDayOfInterval({ start: parseISO(from), end: parseISO(to) });
-  return flights.flatMap((flight) =>
-    days.map((day) => {
-      const iso = format(day, ISO);
-      const bookings =
-        flight.estado === 'Cancelado' ? 0 : Math.floor(random01(`${flight.id}${iso}`) * 12) + 1;
-      return { iso, flight, bookings, sales: bookings * flight.precioProm };
-    }),
-  );
+/**
+ * Ciclo de venta de un vuelo: desde su primera compra hasta la última. Empieza
+ * entre 20 y 59 días antes de la salida y termina el día de la salida (o antes,
+ * si el vuelo se canceló o todavía no salió). Devuelve null si aún no hubo ventas.
+ */
+const salesWindow = (flight: AdminFlight): { first: string; last: string } | null => {
+  const departure = parseISO(flight.fecha);
+  const first = subDays(departure, 20 + (hash(`${flight.id}lead`) % 40));
+  const rawLast =
+    flight.estado === 'Cancelado'
+      ? subDays(departure, 2 + (hash(`${flight.id}cut`) % 5))
+      : flight.estado === 'Programado'
+        ? subDays(departure, 1)
+        : departure;
+  const today = startOfDay(new Date());
+  const last = rawLast > today ? today : rawLast;
+  if (first > last) return null;
+  return { first: format(first, ISO), last: format(last, ISO) };
 };
+
+/** Compras diarias de un vuelo durante todo su ciclo de venta (más fuertes cerca de la salida). */
+const flightRecords = (flight: AdminFlight): DayRecord[] => {
+  const window = salesWindow(flight);
+  if (!window) return [];
+  const days = eachDayOfInterval({ start: parseISO(window.first), end: parseISO(window.last) });
+  return days.map((day, index) => {
+    const iso = format(day, ISO);
+    const progress = days.length > 1 ? index / (days.length - 1) : 1;
+    const raw = Math.floor(random01(`${flight.id}${iso}`) * (3 + 9 * progress));
+    // La primera y la última compra existen por definición: al menos 1 pasaje cada una.
+    const isEdge = index === 0 || index === days.length - 1;
+    const bookings = isEdge ? Math.max(1, raw) : raw;
+    return { iso, flight, bookings, sales: bookings * flight.precioProm };
+  });
+};
+
+const buildRecords = (flights: AdminFlight[], from: string, to: string): DayRecord[] =>
+  flights.flatMap((flight) =>
+    flightRecords(flight).filter((record) => record.iso >= from && record.iso <= to),
+  );
 
 const selectFlights = async (flightId: string) => {
   const all = await getFlights();
@@ -81,11 +120,14 @@ const sum = (records: DayRecord[], pick: (r: DayRecord) => number) =>
 const deltaPct = (current: number, previous: number) =>
   previous === 0 ? 0 : Math.round(((current - previous) / previous) * 1000) / 10;
 
-const summarize = (records: DayRecord[], todayISO: string) => ({
+const passengersOf = (records: DayRecord[]) => Math.round(sum(records, (r) => r.bookings) * 1.7);
+
+const summarize = (records: DayRecord[], flights: AdminFlight[], from: string, to: string) => ({
   ventas: sum(records, (r) => r.sales),
   reservas: sum(records, (r) => r.bookings),
-  completados: records.filter((r) => r.bookings > 0 && r.iso < todayISO).length,
-  pasajeros: Math.round(sum(records, (r) => r.bookings) * 1.7),
+  completados: flights.filter((f) => f.estado === 'Completado' && f.fecha >= from && f.fecha <= to)
+    .length,
+  pasajeros: passengersOf(records),
 });
 
 const CITY: Record<string, string> = {
@@ -119,10 +161,30 @@ export const getReportFlights = async (): Promise<ReportFlightOption[]> => {
 };
 
 // TODO(backend): GET reportes/resumen, ventas-por-dia, reservas-por-origen y top-destinos
+/** Ventas de un vuelo puntual desde su primera hasta su última compra (un punto por día). */
+const buildSingleFlightData = (flight: AdminFlight | undefined): SingleFlightReportsData => {
+  const records = flight ? flightRecords(flight) : [];
+  const summary: FlightSalesSummary = {
+    ventasTotales: sum(records, (r) => r.sales),
+    reservasTotales: sum(records, (r) => r.bookings),
+    pasajeros: passengersOf(records),
+    primeraCompra: records[0]?.iso ?? null,
+    ultimaCompra: records[records.length - 1]?.iso ?? null,
+  };
+  return {
+    scope: 'flight',
+    summary,
+    salesByDay: records.map((r) => ({ fecha: shortDate(r.iso), ventas: r.sales })),
+  };
+};
+
 export const getReportsData = async (filters: ReportFilters): Promise<ReportsData> => {
   await mockDelay();
   const flights = await selectFlights(filters.flightId);
-  const todayISO = format(new Date(), ISO);
+
+  if (filters.flightId !== 'todos') {
+    return buildSingleFlightData(flights[0]);
+  }
 
   const current = buildRecords(flights, filters.from, filters.to);
   const periodDays = differenceInCalendarDays(parseISO(filters.to), parseISO(filters.from)) + 1;
@@ -132,8 +194,13 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
     format(subDays(parseISO(filters.from), 1), ISO),
   );
 
-  const now = summarize(current, todayISO);
-  const before = summarize(previous, todayISO);
+  const now = summarize(current, flights, filters.from, filters.to);
+  const before = summarize(
+    previous,
+    flights,
+    format(subDays(parseISO(filters.from), periodDays), ISO),
+    format(subDays(parseISO(filters.from), 1), ISO),
+  );
 
   const summary: ReportsSummary = {
     ventasTotales: now.ventas,
@@ -173,7 +240,14 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
     .slice(0, 5)
     .map(([destino, reservas]) => ({ destino: cityName(destino), reservas }));
 
-  return { summary, salesByDay, bookingsByOrigin, topDestinations };
+  const data: AllFlightsReportsData = {
+    scope: 'all',
+    summary,
+    salesByDay,
+    bookingsByOrigin,
+    topDestinations,
+  };
+  return data;
 };
 
 // --- Reportes generados ---------------------------------------------------
@@ -217,11 +291,20 @@ export const createReport = async (
   await mockDelay(600);
   const flights = await getReportFlights();
   const flight = flights.find((f) => f.id === filters.flightId);
+  // Un reporte de un vuelo puntual cubre todo su ciclo de venta, no el rango elegido.
+  let range = { from: filters.from, to: filters.to };
+  if (flight) {
+    const { summary } = buildSingleFlightData((await selectFlights(flight.id))[0]);
+    if (summary.primeraCompra && summary.ultimaCompra) {
+      range = { from: summary.primeraCompra, to: summary.ultimaCompra };
+    }
+  }
   const report: GeneratedReport = {
     id: `r${Date.now()}`,
     nombre: flight ? `${REPORT_NAMES[tipo]} · ${flight.label.split(' · ')[0]}` : REPORT_NAMES[tipo],
     tipo,
-    ...filters,
+    flightId: filters.flightId,
+    ...range,
     generadoEl: new Date().toISOString(),
     formato: 'CSV',
   };
@@ -234,15 +317,28 @@ export const deleteReport = async (id: string): Promise<void> => {
   reports = reports.filter((r) => r.id !== id);
 };
 
+/** Rango de un vuelo puntual: su ciclo de venta; si no tiene ventas, el rango pedido. */
+const flightSalesRange = (
+  flight: AdminFlight | undefined,
+  fallback: ReportFilters,
+): ReportFilters => {
+  const { summary } = buildSingleFlightData(flight);
+  return summary.primeraCompra && summary.ultimaCompra
+    ? { ...fallback, from: summary.primeraCompra, to: summary.ultimaCompra }
+    : fallback;
+};
+
 const csvRow = (cells: (string | number)[]) =>
   cells.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
 
 /** Arma el archivo CSV de un reporte según su tipo, rango y vuelo. */
 export const buildReportFile = async (
   tipo: ReportType,
-  filters: ReportFilters,
+  requested: ReportFilters,
 ): Promise<ReportFile> => {
-  const flights = await selectFlights(filters.flightId);
+  const flights = await selectFlights(requested.flightId);
+  const filters =
+    requested.flightId === 'todos' ? requested : flightSalesRange(flights[0], requested);
   const records = buildRecords(flights, filters.from, filters.to);
   const filename = `reporte-${tipo.toLowerCase()}_${filters.from}_${filters.to}.csv`;
 

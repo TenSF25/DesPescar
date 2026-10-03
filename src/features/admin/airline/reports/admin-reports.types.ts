@@ -35,12 +35,33 @@ export interface ReportFilters {
   flightId: string;
 }
 
-export interface ReportsData {
+/** Reporte general: todos los vuelos, dentro del rango de fechas elegido. */
+export interface AllFlightsReportsData {
+  scope: 'all';
   summary: ReportsSummary;
   salesByDay: SalesByDayDatum[];
   bookingsByOrigin: BookingsByOriginDatum[];
   topDestinations: TopDestinationDatum[];
 }
+
+/** Resumen de un vuelo puntual, sobre todo su ciclo de venta. */
+export interface FlightSalesSummary {
+  ventasTotales: number; // venta de asientos, USD
+  reservasTotales: number;
+  pasajeros: number;
+  /** Fecha (YYYY-MM-DD) de la primera y la última compra; null si aún no tiene ventas. */
+  primeraCompra: string | null;
+  ultimaCompra: string | null;
+}
+
+/** Reporte de un vuelo puntual: ignora el rango y cubre desde su primera hasta su última compra. */
+export interface SingleFlightReportsData {
+  scope: 'flight';
+  summary: FlightSalesSummary;
+  salesByDay: SalesByDayDatum[];
+}
+
+export type ReportsData = AllFlightsReportsData | SingleFlightReportsData;
 
 export interface ReportFlightOption {
   id: string;
