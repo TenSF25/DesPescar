@@ -16,5 +16,6 @@ export interface BookingStats {
   reservasTotales: number;
   confirmadas: number;
   pendientes: number;
+  canceladas: number;
   ingresosTotales: number;
 }

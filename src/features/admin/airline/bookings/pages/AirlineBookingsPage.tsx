@@ -88,7 +88,7 @@ export const AirlineBookingsPage = () => {
         description="Administra las reservas realizadas en la plataforma."
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           icon="confirmation_number"
           iconClassName="bg-primary/10 text-primary"
@@ -106,6 +106,12 @@ export const AirlineBookingsPage = () => {
           iconClassName="bg-amber-100 text-amber-600"
           label="Pendientes"
           value={stats?.pendientes ?? '—'}
+        />
+        <StatCard
+          icon="cancel"
+          iconClassName="bg-red-100 text-alert"
+          label="Canceladas"
+          value={stats?.canceladas ?? '—'}
         />
         <StatCard
           icon="payments"

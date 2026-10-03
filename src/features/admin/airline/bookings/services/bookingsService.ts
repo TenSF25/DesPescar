@@ -63,6 +63,7 @@ const MOCK_STATS: BookingStats = {
   reservasTotales: 1250,
   confirmadas: 980,
   pendientes: 145,
+  canceladas: 125,
   ingresosTotales: 1902450,
 };
 
