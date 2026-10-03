@@ -1,4 +1,8 @@
+import { addDays, format } from 'date-fns';
 import { mockDelay } from '@/utils/mockDelay';
+
+/** Fecha (YYYY-MM-DD) a `offset` días de hoy, para que los datos de prueba siempre estén vigentes. */
+const dayFromToday = (offset: number) => format(addDays(new Date(), offset), 'yyyy-MM-dd');
 import type { AdminFlight, FlightStats, FlightInput } from '../admin-flights.types';
 
 // Array mutable "en memoria" para simular un backend real durante la sesión:
@@ -9,7 +13,7 @@ let mockFlights: AdminFlight[] = [
     numero: 'DSC2456',
     origen: 'MAD',
     destino: 'MEX',
-    fecha: '2026-10-03',
+    fecha: dayFromToday(0),
     hora: '10:30',
     estado: 'En curso',
     precioProm: 218,
@@ -19,7 +23,7 @@ let mockFlights: AdminFlight[] = [
     numero: 'DSC7891',
     origen: 'MIA',
     destino: 'BOG',
-    fecha: '2026-10-05',
+    fecha: dayFromToday(2),
     hora: '08:45',
     estado: 'Programado',
     precioProm: 195,
@@ -29,7 +33,7 @@ let mockFlights: AdminFlight[] = [
     numero: 'DSC1123',
     origen: 'JFK',
     destino: 'SCL',
-    fecha: '2026-10-06',
+    fecha: dayFromToday(3),
     hora: '11:20',
     estado: 'Programado',
     precioProm: 265,
@@ -39,7 +43,7 @@ let mockFlights: AdminFlight[] = [
     numero: 'DSC3344',
     origen: 'LIM',
     destino: 'MAD',
-    fecha: '2026-10-02',
+    fecha: dayFromToday(-1),
     hora: '09:10',
     estado: 'Completado',
     precioProm: 205,
@@ -49,7 +53,7 @@ let mockFlights: AdminFlight[] = [
     numero: 'DSC6622',
     origen: 'EZE',
     destino: 'MIA',
-    fecha: '2026-10-01',
+    fecha: dayFromToday(-2),
     hora: '19:50',
     estado: 'Cancelado',
     precioProm: 180,

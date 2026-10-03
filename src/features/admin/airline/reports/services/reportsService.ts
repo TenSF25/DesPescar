@@ -137,7 +137,7 @@ const flightInstances = (flight: AdminFlight, depFrom: string, depTo: string): A
     const departure = format(addDays(base, k * INSTANCE_STEP_DAYS), ISO);
     const estado =
       departure < todayISO
-        ? random01(`${flight.id}${departure}x`) < 0.1
+        ? random01(`${flight.id}${departure}x`) < 0.04
           ? 'Cancelado'
           : 'Completado'
         : departure === todayISO
@@ -194,12 +194,47 @@ const completedFlights = (flights: AdminFlight[], from: string, to: string) =>
     0,
   );
 
-const summarize = (records: DayRecord[], flights: AdminFlight[], from: string, to: string) => ({
-  ventas: sum(records, (r) => r.sales),
-  reservas: sum(records, (r) => r.bookings),
-  completados: completedFlights(flights, from, to),
-  pasajeros: passengersOf(records),
-});
+/** Asientos de cada vuelo (dato de prueba; vendrá del avión asignado). */
+export const SEATS_PER_FLIGHT = 300;
+
+/** Ocupación (%) de una salida con los pasajes vendidos hasta hoy. */
+export const occupancyOf = (flight: AdminFlight): number =>
+  Math.min(100, Math.round((passengersOf(flightRecords(flight)) / SEATS_PER_FLIGHT) * 100));
+
+/** Salidas del rango que ya salieron o están saliendo (las que cuentan para ocupación y cancelación). */
+const operatedDepartures = (flights: AdminFlight[], from: string, to: string) => {
+  const todayISO = format(new Date(), ISO);
+  const upTo = to > todayISO ? todayISO : to;
+  if (upTo < from) return [];
+  return flights.flatMap((flight) => flightInstances(flight, from, upTo));
+};
+
+const averageOccupancy = (departures: AdminFlight[]) => {
+  const flown = departures.filter((f) => f.estado !== 'Cancelado');
+  if (flown.length === 0) return 0;
+  return Math.round(flown.reduce((total, f) => total + occupancyOf(f), 0) / flown.length);
+};
+
+const cancellationRate = (departures: AdminFlight[]) => {
+  if (departures.length === 0) return 0;
+  const cancelled = departures.filter((f) => f.estado === 'Cancelado').length;
+  return Math.round((cancelled / departures.length) * 1000) / 10;
+};
+
+const summarize = (records: DayRecord[], flights: AdminFlight[], from: string, to: string) => {
+  const departures = operatedDepartures(flights, from, to);
+  return {
+    ventas: sum(records, (r) => r.sales),
+    reservas: sum(records, (r) => r.bookings),
+    completados: completedFlights(flights, from, to),
+    pasajeros: passengersOf(records),
+    ocupacion: averageOccupancy(departures),
+    cancelacion: cancellationRate(departures),
+  };
+};
+
+const pointsDelta = (current: number, previous: number) =>
+  Math.round((current - previous) * 10) / 10;
 
 const CITY: Record<string, string> = {
   MEX: 'Ciudad de México',
@@ -288,6 +323,10 @@ export const getReportsData = async (filters: ReportFilters): Promise<ReportsDat
     vuelosDeltaPct: deltaPct(now.completados, before.completados),
     pasajeros: now.pasajeros,
     pasajerosDeltaPct: deltaPct(now.pasajeros, before.pasajeros),
+    ocupacionPromedio: now.ocupacion,
+    ocupacionDeltaPts: pointsDelta(now.ocupacion, before.ocupacion),
+    tasaCancelacion: now.cancelacion,
+    cancelacionDeltaPts: pointsDelta(now.cancelacion, before.cancelacion),
   };
 
   // Ventas agrupadas según el largo del rango: por día, por semana o por mes.
@@ -482,4 +521,53 @@ export const buildReportFile = async (
     filename,
     content: [csvRow(['Fecha', 'Pasajeros']), ...rows.map(csvRow)].join('\n'),
   };
+};
+
+// --- Métricas del día (Panel general) -------------------------------------
+
+export interface DayMetrics {
+  ventas: number;
+  reservas: number;
+  routes: { ruta: string; reservas: number }[];
+}
+
+const dayMetrics = (flights: AdminFlight[], iso: string): DayMetrics => {
+  const records = buildRecords(flights, iso, iso, true);
+  return {
+    ventas: sum(records, (r) => r.sales),
+    reservas: sum(records, (r) => r.bookings),
+    routes: groupCount(records, (r) => `${r.flight.origen} → ${r.flight.destino}`).map(
+      ([ruta, reservas]) => ({ ruta, reservas }),
+    ),
+  };
+};
+
+/** Reparte `total` reservas en franjas de 3 horas con una curva diurna (suma exacta). */
+const distributeByHour = (total: number) => {
+  const weights = [1, 0.5, 2, 4, 5, 4.5, 6, 3];
+  const weightSum = weights.reduce((a, b) => a + b, 0);
+  const raw = weights.map((w) => (total * w) / weightSum);
+  const counts = raw.map(Math.floor);
+  let remainder = total - counts.reduce((a, b) => a + b, 0);
+  [...raw.keys()]
+    .sort((a, b) => raw[b] - Math.floor(raw[b]) - (raw[a] - Math.floor(raw[a])))
+    .forEach((index) => {
+      if (remainder > 0) {
+        counts[index] += 1;
+        remainder -= 1;
+      }
+    });
+  return counts.map((value, index) => ({
+    label: `${String(index * 3).padStart(2, '0')}h`,
+    value,
+  }));
+};
+
+// TODO(backend): GET reportes/hoy (ventas y reservas de hoy y de ayer, por ruta y por franja horaria)
+export const getTodayMetrics = async () => {
+  await mockDelay();
+  const flights = await getFlights();
+  const today = dayMetrics(flights, format(new Date(), ISO));
+  const yesterday = dayMetrics(flights, format(subDays(new Date(), 1), ISO));
+  return { today, yesterday, bookingsByHour: distributeByHour(today.reservas) };
 };

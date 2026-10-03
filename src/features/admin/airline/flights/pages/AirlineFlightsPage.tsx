@@ -10,6 +10,8 @@ import {
   ConfirmDialog,
   type TableColumn,
 } from '@/components/admin';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { useFlightsPage } from '../hooks/useFlightsPage';
 import { FlightFormModal } from '../components/FlightFormModal';
@@ -18,6 +20,13 @@ import { FLIGHT_STATUS_TONE, formatFlightDate } from '../flights.utils';
 import type { AdminFlight } from '../admin-flights.types';
 
 export const AirlineFlightsPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // El estado del acceso rápido se usa una sola vez: se limpia para que recargar no reabra el modal.
+  useEffect(() => {
+    if (location.state?.openAddFlight) navigate(location.pathname, { replace: true, state: null });
+  }, [location, navigate]);
   const {
     isLoading,
     stats,
@@ -52,7 +61,7 @@ export const AirlineFlightsPage = () => {
     cancelDeleteFlight,
     isDeleting,
     handleConfirmDelete,
-  } = useFlightsPage();
+  } = useFlightsPage(Boolean(location.state?.openAddFlight));
 
   const columns: TableColumn<AdminFlight>[] = [
     { key: 'numero', header: 'Número de vuelo', className: 'font-semibold' },

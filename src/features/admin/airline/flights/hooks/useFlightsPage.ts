@@ -32,7 +32,8 @@ const adjustStats = (
   return next;
 };
 
-export const useFlightsPage = () => {
+/** `openAddOnMount`: abre el modal de alta al entrar (ej: desde el acceso rápido del Panel general). */
+export const useFlightsPage = (openAddOnMount = false) => {
   const [flights, setFlights] = useState<AdminFlight[]>([]);
   const [stats, setStats] = useState<FlightStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +43,7 @@ export const useFlightsPage = () => {
   const [origenFilter, setOrigenFilter] = useState('todos');
   const [page, setPage] = useState(1);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(openAddOnMount);
   const [isSaving, setIsSaving] = useState(false);
 
   const [flightToView, setFlightToView] = useState<AdminFlight | null>(null);

@@ -7,6 +7,12 @@ export interface ReportsSummary {
   vuelosDeltaPct: number;
   pasajeros: number;
   pasajerosDeltaPct: number;
+  /** Ocupación promedio de las salidas del período (%). */
+  ocupacionPromedio: number;
+  ocupacionDeltaPts: number; // diferencia en puntos porcentuales vs el período anterior
+  /** Salidas canceladas sobre el total de salidas del período (%). */
+  tasaCancelacion: number;
+  cancelacionDeltaPts: number;
 }
 
 export interface SalesByDayDatum {

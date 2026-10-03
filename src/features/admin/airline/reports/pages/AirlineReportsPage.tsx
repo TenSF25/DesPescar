@@ -24,6 +24,15 @@ const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
   Pasajeros: { icon: 'group', className: 'bg-green-100 text-green-600' },
 };
 
+/** Texto y flecha de una variación vs el período anterior (verde si sube, rojo si baja). */
+const pctTrend = (delta: number | undefined, unit: '%' | 'pts' = '%') =>
+  delta === undefined
+    ? {}
+    : {
+        trendValue: `${Math.abs(delta)}${unit === '%' ? '%' : ' pts'} vs periodo anterior`,
+        trendDirection: delta >= 0 ? ('up' as const) : ('down' as const),
+      };
+
 const GRANULARITY_LABEL: Record<ReportGranularity, string> = {
   day: 'día',
   week: 'semana',
@@ -284,38 +293,52 @@ export const AirlineReportsPage = () => {
         </>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
               icon="payments"
               iconClassName="bg-primary/10 text-primary"
               label="Ventas totales"
               value={summary ? `$${summary.ventasTotales.toLocaleString('es-AR')}` : '—'}
-              trendValue={summary ? `${summary.ventasDeltaPct}% vs periodo anterior` : undefined}
-              trendDirection="up"
+              {...pctTrend(summary?.ventasDeltaPct)}
             />
             <StatCard
               icon="confirmation_number"
               iconClassName="bg-blue-100 text-blue-600"
               label="Reservas totales"
               value={summary?.reservasTotales ?? '—'}
-              trendValue={summary ? `${summary.reservasDeltaPct}% vs periodo anterior` : undefined}
-              trendDirection="up"
+              {...pctTrend(summary?.reservasDeltaPct)}
             />
             <StatCard
               icon="flight"
               iconClassName="bg-green-100 text-green-600"
               label="Vuelos completados"
               value={summary?.vuelosCompletados ?? '—'}
-              trendValue={summary ? `${summary.vuelosDeltaPct}% vs periodo anterior` : undefined}
-              trendDirection="up"
+              {...pctTrend(summary?.vuelosDeltaPct)}
             />
             <StatCard
               icon="group"
               iconClassName="bg-orange-100 text-orange-600"
               label="Pasajeros transportados"
               value={summary?.pasajeros ?? '—'}
-              trendValue={summary ? `${summary.pasajerosDeltaPct}% vs periodo anterior` : undefined}
-              trendDirection="up"
+              {...pctTrend(summary?.pasajerosDeltaPct)}
+            />
+            <StatCard
+              icon="airline_seat_recline_normal"
+              iconClassName="bg-purple-100 text-purple-600"
+              label="Ocupación promedio"
+              value={summary ? `${summary.ocupacionPromedio}%` : '—'}
+              {...pctTrend(summary?.ocupacionDeltaPts, 'pts')}
+            />
+            <StatCard
+              icon="cancel"
+              iconClassName="bg-red-100 text-alert"
+              label="Tasa de cancelación"
+              value={summary ? `${summary.tasaCancelacion}%` : '—'}
+              caption={
+                summary
+                  ? `${summary.cancelacionDeltaPts > 0 ? '+' : ''}${summary.cancelacionDeltaPts} pts vs periodo anterior`
+                  : undefined
+              }
             />
           </div>
 
