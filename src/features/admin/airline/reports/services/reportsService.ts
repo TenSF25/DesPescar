@@ -29,7 +29,7 @@ import type {
 const ISO = 'yyyy-MM-dd';
 
 /** Ventana de datos disponibles hacia atrás desde hoy (días). */
-export const REPORTS_HISTORY_DAYS = 120;
+export const REPORTS_HISTORY_DAYS = 365;
 
 export const getReportsDateLimits = () => {
   const today = new Date();

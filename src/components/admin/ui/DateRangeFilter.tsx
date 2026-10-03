@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { DayPicker, type DateRange as DayPickerRange } from 'react-day-picker';
-import { format, parseISO, subDays, subMonths } from 'date-fns';
+import { format, parseISO, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 import { cn } from '@/utils/cn';
@@ -19,20 +19,14 @@ interface DateRangeFilterProps {
   min?: string;
   /** Fecha máxima seleccionable (YYYY-MM-DD). También es el fin de los atajos. */
   max: string;
-  /** Atajos de "últimos N días". Pasar [] para ocultarlos. */
+  /** Atajos de "últimos N días" (365 se muestra como "Último año"). Pasar [] para ocultarlos. */
   presetDays?: number[];
   className?: string;
 }
 
 const ISO = 'yyyy-MM-dd';
 
-const WIDE_QUERY = '(min-width: 768px)';
-const subscribeWide = (callback: () => void) => {
-  const query = window.matchMedia(WIDE_QUERY);
-  query.addEventListener('change', callback);
-  return () => query.removeEventListener('change', callback);
-};
-const getWide = () => window.matchMedia(WIDE_QUERY).matches;
+const presetLabel = (days: number) => (days === 365 ? 'Último año' : `Últimos ${days} días`);
 
 // Colores del calendario (react-day-picker usa estas variables CSS).
 const calendarTheme = {
@@ -53,13 +47,12 @@ export const DateRangeFilter = ({
   onChange,
   min,
   max,
-  presetDays = [7, 30, 90],
+  presetDays = [7, 30, 90, 365],
   className,
 }: DateRangeFilterProps) => {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DayPickerRange | undefined>();
   const containerRef = useRef<HTMLDivElement>(null);
-  const isWide = useSyncExternalStore(subscribeWide, getWide, () => true);
 
   useEffect(() => {
     if (!open) return;
@@ -110,7 +103,6 @@ export const DateRangeFilter = ({
   const label = `${format(parseISO(value.from), 'dd/MM/yyyy')} - ${format(parseISO(value.to), 'dd/MM/yyyy')}`;
   const minDate = min ? parseISO(min) : undefined;
   const maxDate = parseISO(max);
-  const visibleMonth = subMonths(parseISO(value.to), isWide ? 1 : 0);
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
@@ -154,7 +146,7 @@ export const DateRangeFilter = ({
                       : 'hover:text-secondary border-black/15 text-[#44474E]',
                   )}
                 >
-                  Últimos {days} días
+                  {presetLabel(days)}
                 </button>
               ))}
             </div>
@@ -164,10 +156,10 @@ export const DateRangeFilter = ({
             <DayPicker
               mode="range"
               locale={es}
-              numberOfMonths={isWide ? 2 : 1}
+              numberOfMonths={1}
               selected={draft}
               onSelect={setDraft}
-              defaultMonth={visibleMonth}
+              defaultMonth={parseISO(value.to)}
               startMonth={minDate}
               endMonth={maxDate}
               disabled={[...(minDate ? [{ before: minDate }] : []), { after: maxDate }]}
