@@ -2,6 +2,13 @@ import { FooterLayout } from '@/components/layout/FooterLayout';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PublicRoute } from '@/components/Routes/PublicRoute';
 import { ProtectedRoute } from '@/components/Routes/ProtectedRoute';
+import { MyDataPage } from '@/features/profile/pages/MyDataPage';
+import { ReservationsLayout } from '@/features/reservations/layouts/ReservationsLayout';
+import { CancelTripPage } from '@/features/reservations/pages/CancelTripPage';
+import { FlightDetailsPage } from '@/features/reservations/pages/FlightDetailsPage';
+import { ManageTripPage } from '@/features/reservations/pages/ManageTripPage';
+import { MyReservationsPage } from '@/features/reservations/pages/MyReservationsPage';
+import { SettingsPage } from '@/features/settings/pages/SettingsPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { Baggage } from '@/features/bookings/pages/Baggage';
@@ -61,6 +68,32 @@ export const router = createBrowserRouter([
           {
             path: 'checkout/travelers-data',
             element: <h1>HOLA</h1>,
+          },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            element: <FooterLayout />,
+            children: [
+              {
+                element: <ReservationsLayout />,
+                children: [
+                  { path: '/my-data', element: <MyDataPage /> },
+                  { path: '/settings', element: <SettingsPage /> },
+                  {
+                    path: '/my-reservations',
+                    children: [
+                      { index: true, element: <MyReservationsPage /> },
+                      { path: ':id/manage', element: <ManageTripPage /> },
+                      { path: ':id/details', element: <FlightDetailsPage /> },
+                      { path: ':id/cancel', element: <CancelTripPage /> },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
