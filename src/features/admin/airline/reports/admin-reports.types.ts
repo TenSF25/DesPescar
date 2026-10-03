@@ -37,9 +37,13 @@ export interface ReportFilters {
   flightId: string;
 }
 
+/** Cómo se agrupa la serie de ventas: un punto por día, por semana o por mes. */
+export type ReportGranularity = 'day' | 'week' | 'month';
+
 /** Reporte general: todos los vuelos, dentro del rango de fechas elegido. */
 export interface AllFlightsReportsData {
   scope: 'all';
+  granularity: ReportGranularity;
   summary: ReportsSummary;
   salesByDay: SalesByDayDatum[];
   bookingsByOrigin: BookingsByOriginDatum[];

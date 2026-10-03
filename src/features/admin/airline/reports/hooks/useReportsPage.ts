@@ -115,6 +115,7 @@ export const useReportsPage = () => {
     /** Solo cuando se filtra por un vuelo puntual. */
     flightData,
     salesByDay: data?.salesByDay ?? [],
+    granularity: allData?.granularity ?? 'day',
     bookingsByOrigin: allData?.bookingsByOrigin ?? [],
     topDestinations: allData?.topDestinations ?? [],
     maxDestinationValue,

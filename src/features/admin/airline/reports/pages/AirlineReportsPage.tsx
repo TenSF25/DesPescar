@@ -16,12 +16,18 @@ import {
 import { format, parseISO } from 'date-fns';
 import { useState, type ReactNode } from 'react';
 import { useReportsPage } from '../hooks/useReportsPage';
-import type { GeneratedReport, ReportType } from '../admin-reports.types';
+import type { GeneratedReport, ReportGranularity, ReportType } from '../admin-reports.types';
 
 const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
   Ventas: { icon: 'payments', className: 'bg-blue-100 text-blue-600' },
   Vuelos: { icon: 'flight', className: 'bg-purple-100 text-purple-600' },
   Pasajeros: { icon: 'group', className: 'bg-green-100 text-green-600' },
+};
+
+const GRANULARITY_LABEL: Record<ReportGranularity, string> = {
+  day: 'día',
+  week: 'semana',
+  month: 'mes',
 };
 
 const formatDay = (iso: string) => format(parseISO(iso), 'dd/MM/yyyy');
@@ -48,6 +54,7 @@ export const AirlineReportsPage = () => {
     summary,
     flightData,
     salesByDay,
+    granularity,
     bookingsByOrigin,
     topDestinations,
     maxDestinationValue,
@@ -339,7 +346,7 @@ export const AirlineReportsPage = () => {
             </ChartCard>
           </div>
 
-          <ChartCard title="Ventas por día">
+          <ChartCard title={`Ventas por ${GRANULARITY_LABEL[granularity]}`}>
             <LineChart
               height={300}
               valueLabel="Ventas"
