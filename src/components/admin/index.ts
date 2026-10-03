@@ -21,5 +21,7 @@ export * from './ui/ActivityListItem';
 export * from './ui/Modal';
 export * from './ui/ConfirmDialog';
 
+export * from './ui/AdminInput';
+
 // Types
 export * from './admin.types';

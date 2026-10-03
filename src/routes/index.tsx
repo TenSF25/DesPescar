@@ -20,7 +20,12 @@ import { AdminLayout } from '@/components/admin';
 import { generalNavItems } from '@/features/admin/general/general.nav';
 import { GeneralDashboardPage } from '@/features/admin/general/pages/GeneralDashboardPage';
 import { GeneralUsersPage } from '@/features/admin/general/pages/GeneralUsersPage';
-import { createBrowserRouter } from 'react-router';
+import { airlineNavItems } from '@/features/admin/airline/airline.nav';
+import { AirlineBookingsPage } from '@/features/admin/airline/bookings/pages/AirlineBookingsPage';
+import { AirlineFlightsPage } from '@/features/admin/airline/flights/pages/AirlineFlightsPage';
+import { AirlineReportsPage } from '@/features/admin/airline/reports/pages/AirlineReportsPage';
+import { AirlineUsersPage } from '@/features/admin/airline/users/pages/AirlineUsersPage';
+import { createBrowserRouter, Navigate } from 'react-router';
 
 export const router = createBrowserRouter([
   {
@@ -112,6 +117,22 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <GeneralDashboardPage /> },
           { path: 'usuarios', element: <GeneralUsersPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/admin/aerolinea',
+    element: <ProtectedRoute allow={['AIRLINE_ADMIN']} />,
+    children: [
+      {
+        element: <AdminLayout navItems={airlineNavItems} sidebarSubtitle="PANEL DE AEROLÍNEA" />,
+        children: [
+          { index: true, element: <Navigate to="usuarios" replace /> },
+          { path: 'usuarios', element: <AirlineUsersPage /> },
+          { path: 'vuelos', element: <AirlineFlightsPage /> },
+          { path: 'reservas', element: <AirlineBookingsPage /> },
+          { path: 'reportes', element: <AirlineReportsPage /> },
         ],
       },
     ],
