@@ -28,10 +28,10 @@ export const SeatSelection = () => {
   return (
     <SectionContainer className="mt-10 mr-auto mb-10 ml-auto flex w-full max-w-312.5 flex-row items-center justify-center gap-20">
       <DetailSelectionSeats />
-      <div>
+      <div className="relative z-1">
         <AirplaneCanvas></AirplaneCanvas>
       </div>
-      <div className="fixed bottom-0 left-0 z-9999 flex w-full justify-center border-t border-[#3234392d] bg-white">
+      <div className="fixed bottom-0 left-0 z-2 flex w-full justify-center border-t border-[#3234392d] bg-white">
         <div className="flex w-360 items-center justify-between p-4">
           <div>
             <h3 className="text-xl font-semibold text-[#323439]">Asientos</h3>
@@ -45,10 +45,7 @@ export const SeatSelection = () => {
               className="rounded-full px-5"
               onClick={handleClick}
               disabled={
-                !seatsMap ||
-                seatsLoading ||
-                isLoading ||
-                selectedSeats.length !== passengerCount
+                !seatsMap || seatsLoading || isLoading || selectedSeats.length !== passengerCount
               }
             >
               {isLoading ? 'Creando reserva...' : 'Continuar'}
@@ -56,7 +53,10 @@ export const SeatSelection = () => {
           </div>
         </div>
         {(error || seatsError) && (
-          <p role="alert" className="absolute bottom-full mb-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p
+            role="alert"
+            className="absolute bottom-full mb-2 rounded bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
             {error || seatsError}
           </p>
         )}

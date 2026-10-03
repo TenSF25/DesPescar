@@ -7,6 +7,7 @@ export const gatewayBaseUrl = (import.meta.env.VITE_GATEWAY_URL || 'http://local
 );
 
 export const api = axios.create({
+  baseURL: gatewayBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,7 +15,11 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    if (config.url?.includes('/auth/register') || config.url?.includes('/auth/login')) {
+    if (
+      config.url?.includes('/auth/register') ||
+      config.url?.includes('/auth/login') ||
+      config.url?.includes('/api/koi')
+    ) {
       return config;
     }
 
@@ -55,6 +60,11 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // SI YA ESTAMOS EN EL LOGIN, NO HAGAS NADA PARA EVITAR EL LOOP
+      if (window.location.pathname.includes('/login')) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -74,7 +84,9 @@ api.interceptors.response.use(
       try {
         if (!tokens?.refreshToken) {
           logout();
-          window.location.href = '/login';
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
           return Promise.reject(error);
         }
 
@@ -97,7 +109,9 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
         logout();
-        window.location.href = '/login';
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

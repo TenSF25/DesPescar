@@ -35,7 +35,7 @@ export const useBooking = () => {
     passengers: passengersLimit,
     selectedDepartureFare,
     selectedReturnFare,
-      setPassengersAssignedBookingId,
+    setPassengersAssignedBookingId,
   } = useFlightStore();
 
   const getAuthHeaders = () => {
@@ -67,7 +67,6 @@ export const useBooking = () => {
       }
 
       const initPayload = {
-        creadorId: myUserId,
         flightIds,
         cantidadPasajeros: Number(passengersLimit),
         paymentType: 'SINGLE_PAYMENT',
@@ -77,7 +76,7 @@ export const useBooking = () => {
       };
 
       const initResponse = await api.post<BookingInitResponse>(
-        'http://localhost:8085/api/bookings/init',
+        '/api/bookings/init',
         initPayload,
         getAuthHeaders(),
       );
@@ -91,7 +90,10 @@ export const useBooking = () => {
       return { success: true, reservationId };
     } catch (err: unknown) {
       console.error('Error inicializando la reserva:', err);
-      const message = getRequestErrorMessage(err, 'Ha ocurrido un error al inicializar la reserva.');
+      const message = getRequestErrorMessage(
+        err,
+        'Ha ocurrido un error al inicializar la reserva.',
+      );
       setError(message);
       return { success: false, error: message };
     } finally {
@@ -119,21 +121,20 @@ export const useBooking = () => {
       }
 
       const pasajerosPayload = formData.map((pasajero, index) => ({
-          nombreCompleto: pasajero.nombreCompleto,
-          dniPasaporte: pasajero.dniPasaporte,
-          asientoIda: selectedSeats[index],
-          asientoVuelta: null,
-          tarifaId: fareDetails.id,
-          tarifaNombre: fareDetails.name,
-          precioTarifa: fareDetails.pricePerPassenger,
-        }));
+        nombreCompleto: pasajero.nombreCompleto,
+        dniPasaporte: pasajero.dniPasaporte,
+        asientoIda: selectedSeats[index],
+        asientoVuelta: null,
+        tarifaId: fareDetails.id,
+        tarifaNombre: fareDetails.name,
+        precioTarifa: fareDetails.pricePerPassenger,
+      }));
 
       // 1. Guardar pasajeros inyectando el token
       if (useFlightStore.getState().passengersAssignedBookingId !== reservationId) {
         await api.put(
-          `http://localhost:8085/api/bookings/${reservationId}/passengers`,
+          `/api/bookings/${reservationId}/passengers`,
           {
-            solicitanteId: myUserId,
             pasajeros: pasajerosPayload,
           },
           getAuthHeaders(),
@@ -146,7 +147,6 @@ export const useBooking = () => {
         `${gatewayBaseUrl}/api/payments`,
         {
           reservationId: reservationId,
-          userId: myUserId,
         },
         getAuthHeaders(),
       );
