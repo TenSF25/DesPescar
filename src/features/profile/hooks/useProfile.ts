@@ -13,7 +13,7 @@ export const useProfile = () => {
   const perfil = useMemo(
     () => ({
       ...profile,
-      nombre: user?.firsName ?? profile.nombre,
+      nombre: user?.firstName ?? profile.nombre,
       apellido: user?.lastName ?? profile.apellido,
       email: user?.email ?? profile.email,
     }),

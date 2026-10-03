@@ -8,7 +8,7 @@ export interface Airport {
 
 export interface User {
   id: number;
-  firsName: string;
+  firstName: string;
   lastName: string;
   email: string;
   role: string;
