@@ -130,11 +130,27 @@ const deltaPct = (current: number, previous: number) =>
 
 const passengersOf = (records: DayRecord[]) => sum(records, (r) => r.passengers);
 
+/**
+ * Vuelos operados (completados) en el rango: cada vuelo del catálogo opera en
+ * algunos días del pasado, según una semilla (id + fecha). Los cancelados casi
+ * no operan y hoy o el futuro no cuentan. Así el número crece con el rango.
+ * TODO(backend): contar los vuelos con estado COMPLETED dentro del rango.
+ */
+const completedFlights = (flights: AdminFlight[], from: string, to: string) => {
+  const todayISO = format(new Date(), ISO);
+  const days = eachDayOfInterval({ start: parseISO(from), end: parseISO(to) })
+    .map((day) => format(day, ISO))
+    .filter((iso) => iso < todayISO);
+  return flights.reduce((total, flight) => {
+    const rate = flight.estado === 'Cancelado' ? 0.1 : 0.6;
+    return total + days.filter((iso) => random01(`${flight.id}${iso}op`) < rate).length;
+  }, 0);
+};
+
 const summarize = (records: DayRecord[], flights: AdminFlight[], from: string, to: string) => ({
   ventas: sum(records, (r) => r.sales),
   reservas: sum(records, (r) => r.bookings),
-  completados: flights.filter((f) => f.estado === 'Completado' && f.fecha >= from && f.fecha <= to)
-    .length,
+  completados: completedFlights(flights, from, to),
   pasajeros: passengersOf(records),
 });
 
