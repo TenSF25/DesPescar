@@ -13,6 +13,7 @@ import {
   type TableColumn,
 } from '@/components/admin';
 import { format, parseISO } from 'date-fns';
+import type { ReactNode } from 'react';
 import { useReportsPage } from '../hooks/useReportsPage';
 import type { GeneratedReport, ReportType } from '../admin-reports.types';
 
@@ -24,6 +25,13 @@ const TIPO_ICON: Record<ReportType, { icon: string; className: string }> = {
 
 const formatDay = (iso: string) => format(parseISO(iso), 'dd/MM/yyyy');
 const formatDateTime = (iso: string) => format(new Date(iso), 'dd/MM/yyyy, HH:mm');
+
+const FilterField = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div className="flex flex-col gap-1.5">
+    <span className="text-xs font-semibold tracking-wide text-[#44474E] uppercase">{label}</span>
+    {children}
+  </div>
+);
 
 export const AirlineReportsPage = () => {
   const {
@@ -101,18 +109,23 @@ export const AirlineReportsPage = () => {
       <PageHeader
         title="Reportes"
         description="Visualiza estadísticas y métricas clave de la plataforma."
-        actions={
-          <>
+      />
+
+      <div className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-wrap items-end gap-4">
+          <FilterField label="Período">
             <DateRangeFilter
               value={{ from: filters.from, to: filters.to }}
               onChange={onRangeChange}
               min={dateLimits.min}
               max={dateLimits.max}
             />
+          </FilterField>
+          <FilterField label="Vuelo">
             <Select
               value={filters.flightId}
               onChange={(e) => onFlightChange(e.target.value)}
-              containerClassName="w-52"
+              containerClassName="w-56"
             >
               <option value="todos">Todos los vuelos</option>
               {flightOptions.map((flight) => (
@@ -121,28 +134,32 @@ export const AirlineReportsPage = () => {
                 </option>
               ))}
             </Select>
+          </FilterField>
+        </div>
+
+        <div className="flex flex-wrap items-end gap-3 border-t border-black/10 pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
+          <FilterField label="Tipo de reporte">
             <Select
               value={reportType}
               onChange={(e) => onReportTypeChange(e.target.value as ReportType)}
-              containerClassName="w-40"
-              aria-label="Tipo de reporte"
+              containerClassName="w-44"
             >
-              <option value="Ventas">Reporte de ventas</option>
-              <option value="Vuelos">Reporte de vuelos</option>
-              <option value="Usuarios">Reporte de usuarios</option>
+              <option value="Ventas">Ventas</option>
+              <option value="Vuelos">Vuelos</option>
+              <option value="Usuarios">Usuarios</option>
             </Select>
-            <button
-              type="button"
-              onClick={handleExportReport}
-              disabled={isExporting}
-              className="bg-secondary hover:bg-secondary/90 flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              {isExporting ? 'Exportando...' : 'Exportar reporte'}
-            </button>
-          </>
-        }
-      />
+          </FilterField>
+          <button
+            type="button"
+            onClick={handleExportReport}
+            disabled={isExporting}
+            className="bg-secondary hover:bg-secondary/90 flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            {isExporting ? 'Exportando...' : 'Exportar reporte'}
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
