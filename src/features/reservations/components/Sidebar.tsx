@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
+import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '@/utils/cn';
 
 const links = [
@@ -8,6 +9,14 @@ const links = [
 ];
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
+
+  const cerrarSesion = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <aside className="lg:sticky lg:top-6 lg:h-fit lg:w-66 lg:shrink-0 lg:self-start">
       {/* Desktop: lista vertical */}
@@ -29,6 +38,14 @@ export const Sidebar = () => {
             {label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          className="text-neutral hover:bg-neutral/10 hover:text-secondary mt-2 flex cursor-pointer items-center gap-3 rounded-[10px] border-t border-black/10 px-4 py-2.5 pt-3 text-sm font-semibold transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]!">logout</span>
+          Cerrar sesión
+        </button>
       </nav>
 
       {/* Mobile/tablet: fila de pills scrolleable */}
@@ -50,6 +67,14 @@ export const Sidebar = () => {
             {label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          className="text-neutral hover:text-secondary flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px]!">logout</span>
+          Cerrar sesión
+        </button>
       </nav>
     </aside>
   );

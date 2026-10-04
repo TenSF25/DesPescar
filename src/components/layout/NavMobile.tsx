@@ -1,11 +1,22 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '../ui/Button';
+import { userMenuItems } from './userMenuItems';
 
 interface NavMobile {
   open: boolean;
 }
 
 export const NavMobile = ({ open }: NavMobile) => {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const cerrarSesion = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <>
       {open && (
@@ -21,14 +32,35 @@ export const NavMobile = ({ open }: NavMobile) => {
               OFERTAS
             </li>
           </ul>
-          <Link to={'/login'}>
-            <Button
-              variant="primary"
-              className="flex w-full justify-center rounded-none text-[14px] md:hidden"
-            >
-              INICIAR SESIÓN
-            </Button>
-          </Link>
+          {user ? (
+            <ul className="flex w-full flex-col border-t text-center">
+              {userMenuItems.map(({ to, label }) => (
+                <li key={to} className="hover:bg-secondary border-b hover:text-white">
+                  <Link to={to} className="block p-1">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Button
+                  variant="primary"
+                  className="flex w-full justify-center rounded-none text-[14px] md:hidden"
+                  onClick={cerrarSesion}
+                >
+                  CERRAR SESIÓN
+                </Button>
+              </li>
+            </ul>
+          ) : (
+            <Link to={'/login'}>
+              <Button
+                variant="primary"
+                className="flex w-full justify-center rounded-none text-[14px] md:hidden"
+              >
+                INICIAR SESIÓN
+              </Button>
+            </Link>
+          )}
         </div>
       )}
     </>

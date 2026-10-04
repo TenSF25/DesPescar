@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router';
 import { Button } from '../ui/Button';
 import { useNav } from './hooks/useNav';
 import { NavMobile } from './NavMobile';
+import { UserMenu } from './UserMenu';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export const Nav = () => {
@@ -10,12 +11,6 @@ export const Nav = () => {
   const user = useAuthStore((state) => state.user);
 
   const getButtonConfig = () => {
-    if (user) {
-      return {
-        label: 'MI PERFIL',
-        path: '/perfil',
-      };
-    }
     if (location.pathname === '/register') {
       return {
         label: 'INICIAR SESIÓN',
@@ -53,11 +48,15 @@ export const Nav = () => {
               OFERTAS
             </li>
           </ul>
-          <Link to={path}>
-            <Button variant="secondary" className="hidden w-40 justify-center text-[14px] md:flex">
-              {label}
-            </Button>
-          </Link>
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Link to={path}>
+              <Button variant="secondary" className="hidden w-40 justify-center text-[14px] md:flex">
+                {label}
+              </Button>
+            </Link>
+          )}
           <div className="flex cursor-pointer justify-center md:hidden" onClick={toggleMenu}>
             <span className="material-symbols-outlined">{isOpen ? 'close' : 'menu'}</span>
           </div>
