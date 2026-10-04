@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { useFlightId } from '@/hooks/useAPI';
 import { useFlightStore } from '@/store/useFlightStore';
+import { isTrustedPaymentUrl } from '@/utils/isTrustedPaymentUrl';
 import { useBooking, type PassengerFormInput } from '../hooks/useBooking';
 
 const formatAmount = (amount: number, currency: string) => {
@@ -102,6 +103,10 @@ export const Booking = () => {
       fareDetails,
     );
     if (result.success && result.paymentUrl) {
+      if (!isTrustedPaymentUrl(result.paymentUrl)) {
+        setSubmitError('El enlace de pago recibido no es válido. Intentá de nuevo más tarde.');
+        return;
+      }
       window.location.assign(result.paymentUrl);
       return;
     }

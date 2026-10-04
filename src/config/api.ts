@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/useAuthStore';
+import type { TokenData } from '@/types/Interfaces';
 import axios from 'axios';
 
 export const gatewayBaseUrl = (import.meta.env.VITE_GATEWAY_URL || 'http://localhost:8087').replace(
@@ -85,6 +86,8 @@ api.interceptors.response.use(
 
       try {
         if (!tokens?.refreshToken) {
+          processQueue(error, null);
+          isRefreshing = false;
           logout();
           if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
@@ -96,16 +99,17 @@ api.interceptors.response.use(
           refreshToken: tokens.refreshToken,
         });
 
-        const newToken = refreshResponse.data;
+        // Se combina con los tokens actuales para no perder el refresh token si el backend no rota
+        const newTokens: TokenData = { ...tokens, ...(refreshResponse.data as Partial<TokenData>) };
 
         if (user) {
-          login({ ...tokens, ...newToken }, user);
+          login(newTokens, user);
         }
 
-        processQueue(null, newToken.accessToken);
+        processQueue(null, newTokens.accessToken);
         isRefreshing = false;
 
-        originalRequest.headers['Authorization'] = `Bearer ${newToken.accessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newTokens.accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
@@ -115,6 +119,22 @@ api.interceptors.response.use(
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+// Los errores de axios llevan la config del pedido: sin esto, un console.error(err) imprime el
+// token y, en /auth/, la contraseña o el refresh token del cuerpo. Se registra al final para que
+// corra después del refresh, cuando el error ya no se va a reintentar.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.config) {
+      error.config.headers?.delete('Authorization');
+      if (error.config.url?.includes('/auth/')) {
+        error.config.data = undefined;
       }
     }
     return Promise.reject(error);

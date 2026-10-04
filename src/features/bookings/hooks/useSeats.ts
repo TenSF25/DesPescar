@@ -225,7 +225,6 @@ export const useSeats = () => {
         }
       }
 
-      console.log('🛠️ ID enviado al Backend:', canonicalId);
       if (!canonicalId.includes('-') && canonicalId.length < 10) {
         console.warn(
           '⚠️ ALERTA: Estás enviando un número de asiento corto (ej. 12A) en lugar de un UUID. El backend rechazará esto.',

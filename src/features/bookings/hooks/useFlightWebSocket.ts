@@ -23,7 +23,8 @@ export const useFlightWebSocket = (flightId: string, onSeatUpdate: (update: unkn
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },
-      debug: (str) => console.log(str),
+      // El debug imprime cada frame con sus cabeceras, incluido el token del CONNECT
+      debug: import.meta.env.DEV ? (str) => console.log(str) : () => {},
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -69,7 +70,6 @@ export const useFlightWebSocket = (flightId: string, onSeatUpdate: (update: unkn
 
   const deselectSeat = (seatUuid: string) => {
     if (clientRef.current?.connected) {
-      console.log('🚀 Enviando deselección al backend:', { seatUuid, userId });
       clientRef.current.publish({
         destination: `/app/deselect-seat/${flightId}`,
         body: JSON.stringify({ seatUuid, userId }),
