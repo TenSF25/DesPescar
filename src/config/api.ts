@@ -124,3 +124,19 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// Los errores de axios llevan la config del pedido: sin esto, un console.error(err) imprime el
+// token y, en /auth/, la contraseña o el refresh token del cuerpo. Se registra al final para que
+// corra después del refresh, cuando el error ya no se va a reintentar.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.config) {
+      error.config.headers?.delete('Authorization');
+      if (error.config.url?.includes('/auth/')) {
+        error.config.data = undefined;
+      }
+    }
+    return Promise.reject(error);
+  },
+);
