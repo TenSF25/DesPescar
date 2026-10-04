@@ -99,7 +99,7 @@ api.interceptors.response.use(
         const newToken = refreshResponse.data;
 
         if (user) {
-          login(newToken.accessToken, user);
+          login({ ...tokens, ...newToken }, user);
         }
 
         processQueue(null, newToken.accessToken);

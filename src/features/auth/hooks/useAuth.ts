@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import type { errorAuth, InterfaceAuth } from '../auth.types';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api, gatewayBaseUrl } from '@/config/api';
 import axios from 'axios';
-import { getHomeForRole } from '@/features/admin/roles';
+import { getPostLoginPath } from '../postLoginPath';
 
 export const useAuth = () => {
   const [errorAuth, setErrAuth] = useState<errorAuth>();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const executeRegister = async (datos: InterfaceAuth) => {
     setErrAuth(undefined);
@@ -45,7 +46,7 @@ export const useAuth = () => {
       const userData = await currentUser();
       const { login } = useAuthStore.getState();
       login(tokens, userData);
-      navigate(getHomeForRole(userData.role));
+      navigate(getPostLoginPath(location.state, userData.role), { replace: true });
       return tokens;
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
