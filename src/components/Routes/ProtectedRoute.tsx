@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/useAuthStore';
 import { getHomeForRole } from '@/features/admin/roles';
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 
 interface ProtectedRouteProps {
   /** Roles que pueden entrar. Si se omite, alcanza con estar logueado. */
@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ allow }: ProtectedRouteProps) => {
   const { user } = useAuthStore();
+  const location = useLocation();
 
   if (!user) {
     return <Navigate to={'/login'} state={{ from: location }} replace />;
