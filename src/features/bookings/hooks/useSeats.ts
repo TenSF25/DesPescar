@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import type { FlightSeatMapResponse, SeatsWebSockets } from '../bookings.types';
-import { api } from '@/config/api';
+import { api, gatewayBaseUrl } from '@/config/api';
 import { useFlightWebSocket } from './useFlightWebSocket';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useFlightStore } from '@/store/useFlightStore';
@@ -59,12 +59,12 @@ export const useSeats = () => {
     const seatsFetch = async () => {
       setIsLoading(true);
       try {
-        const resSeats = await api.get(`http://localhost:8085/api/flights/${departureId}/seats`);
+        const resSeats = await api.get(`${gatewayBaseUrl}/api/flights/${departureId}/seats`);
 
         if (!resSeats || !resSeats.data) return;
 
         const resSeatsMap = await api.get(
-          `http://localhost:8085/api/flights/${departureId}/seat-map?selectionLimit=${passengersLimit}`,
+          `${gatewayBaseUrl}/api/flights/${departureId}/seat-map?selectionLimit=${passengersLimit}`,
         );
 
         if (!resSeatsMap || !resSeatsMap.data) return;

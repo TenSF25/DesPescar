@@ -77,7 +77,7 @@ export const useBooking = () => {
       };
 
       const initResponse = await api.post<BookingInitResponse>(
-        'http://localhost:8085/api/bookings/init',
+        `${gatewayBaseUrl}/api/bookings/init`,
         initPayload,
         getAuthHeaders(),
       );
@@ -131,7 +131,7 @@ export const useBooking = () => {
       // 1. Guardar pasajeros inyectando el token
       if (useFlightStore.getState().passengersAssignedBookingId !== reservationId) {
         await api.put(
-          `http://localhost:8085/api/bookings/${reservationId}/passengers`,
+          `${gatewayBaseUrl}/api/bookings/${reservationId}/passengers`,
           {
             solicitanteId: myUserId,
             pasajeros: pasajerosPayload,

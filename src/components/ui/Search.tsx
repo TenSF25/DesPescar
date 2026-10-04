@@ -26,6 +26,8 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
     origenInput,
     destinoSelect,
     destinoInput,
+    origenSeleccionado,
+    destinoSeleccionado,
     setOrigenSelect,
     setDestinoSelect,
     origen,
@@ -74,6 +76,16 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
       setDestinoError(null);
     }
 
+    if (!origenSeleccionado) {
+      setOrigenError('Seleccione un aeropuerto de origen.');
+      errores = true;
+    }
+
+    if (!destinoSeleccionado) {
+      setDestinoError('Seleccione un aeropuerto de destino.');
+      errores = true;
+    }
+
     if (errores) return;
 
     const formatedDateDeparture = formatearFechaAString(dateRange!.from!);
@@ -82,7 +94,7 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
     clearSearch();
 
     navigate(
-      `/vuelos?origin=${origen[0].code}&destination=${destino[0].code}&passengers=${pasajeros}&departureDate=${formatedDateDeparture}&returnDate=${formatedDateReturn}`,
+      `/vuelos?origin=${origenSeleccionado.code}&destination=${destinoSeleccionado.code}&passengers=${pasajeros}&departureDate=${formatedDateDeparture}&returnDate=${formatedDateReturn}`,
     );
     if (moodle && onClose) {
       onClose();

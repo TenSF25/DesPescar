@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Airport, RutaBuscada } from '../types/Interfaces';
 import type { MetadataSearch, Flight, FlightById } from '@/features/flights/flights.types';
-import { api } from '@/config/api';
+import { api, gatewayBaseUrl } from '@/config/api';
 
 export const useAeropuerto = () => {
   const [aeropuertos, setAero] = useState<Airport[]>([]);
@@ -9,7 +9,7 @@ export const useAeropuerto = () => {
   useEffect(() => {
     const fetchAeropuertos = async () => {
       try {
-        const res = await api.get('http://localhost:8081/api/airports');
+        const res = await api.get(`${gatewayBaseUrl}/api/airports`);
         setAero(res.data);
       } catch {
         console.error('ERROR');
@@ -54,7 +54,7 @@ export const useVuelos = (filtros?: RutaBuscada) => {
           passengers: String(filtros?.passengers ?? 1),
         });
 
-        const res = await api.get(`http://localhost:8081/api/flights/search?${params.toString()}`);
+        const res = await api.get(`${gatewayBaseUrl}/api/flights/search?${params.toString()}`);
         if (!activo) return;
         setDepartureFlights(res.data.departureFlights || []);
         setReturnFlights(res.data.returnFlights || []);
@@ -100,7 +100,7 @@ export const useFlightId = (id: string) => {
       setError('');
 
       try {
-        const res = await api.get(`http://localhost:8081/api/flights/${id}`);
+        const res = await api.get(`${gatewayBaseUrl}/api/flights/${id}`);
         if (activo) setFlightById(res.data);
       } catch {
         if (activo) setError('Ocurrio un error al buscar el vuelo por ID.');
@@ -132,7 +132,7 @@ export const useSearchAirportByCode = (code: string) => {
     const fetchAirport = async () => {
       try {
         setIsLoading(true);
-        const res = await api.get(`http://localhost:8081/api/airports/code/${code}`);
+        const res = await api.get(`${gatewayBaseUrl}/api/airports/code/${code}`);
         setAirport(res.data);
       } catch {
         console.warn('ERROR');
