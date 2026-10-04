@@ -1,7 +1,7 @@
 import { AdminInput, Badge, PageHeader, Select, Switch } from '@/components/admin';
 import { Button } from '@/components/ui/Button';
 import { HOTEL_TYPES, type HotelInfo, type HotelType } from '../../shared/hotel.types';
-import { formatUsd } from '../../shared/hotel.utils';
+import { formatUsd, thumbnailUrl } from '../../shared/hotel.utils';
 import { useHotelManagement } from '../hooks/useHotelManagement';
 
 const Card = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -114,9 +114,13 @@ export const HotelManagementPage = () => {
                 className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:gap-4"
               >
                 <img
-                  src={room.imageUrl}
+                  src={thumbnailUrl(room.imageUrl, 80, 56)}
                   alt={room.nombre}
-                  className="h-14 w-20 shrink-0 rounded-lg object-cover"
+                  width={80}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-14 w-20 shrink-0 rounded-lg bg-black/5 object-cover"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-secondary font-semibold">{room.nombre}</p>
