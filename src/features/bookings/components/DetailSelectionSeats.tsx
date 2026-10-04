@@ -34,7 +34,7 @@ export const DetailSelectionSeats = () => {
   };
 
   return (
-    <div className="fixed top-60 left-20 z-999 flex flex-col gap-8">
+    <div className="fixed top-60 left-20 z-99 flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <h2 className="text-secondary text-2xl font-bold">Tipos de asientos</h2>
         <div className="flex max-w-150 flex-wrap gap-3">

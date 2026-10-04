@@ -39,10 +39,13 @@ export const useSeats = () => {
 
   const seatsMapRef = useRef<FlightSeatMapResponse | undefined>(undefined);
 
-  const updateSelectedSeats = useCallback((newSeats: string[]) => {
-    selectedSeatsRef.current = newSeats;
-    setStoredSeats(newSeats);
-  }, [setStoredSeats]);
+  const updateSelectedSeats = useCallback(
+    (newSeats: string[]) => {
+      selectedSeatsRef.current = newSeats;
+      setStoredSeats(newSeats);
+    },
+    [setStoredSeats],
+  );
 
   useEffect(() => {
     selectedSeatsRef.current = selectedSeats;
@@ -59,12 +62,12 @@ export const useSeats = () => {
     const seatsFetch = async () => {
       setIsLoading(true);
       try {
-        const resSeats = await api.get(`http://localhost:8085/api/flights/${departureId}/seats`);
+        const resSeats = await api.get(`/api/bookings/flights/${departureId}/seats`);
 
         if (!resSeats || !resSeats.data) return;
 
         const resSeatsMap = await api.get(
-          `http://localhost:8085/api/flights/${departureId}/seat-map?selectionLimit=${passengersLimit}`,
+          `/api/bookings/flights/${departureId}/seat-map?selectionLimit=${passengersLimit}`,
         );
 
         if (!resSeatsMap || !resSeatsMap.data) return;

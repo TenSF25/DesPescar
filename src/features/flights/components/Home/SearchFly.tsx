@@ -10,7 +10,7 @@ export const SearchFly = () => {
             Viajar bien empieza con una buena elección.
           </h1>
           <h3 className="text-sm font-semibold md:text-2xl">
-            "No colleciones cosas, coleccioná viajes y momentos inolvidables"
+            "No colecciones cosas, coleccioná viajes y momentos inolvidables"
           </h3>
         </div>
         <Search moodle={false}></Search>
