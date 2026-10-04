@@ -6,6 +6,8 @@ export const gatewayBaseUrl = (import.meta.env.VITE_GATEWAY_URL || 'http://local
   '',
 );
 
+export const wsBrokerUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8085/ws-despescar';
+
 export const api = axios.create({
   baseURL: gatewayBaseUrl,
   headers: {

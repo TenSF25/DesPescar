@@ -1,3 +1,4 @@
+import { wsBrokerUrl } from '@/config/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Client } from '@stomp/stompjs';
 import { useEffect, useRef } from 'react';
@@ -18,7 +19,7 @@ export const useFlightWebSocket = (flightId: string, onSeatUpdate: (update: unkn
     if (!token || !flightId) return;
 
     const client = new Client({
-      brokerURL: 'ws://localhost:8085/ws-despescar',
+      brokerURL: wsBrokerUrl,
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },
