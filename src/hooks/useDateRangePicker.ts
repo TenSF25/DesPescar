@@ -28,6 +28,14 @@ export const useDateRangePicker = ({ range, onRangeChange }: DateRangePickerProp
   }, [onRangeChange, tempRange]);
 
   useEffect(() => {
+    if (!isOpen) return;
+    document.body.dataset.calendarioAbierto = 'true';
+    return () => {
+      delete document.body.dataset.calendarioAbierto;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         handleApply();

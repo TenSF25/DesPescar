@@ -53,3 +53,9 @@ body {
     animation: none;
   }
 }
+
+/* La burbuja ya tiene transition-all, por eso el fundido es suave. */
+body[data-calendario-abierto] .koi-fab {
+  opacity: 0;
+  pointer-events: none;
+}

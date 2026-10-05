@@ -86,7 +86,7 @@ export default function KoiChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         title={isOpen ? 'Cerrar ventana' : '¡Haz blup para hablar con KOI!'}
-        className={`group fixed right-6 bottom-6 z-50 flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none ${
+        className={`koi-fab group fixed right-6 bottom-6 z-50 flex h-24 w-24 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none ${
           isOpen
             ? 'right-10! h-16! w-16! bg-red-500 shadow-2xl hover:bg-red-600'
             : 'fish-bowl border-2 border-white/40 bg-linear-to-br from-blue-100 via-blue-200 to-blue-400 backdrop-blur-sm'
