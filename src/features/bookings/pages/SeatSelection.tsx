@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/Button';
 import { useBooking } from '../hooks/useBooking';
 import { useNavigate } from 'react-router';
 import { useFlightStore } from '@/store/useFlightStore';
+import { useBarraInferior } from '@/hooks/useBarraInferior';
 import { useSeats } from '../hooks/useSeats';
 
 export const SeatSelection = () => {
+  useBarraInferior();
   const { initBooking, isLoading, error } = useBooking();
   const { seatsMap, selectedSeats, isLoading: seatsLoading, error: seatsError } = useSeats();
   const passengers = useFlightStore((state) => state.passengers);

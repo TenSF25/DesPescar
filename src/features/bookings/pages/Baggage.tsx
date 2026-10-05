@@ -2,10 +2,12 @@ import { SectionContainer } from '@/components/ui/SectionContainer';
 import { BaggageCard } from '../components/BaggageCard';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/utils/formatDate';
+import { useBarraInferior } from '@/hooks/useBarraInferior';
 import { useBaggage } from '../hooks/useBaggage';
 import type { Fare } from '@/features/flights/flights.types';
 
 export const Baggage = () => {
+  useBarraInferior();
   const {
     flight,
     flightDepartureId,

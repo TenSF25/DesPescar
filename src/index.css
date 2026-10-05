@@ -63,3 +63,12 @@ body[data-calendario-abierto] .koi-fab {
     opacity 0.3s ease,
     visibility 0s 0.3s;
 }
+
+/* Paginas con barra fija inferior: la burbuja y la ventana de KOI quedan por encima. */
+body[data-barra-inferior] .koi-fab {
+  bottom: 6.5rem;
+}
+body[data-barra-inferior] .koi-fab ~ div {
+  bottom: 12rem;
+  max-height: calc(100dvh - 14rem);
+}

@@ -72,7 +72,7 @@ export const useDateCarousel = (selectedDate: string) => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (containerDates.current) {
-      const scrollAmount = 128 * 7;
+      const scrollAmount = containerDates.current.clientWidth || 128 * 7;
       containerDates.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
