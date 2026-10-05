@@ -30,6 +30,7 @@ import { HotelDashboardPage } from '@/features/admin/hotel/dashboard/pages/Hotel
 import { HotelManagementPage } from '@/features/admin/hotel/management/pages/HotelManagementPage';
 import { HotelReportsPage } from '@/features/admin/hotel/reports/pages/HotelReportsPage';
 import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages/HotelReservationsPage';
+import { HotelDetailPage } from '@/features/hotels/pages/HotelDetailPage';
 import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
 import { createBrowserRouter } from 'react-router';
 
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
           {
             path: '/hoteles',
             element: <HotelResultsPage />,
+          },
+          {
+            path: '/hoteles/:id',
+            element: <HotelDetailPage />,
           },
         ],
       },
