@@ -36,7 +36,9 @@ export const AvisoPartesPendientes = ({ omitirReserva }: { omitirReserva?: numbe
     return () => {
       activo = false;
     };
-  }, [userId]);
+    // omitirReserva cambia cuando el carrito pasa a otro estado (por ejemplo, al cancelar un grupo):
+    // se vuelve a consultar para no mostrar un grupo que ya se cerró.
+  }, [userId, omitirReserva]);
 
   // Lo leído para otra sesión no se muestra.
   const grupos = leido && leido.userId === userId ? leido.grupos : [];
