@@ -1,10 +1,17 @@
 import { api } from '@/config/api';
 import type { Pago } from '../payments.types';
+import { useFlightStore } from '@/store/useFlightStore';
 
 const BASE = '/api/payments';
 
 /** Crea (o reutiliza, D19) el pago del carrito. El monto lo pone el servidor. */
-export const crearPago = async (reservationId: number): Promise<Pago> => {
+export const crearPago = async (): Promise<Pago> => {
+  const reservationId = useFlightStore.getState().reservationId;
+
+  if (!reservationId) {
+    throw new Error('No se encontró un ID de reserva activo en la sesión.');
+  }
+
   const res = await api.post<Pago>(BASE, { reservationId });
   return res.data;
 };

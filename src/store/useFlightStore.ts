@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface FlightStoreDate {
+  reservationId: number | null;
   selectedDepartureFlight: string | null;
   selectedReturnFlight: string | null;
   selectedDepartureFare: string | null;
@@ -9,6 +10,7 @@ interface FlightStoreDate {
   passengers: number | null;
   /** UUIDs de los asientos de ida bloqueados por el usuario, en orden de pasajero. */
   selectedSeats: string[];
+  setReservationId: (id: number | null) => void;
   setSelectedDepartureFlight: (flightId: string | null) => void;
   setSelectedReturnFlight: (flightId: string | null) => void;
   setSelectedDepartureFare: (fare: string | null) => void;
@@ -23,12 +25,14 @@ interface FlightStoreDate {
 export const useFlightStore = create<FlightStoreDate>()(
   persist(
     (set) => ({
+      reservationId: null,
       selectedDepartureFlight: null,
       selectedReturnFlight: null,
       selectedDepartureFare: null,
       selectedReturnFare: null,
       passengers: null,
       selectedSeats: [],
+      setReservationId: (id: number | null) => set({ reservationId: id }),
       setSelectedDepartureFlight: (flight) =>
         set({
           selectedDepartureFlight: flight,

@@ -132,7 +132,7 @@ export const CarritoPage = () => {
     setErrorPago(null);
     let saliendo = false;
     try {
-      const pago = await crearPago(carrito.idCarrito);
+      const pago = await crearPago();
       const destino = destinoPago(pago.checkoutUrl);
       if (destino.tipo === 'interno') {
         navigate(destino.ruta);

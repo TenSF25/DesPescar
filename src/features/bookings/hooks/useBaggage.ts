@@ -7,6 +7,7 @@ import { useFlightStore } from '@/store/useFlightStore';
 export const useBaggage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { setSelectedSeats } = useFlightStore();
 
   const departureId = searchParams.get('departureId') || searchParams.get('id') || '';
   const returnId = searchParams.get('returnId') || '';
@@ -68,6 +69,7 @@ export const useBaggage = () => {
           selectedDepartureFare: selectedOutboundFareId,
           passengers: Number(passengers),
         });
+        setSelectedSeats([]);
         navigate(`/booking/seats`);
       }
     } else {
@@ -78,6 +80,7 @@ export const useBaggage = () => {
         selectedReturnFare: selectedReturnFareId,
         passengers: Number(passengers),
       });
+      setSelectedSeats([]);
       navigate(`/booking/seats`);
     }
   };

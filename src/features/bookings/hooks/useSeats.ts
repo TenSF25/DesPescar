@@ -23,6 +23,7 @@ export const useSeats = () => {
   const passengers = useFlightStore((state) => state.passengers);
   const selectedSeats = useFlightStore((state) => state.selectedSeats);
   const setStoredSeats = useFlightStore((state) => state.setSelectedSeats);
+  const { setSelectedSeats } = useFlightStore();
 
   const passengersLimit = useMemo(() => {
     if (Array.isArray(passengers)) return Math.max(1, passengers.length);
@@ -58,6 +59,10 @@ export const useSeats = () => {
 
   useEffect(() => {
     if (!departureId || !myUserId) return;
+
+    if (hasFetchedInitialRef.current) return;
+
+    setSelectedSeats([]);
 
     const seatsFetch = async () => {
       setIsLoading(true);
