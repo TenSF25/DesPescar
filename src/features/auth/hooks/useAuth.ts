@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { api, gatewayBaseUrl } from '@/config/api';
 import axios from 'axios';
 import { getPostLoginPath } from '../postLoginPath';
+import { ingresarConGoogle, type LoginTokens } from '../google';
 
 const SIN_CONEXION = 'No pudimos conectar con el servidor. Probá de nuevo en unos segundos.';
 
@@ -48,18 +49,33 @@ export const useAuth = () => {
     }
   };
 
+  /** Con los tokens ya emitidos: guarda la sesión, trae el usuario y lo lleva a donde iba. */
+  const terminarIngreso = async (tokens: LoginTokens) => {
+    useAuthStore.setState({ tokens });
+    const userData = await currentUser();
+    const { login } = useAuthStore.getState();
+    login(tokens, userData);
+    navigate(getPostLoginPath(location.state, userData.role), { replace: true });
+    return tokens;
+  };
+
   const executeLogin = async (datos: InterfaceAuth) => {
     setErrAuth(undefined);
 
     try {
       const res = await api.post(`${gatewayBaseUrl}/api/auth/login`, datos);
-      const tokens = await res.data;
-      useAuthStore.setState({ tokens });
-      const userData = await currentUser();
-      const { login } = useAuthStore.getState();
-      login(tokens, userData);
-      navigate(getPostLoginPath(location.state, userData.role), { replace: true });
-      return tokens;
+      return await terminarIngreso(res.data as LoginTokens);
+    } catch (err: unknown) {
+      setErrAuth(errorParaMostrar(err));
+    }
+  };
+
+  /** Ingreso con el ID token que devuelve el botón de Google. */
+  const executeGoogleLogin = async (credential: string) => {
+    setErrAuth(undefined);
+
+    try {
+      return await terminarIngreso(await ingresarConGoogle(credential));
     } catch (err: unknown) {
       setErrAuth(errorParaMostrar(err));
     }
@@ -84,6 +100,7 @@ export const useAuth = () => {
   return {
     executeRegister,
     executeLogin,
+    executeGoogleLogin,
     currentUser,
     errorAuth,
     setErrAuth,

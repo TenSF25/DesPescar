@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Link, useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
+import { GoogleSignIn } from './GoogleSignIn';
 import type { errorAuth, InterfaceAuth } from '../auth.types';
 
 export const RegisterForm = () => {
-  const { executeRegister, errorAuth, setErrAuth, clearFieldError } = useAuth();
+  const { executeRegister, executeGoogleLogin, errorAuth, setErrAuth, clearFieldError } = useAuth();
   const location = useLocation();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -106,6 +107,10 @@ export const RegisterForm = () => {
         <Button type="submit" className="h-12 border-2">
           Registrarse
         </Button>
+      </div>
+      <div className="flex w-full flex-col items-center gap-4">
+        <p className="text-sm font-semibold">O</p>
+        <GoogleSignIn onCredential={(credential) => void executeGoogleLogin(credential)} />
       </div>
       <div className="flex flex-col items-center gap-4 text-[#df6a17]">
         <Link to="/login" state={location.state}>

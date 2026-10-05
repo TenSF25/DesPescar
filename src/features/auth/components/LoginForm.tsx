@@ -1,23 +1,18 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
+import { GoogleSignIn } from './GoogleSignIn';
 import type { errorAuth, InterfaceAuth } from '../auth.types';
 
-const AVISO_SOCIAL =
-  'Todavía no se puede ingresar con Google ni con Apple: usá tu correo y contraseña.';
-
 export const LoginForm = () => {
-  const { executeLogin, errorAuth, clearFieldError } = useAuth();
+  const { executeLogin, executeGoogleLogin, errorAuth, clearFieldError } = useAuth();
   const location = useLocation();
-  const [avisoSocial, setAvisoSocial] = useState(false);
   // El registro manda acá el correo recién creado para mostrar el aviso y dejarlo cargado
   const cuentaCreada = (location.state as { cuentaCreada?: string } | null)?.cuentaCreada;
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setAvisoSocial(false);
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData) as unknown as InterfaceAuth;
@@ -87,28 +82,7 @@ export const LoginForm = () => {
       </div>
       <div className="flex w-full flex-col items-center gap-4">
         <p className="text-sm font-semibold">O</p>
-        {/* El back no tiene ingreso social: estos botones solo avisan y no envían el formulario */}
-        <Button
-          type="button"
-          variant="secondary"
-          className="h-12 border-2"
-          onClick={() => setAvisoSocial(true)}
-        >
-          <i className="fa-brands fa-google"></i> Continuar con Google
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          className="h-12 border-2"
-          onClick={() => setAvisoSocial(true)}
-        >
-          <i className="fa-brands fa-apple"></i> Continuar con Apple
-        </Button>
-        {avisoSocial && (
-          <p className="text-center text-[14px] text-gray-600" role="status">
-            {AVISO_SOCIAL}
-          </p>
-        )}
+        <GoogleSignIn onCredential={(credential) => void executeGoogleLogin(credential)} />
       </div>
       <div className="flex flex-col items-center gap-4 text-[#df6a17]">
         <h3 className="cursor-pointer font-medium">¿Olvidaste tu contraseña?</h3>
