@@ -11,7 +11,7 @@ import { formatFechaCorta, formatHuespedes, formatNoches } from '../hotelFormat'
 import { SERVICIO_INFO } from '../servicios';
 
 export const HotelDetailPage = () => {
-  const { hotel, params, setSearchParams, isLoading, error } = useHotelDetail();
+  const { hotel, params, setSearchParams, isLoading, error, avisoFechas } = useHotelDetail();
 
   if (isLoading) {
     return (
@@ -85,7 +85,14 @@ export const HotelDetailPage = () => {
                 {formatNoches(hotel.noches!)} · {formatHuespedes(params.huespedes)}
               </p>
             ) : (
-              <ElegirFechas params={params} onBuscar={(q) => setSearchParams(q)} />
+              <>
+                {avisoFechas && (
+                  <p role="alert" className="text-alert text-sm font-semibold">
+                    {avisoFechas}
+                  </p>
+                )}
+                <ElegirFechas params={params} onBuscar={(q) => setSearchParams(q)} />
+              </>
             )}
             {hotel.habitaciones.map((h) => (
               <HabitacionCard key={h.id} habitacion={h} noches={hotel.noches} />

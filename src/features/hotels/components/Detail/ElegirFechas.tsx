@@ -2,7 +2,12 @@ import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
 import type { HotelSearchParams } from '../../hotels.types';
-import { MAX_HUESPEDES, buildHotelSearchQuery, toIsoDate } from '../../hotelSearchParams';
+import {
+  MAX_HUESPEDES,
+  buildHotelSearchQuery,
+  toIsoDate,
+  validarRangoEstadia,
+} from '../../hotelSearchParams';
 
 interface Props {
   params: HotelSearchParams;
@@ -13,7 +18,8 @@ interface Props {
 export const ElegirFechas = ({ params, onBuscar }: Props) => {
   const [range, setRange] = useState<DateRange | undefined>();
   const [huespedes, setHuespedes] = useState(params.huespedes);
-  const listo = Boolean(range?.from && range?.to);
+  const errorRango = range?.from && range.to ? validarRangoEstadia(range.from, range.to) : null;
+  const listo = Boolean(range?.from && range?.to) && !errorRango;
 
   return (
     <div className="bg-secondary flex flex-col gap-4 rounded-2xl p-5 text-white">
@@ -57,6 +63,7 @@ export const ElegirFechas = ({ params, onBuscar }: Props) => {
           Ver disponibilidad
         </button>
       </div>
+      {errorRango && <p className="text-xs font-semibold text-red-300">{errorRango}</p>}
     </div>
   );
 };

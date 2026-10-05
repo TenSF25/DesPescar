@@ -12,6 +12,7 @@ import {
   buildHotelsUrl,
   fromIsoDate,
   toIsoDate,
+  validarRangoEstadia,
 } from '../hotelSearchParams';
 
 interface HotelSearchFormProps {
@@ -50,8 +51,13 @@ export const HotelSearchForm = ({ initial, modal = false, onClose }: HotelSearch
     const sinDestino = destino.trim() === '';
     const sinFechas = !range?.from || !range?.to;
     setDestinoError(sinDestino ? 'Elegí un destino' : null);
-    setFechaError(sinFechas ? 'Elegí check-in y check-out' : null);
-    if (sinDestino || sinFechas || !range?.from || !range?.to) return;
+    if (sinDestino || sinFechas || !range?.from || !range?.to) {
+      setFechaError(sinFechas ? 'Elegí check-in y check-out' : null);
+      return;
+    }
+    const errorRango = validarRangoEstadia(range.from, range.to);
+    setFechaError(errorRango);
+    if (errorRango) return;
 
     navigate(
       buildHotelsUrl({

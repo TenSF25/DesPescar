@@ -12,14 +12,25 @@ export const useHotelDetail = () => {
   const [hotel, setHotel] = useState<HotelDetalle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [avisoFechas, setAvisoFechas] = useState<string | null>(null);
 
   useEffect(() => {
     let activo = true;
     const cargar = async () => {
       setIsLoading(true);
       setError(null);
+      setAvisoFechas(null);
       try {
-        const h = await obtenerHotel(id, params);
+        let h: HotelDetalle;
+        try {
+          h = await obtenerHotel(id, params);
+        } catch (err: unknown) {
+          const conFechas = params.checkIn !== null && params.checkOut !== null;
+          if (!conFechas || !axios.isAxiosError(err) || err.response?.status !== 400) throw err;
+          const aviso = (err.response.data as { error?: string })?.error;
+          h = await obtenerHotel(id, { ...params, checkIn: null, checkOut: null });
+          if (activo) setAvisoFechas(aviso ?? 'Las fechas elegidas no son válidas. Elegí otras.');
+        }
         if (activo) setHotel(h);
       } catch (err: unknown) {
         if (!activo) return;
@@ -41,5 +52,5 @@ export const useHotelDetail = () => {
     };
   }, [id, params]);
 
-  return { hotel, params, setSearchParams, isLoading, error };
+  return { hotel, params, setSearchParams, isLoading, error, avisoFechas };
 };

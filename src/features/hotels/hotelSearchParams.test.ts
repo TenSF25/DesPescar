@@ -6,6 +6,7 @@ import {
   fromIsoDate,
   parseHotelSearchParams,
   toIsoDate,
+  validarRangoEstadia,
 } from './hotelSearchParams';
 
 describe('fechas ISO locales', () => {
@@ -68,5 +69,20 @@ describe('URLs', () => {
     expect(buildHotelDetailUrl('abc', params)).toBe(
       '/hoteles/abc?destino=San+Carlos&checkIn=2026-11-10&checkOut=2026-11-12&huespedes=2',
     );
+  });
+});
+
+describe('validarRangoEstadia', () => {
+  const d = (dia: number) => new Date(2026, 10, dia);
+  it('rechaza el mismo día y el check-out anterior', () => {
+    expect(validarRangoEstadia(d(10), d(10))).toMatch(/al menos un día/);
+    expect(validarRangoEstadia(d(10), d(9))).toMatch(/al menos un día/);
+  });
+  it('acepta de 1 a 30 noches', () => {
+    expect(validarRangoEstadia(d(10), d(11))).toBeNull();
+    expect(validarRangoEstadia(d(1), d(1 + 30))).toBeNull();
+  });
+  it('rechaza más de 30 noches', () => {
+    expect(validarRangoEstadia(d(1), d(1 + 31))).toBe('La estadía puede ser de hasta 30 noches.');
   });
 });
