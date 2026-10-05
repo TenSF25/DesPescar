@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { KoiOpcion } from './koi.types';
-import { botonesDeOpcion, estadoDeAsientos, mensajeErrorCarrito, planDeCarrito } from './koiAcciones';
+import {
+  botonesDeOpcion,
+  estadoDeAsientos,
+  mensajeErrorCarrito,
+  planDeCarrito,
+} from './koiAcciones';
 
 const vuelo = {
   departureFlightId: 'f-ida',
@@ -128,7 +133,6 @@ describe('estadoDeAsientos', () => {
       ...vueloEsperado,
       bookingId: null,
       selectedSeats: [],
-      passengersAssignedBookingId: null,
     });
   });
 });

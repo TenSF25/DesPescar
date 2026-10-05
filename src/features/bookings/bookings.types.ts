@@ -61,18 +61,3 @@ export interface FlightSeatMapResponse {
   fareClasses: Record<string, FareClassDetail>;
   layout: LayoutElement[];
 }
-
-export interface BookingInitResponse {
-  bookingId: number;
-  status: string;
-}
-
-export interface PaymentCreateResponse {
-  id: string;
-  reservationId: number;
-  userId: number;
-  amount: number;
-  currency: string;
-  status: string;
-  checkoutUrl: string | null;
-}

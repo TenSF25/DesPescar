@@ -12,7 +12,6 @@ import { SettingsPage } from '@/features/settings/pages/SettingsPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { Baggage } from '@/features/bookings/pages/Baggage';
-import { Booking } from '@/features/bookings/pages/Booking';
 import { SeatSelection } from '@/features/bookings/pages/SeatSelection';
 import { HomePage } from '@/features/flights/pages/HomePage';
 import { ResultsPage } from '@/features/flights/pages/ResultsPage';
@@ -32,7 +31,8 @@ import { HotelReportsPage } from '@/features/admin/hotel/reports/pages/HotelRepo
 import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages/HotelReservationsPage';
 import { HotelDetailPage } from '@/features/hotels/pages/HotelDetailPage';
 import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
-import { createBrowserRouter } from 'react-router';
+import { CarritoPage } from '@/features/cart/pages/CarritoPage';
+import { createBrowserRouter, Navigate } from 'react-router';
 
 export const router = createBrowserRouter([
   {
@@ -87,11 +87,20 @@ export const router = createBrowserRouter([
           },
           {
             path: 'checkout',
-            element: <Booking />,
+            element: <Navigate to="/carrito" replace />,
           },
           {
             path: 'checkout/travelers-data',
             element: <h1>HOLA</h1>,
+          },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: '/carrito',
+            element: <CarritoPage />,
           },
         ],
       },

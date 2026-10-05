@@ -85,7 +85,6 @@ export const estadoDeAsientos = (vuelo: VueloParaAsientos) => ({
   ...vuelo,
   bookingId: null,
   selectedSeats: [] as string[],
-  passengersAssignedBookingId: null,
 });
 
 /** Texto para el chat cuando el carrito rechaza el pedido (códigos de E2, contrato C4). */
