@@ -35,6 +35,7 @@ import { CarritoPage } from '@/features/cart/pages/CarritoPage';
 import { GrupoInvitacionPage } from '@/features/grupo/pages/GrupoInvitacionPage';
 import { PagoResultadoPage } from '@/features/payments/pages/PagoResultadoPage';
 import { PagoSimuladoPage } from '@/features/payments/pages/PagoSimuladoPage';
+import { PagoMercadoPagoPage } from '@/features/payments/pages/PagoMercadoPagoPage';
 import { createBrowserRouter, Navigate } from 'react-router';
 
 export const router = createBrowserRouter([
@@ -107,6 +108,10 @@ export const router = createBrowserRouter([
           {
             path: '/pago/simulado',
             element: <PagoSimuladoPage />,
+          },
+          {
+            path: '/pago/mercadopago',
+            element: <PagoMercadoPagoPage />,
           },
           {
             path: '/pago/resultado',
