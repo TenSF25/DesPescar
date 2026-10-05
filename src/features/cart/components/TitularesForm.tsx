@@ -1,10 +1,12 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { cn } from '@/utils/cn';
 import type { Carrito, EstadiaCarrito, TitularInput } from '../cart.types';
 import { armarTitulares, estadiasActivas, validarTitular } from '../carrito';
+import { useFocoFormulario } from '../hooks/useFocoFormulario';
+import { useCarritoUi } from './carritoUi';
 import { BOTON_BORDE, BOTON_LLENO, CARD, FOCO } from './estilos';
-import { DatosCargados, inputClass } from './PasajerosForm';
+import { Campo, DatosCargados } from './PasajerosForm';
 
 type Errores = Partial<Record<keyof TitularInput, string>>;
 
@@ -31,22 +33,45 @@ export const TitularesForm = ({ carrito }: { carrito: Carrito }) => {
   const estadias = estadiasActivas(carrito);
   const faltan = estadias.some((e) => !e.titularNombre);
   const cargarTitulares = useCarritoStore((s) => s.cargarTitulares);
-  const recargar = useCarritoStore((s) => s.recargar);
+  const { anunciar, marcarEdicion } = useCarritoUi();
+  const { formRef, botonRef, seccionRef, enfocarDespues, enfocarPrimerError } = useFocoFormulario();
   const [editando, setEditando] = useState(false);
   const [form, setForm] = useState<Record<number, TitularInput>>({});
   const [errores, setErrores] = useState<Record<number, Errores>>({});
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    marcarEdicion('titulares', editando);
+    return () => marcarEdicion('titulares', false);
+  }, [editando, marcarEdicion]);
+
   if (estadias.length === 0) return null;
   const valor = (e: EstadiaCarrito) => form[e.id] ?? inicial(e);
+
+  const empezarEdicion = () => {
+    setForm({});
+    setErrores({});
+    setError(null);
+    enfocarDespues('formulario');
+    setEditando(true);
+  };
+
+  const cancelar = () => {
+    enfocarDespues('cambiar');
+    setEditando(false);
+    setForm({});
+    setErrores({});
+  };
 
   if (!faltan && !editando) {
     return (
       <DatosCargados
         texto="Titulares de las estadías cargados"
         accion="Cambiar titulares"
-        onCambiar={() => setEditando(true)}
+        onCambiar={empezarEdicion}
+        botonRef={botonRef}
+        seccionRef={seccionRef}
       />
     );
   }
@@ -66,16 +91,20 @@ export const TitularesForm = ({ carrito }: { carrito: Carrito }) => {
     const completos = Object.fromEntries(estadias.map((e) => [e.id, valor(e)]));
     const nuevos = Object.fromEntries(estadias.map((e) => [e.id, validarTitular(completos[e.id])]));
     setErrores(nuevos);
-    if (Object.values(nuevos).some((e) => Object.keys(e).length > 0)) return;
+    if (Object.values(nuevos).some((e) => Object.keys(e).length > 0)) {
+      enfocarPrimerError();
+      return;
+    }
     setEnviando(true);
     const r = await cargarTitulares(armarTitulares(carrito, completos));
     setEnviando(false);
     if (r.ok) {
+      enfocarDespues('cambiar');
       setEditando(false);
       setForm({});
+      anunciar('Titulares de las estadías guardados.');
     } else {
       setError(r.error.mensaje);
-      if (r.error.status === 410) await recargar();
     }
   };
 
@@ -87,7 +116,7 @@ export const TitularesForm = ({ carrito }: { carrito: Carrito }) => {
           Es la persona que hace el check-in. El hotel le va a pedir el documento.
         </p>
       </div>
-      <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
+      <form ref={formRef} onSubmit={enviar} noValidate className="flex flex-col gap-4">
         {estadias.map((e, i) => (
           <fieldset
             key={e.id}
@@ -98,25 +127,18 @@ export const TitularesForm = ({ carrito }: { carrito: Carrito }) => {
             </legend>
             <div className="grid gap-3 sm:grid-cols-3">
               {CAMPOS.map(({ campo, label, tipo, auto, max }) => (
-                <label
+                <Campo
                   key={campo}
-                  className="text-secondary flex flex-col gap-1 text-sm font-medium"
-                >
-                  {label}
-                  <input
-                    type={tipo}
-                    autoComplete={i === 0 ? auto : 'off'}
-                    maxLength={max}
-                    value={valor(e)[campo]}
-                    onChange={(ev) => cambiar(e, campo, ev.target.value)}
-                    aria-invalid={Boolean(errores[e.id]?.[campo])}
-                    placeholder={campo === 'telefono' ? '+54 11 5555-5555' : undefined}
-                    className={inputClass}
-                  />
-                  {errores[e.id]?.[campo] && (
-                    <span className="text-alert text-xs">{errores[e.id][campo]}</span>
-                  )}
-                </label>
+                  id={`titular-${e.id}-${campo}`}
+                  label={label}
+                  type={tipo}
+                  autoComplete={i === 0 ? auto : 'off'}
+                  maxLength={max}
+                  value={valor(e)[campo]}
+                  onChange={(ev) => cambiar(e, campo, ev.target.value)}
+                  placeholder={campo === 'telefono' ? '+54 11 5555-5555' : undefined}
+                  error={errores[e.id]?.[campo]}
+                />
               ))}
             </div>
             {i === 0 && estadias.length > 1 && (
@@ -148,15 +170,7 @@ export const TitularesForm = ({ carrito }: { carrito: Carrito }) => {
             {enviando ? 'Guardando...' : 'Guardar titulares'}
           </button>
           {editando && !faltan && (
-            <button
-              type="button"
-              className={cn(BOTON_BORDE, 'min-h-12', FOCO)}
-              onClick={() => {
-                setEditando(false);
-                setForm({});
-                setErrores({});
-              }}
-            >
+            <button type="button" className={cn(BOTON_BORDE, 'min-h-12', FOCO)} onClick={cancelar}>
               Cancelar
             </button>
           )}

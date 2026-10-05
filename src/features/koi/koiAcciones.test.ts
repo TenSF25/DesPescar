@@ -131,7 +131,6 @@ describe('estadoDeAsientos', () => {
   it('carga el vuelo y limpia lo que había quedado de otra compra', () => {
     expect(estadoDeAsientos(vueloEsperado)).toEqual({
       ...vueloEsperado,
-      bookingId: null,
       selectedSeats: [],
     });
   });

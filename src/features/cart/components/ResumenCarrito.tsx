@@ -3,7 +3,7 @@ import { formatNoches } from '@/features/hotels/hotelFormat';
 import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
 import type { Carrito } from '../cart.types';
-import { estadiasActivas, faltantes, puedePagar } from '../carrito';
+import { estadiasActivas, estadoBarraPago, faltantes } from '../carrito';
 import { CARD, FOCO } from './estilos';
 
 const Paso = ({ hecho, children }: { hecho: boolean; children: string }) => (
@@ -84,29 +84,29 @@ export const ResumenCarrito = ({ carrito }: { carrito: Carrito }) => {
 interface BarraProps {
   carrito: Carrito;
   pagando: boolean;
+  /** Algún formulario está en modo edición. */
+  editando: boolean;
+  vencido: boolean;
   error: string | null;
   onPagar: () => void;
 }
 
 /** Barra fija con el total y "Pagar", como en equipaje y asientos (levanta la burbuja de KOI). */
-export const BarraPago = ({ carrito, pagando, error, onPagar }: BarraProps) => {
+export const BarraPago = ({ carrito, pagando, editando, vencido, error, onPagar }: BarraProps) => {
   useBarraInferior();
-  const pendientes = faltantes(carrito);
-  const habilitado = puedePagar(carrito) && !pagando;
-  const ayuda =
-    pendientes.length > 0
-      ? `Falta: ${pendientes.join(' y ').toLowerCase()}`
-      : `${carrito.cantidadItems} ${carrito.cantidadItems === 1 ? 'ítem' : 'ítems'} · ARS`;
+  const { habilitado, ayuda } = estadoBarraPago(carrito, { pagando, editando, vencido });
 
   return (
     <div className="fixed bottom-0 left-0 z-10 flex w-full justify-center border-t border-[#3234392d] bg-white shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
-      <div className="flex w-full max-w-370 items-center justify-between gap-3 px-4 py-3 sm:py-4">
+      <div className="flex w-full max-w-360 items-center justify-between gap-3 p-3 sm:p-4">
         <div className="min-w-0">
           <p className="text-xs font-semibold text-[#323439]">Total</p>
           <p className="text-primary text-xl font-bold sm:text-2xl">
             {formatCurrency(carrito.montoTotal)}
           </p>
-          <p className="text-secondary/60 truncate text-xs">{ayuda}</p>
+          <p id="ayuda-pago" className="text-secondary/60 text-xs leading-tight text-pretty">
+            {ayuda}
+          </p>
         </div>
         <button
           type="button"
@@ -118,6 +118,7 @@ export const BarraPago = ({ carrito, pagando, error, onPagar }: BarraProps) => {
           onClick={onPagar}
           disabled={!habilitado}
           aria-busy={pagando}
+          aria-describedby="ayuda-pago"
         >
           <span
             aria-hidden

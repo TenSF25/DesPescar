@@ -65,7 +65,7 @@ export const VueloEnCarrito = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vu
             </p>
           </div>
         </div>
-        <QuitarItem que="el vuelo" onQuitar={quitar} />
+        <QuitarItem que="el vuelo" anuncio="Quitamos el vuelo del carrito." onQuitar={quitar} />
       </header>
 
       <div className="flex flex-col gap-2">

@@ -1,10 +1,13 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { crearPago } from '@/features/payments/services/pagosService';
+import { useCarritoStore } from '@/store/useCarritoStore';
+import { useFlightStore } from '@/store/useFlightStore';
 import { cn } from '@/utils/cn';
 import { destinoPago } from '@/utils/destinoPago';
 import { estadiasActivas, leerErrorApi } from '../carrito';
+import { CarritoUiContext, type CarritoUi, type Formulario } from '../components/carritoUi';
 import { CuentaRegresiva } from '../components/CuentaRegresiva';
 import { EstadiaEnCarrito } from '../components/EstadiaEnCarrito';
 import { BOTON_BORDE, FOCO } from '../components/estilos';
@@ -49,33 +52,93 @@ const Estado = ({
   </div>
 );
 
-const Titulo = () => <h1 className="text-secondary text-2xl font-bold sm:text-3xl">Tu carrito</h1>;
+const BuscarDeNuevo = () => (
+  <div className="mt-2 flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+    <Link
+      to="/"
+      className={cn(
+        'bg-primary hover:bg-primary/90 flex min-h-11 items-center justify-center gap-2 rounded-xl px-6 font-bold text-white transition-colors',
+        FOCO,
+      )}
+    >
+      <span aria-hidden className="material-symbols-outlined text-[20px]">
+        flight
+      </span>
+      Buscar vuelos
+    </Link>
+    <Link to="/hoteles" className={cn(BOTON_BORDE, FOCO)}>
+      <span aria-hidden className="material-symbols-outlined text-[20px]">
+        hotel
+      </span>
+      Buscar hoteles
+    </Link>
+  </div>
+);
 
 export const CarritoPage = () => {
-  const { carrito, venceEn, cargado, cargando, error, recargar } = useCarrito();
+  const { carrito, venceEn, cargado, cargando, error, expirado, recargar } = useCarrito();
+  const limpiarCompra = useFlightStore((s) => s.limpiarCompra);
   const navigate = useNavigate();
-  const [vencio, setVencio] = useState(false);
+  const titulo = useRef<HTMLHeadingElement>(null);
+  // venceEn del carrito que la cuenta regresiva vio llegar a cero (bloquea Pagar).
+  const [vencioEn, setVencioEn] = useState<number | null>(null);
+  // Aviso de vencimiento para cuando el carrito ya no está.
+  const [avisoVencido, setAvisoVencido] = useState(false);
   const [pagando, setPagando] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
+  const [anuncio, setAnuncio] = useState('');
+  const [edicion, setEdicion] = useState<Record<Formulario, boolean>>({
+    pasajeros: false,
+    titulares: false,
+  });
+  const [enfocarTitulo, setEnfocarTitulo] = useState(0);
   // Evita dos POST /api/payments por doble clic antes de que se vuelva a pintar el botón.
   const pagoEnCurso = useRef(false);
 
+  useEffect(() => {
+    if (enfocarTitulo > 0) titulo.current?.focus();
+  }, [enfocarTitulo]);
+
+  const ui = useMemo<CarritoUi>(() => {
+    const anunciar = (texto: string) => {
+      // Se vacía primero para que un texto repetido se vuelva a anunciar.
+      setAnuncio('');
+      window.setTimeout(() => setAnuncio(texto), 50);
+    };
+    return {
+      anunciar,
+      itemQuitado: (texto) => {
+        anunciar(texto);
+        setEnfocarTitulo((n) => n + 1);
+      },
+      marcarEdicion: (formulario, editando) =>
+        setEdicion((actual) =>
+          actual[formulario] === editando ? actual : { ...actual, [formulario]: editando },
+        ),
+    };
+  }, []);
+
   const alVencer = useCallback(() => {
-    setVencio(true);
+    setVencioEn(venceEn);
+    setAvisoVencido(true);
+    limpiarCompra();
     void recargar();
-  }, [recargar]);
+  }, [venceEn, limpiarCompra, recargar]);
 
   const pagar = async () => {
     if (!carrito || pagoEnCurso.current) return;
     pagoEnCurso.current = true;
     setPagando(true);
     setErrorPago(null);
+    let saliendo = false;
     try {
       const pago = await crearPago(carrito.idCarrito);
       const destino = destinoPago(pago.checkoutUrl);
       if (destino.tipo === 'interno') {
         navigate(destino.ruta);
       } else if (destino.tipo === 'externo') {
+        // Se deja el botón en "Preparando..." mientras el navegador va a Mercado Pago.
+        saliendo = true;
         window.location.assign(destino.url);
       } else {
         setErrorPago('El enlace de pago recibido no es válido. Probá de nuevo más tarde.');
@@ -84,17 +147,42 @@ export const CarritoPage = () => {
       const e = leerErrorApi(err, 'No pudimos iniciar el pago.');
       setErrorPago(e.mensaje);
       // 409/410: el carrito cambió o venció; se muestra como está ahora.
-      if (e.status === 409 || e.status === 410) void recargar();
+      if (e.status === 409 || e.status === 410) {
+        await recargar();
+        if (useCarritoStore.getState().carrito === null) {
+          setAvisoVencido(true);
+          limpiarCompra();
+        }
+      }
     } finally {
-      pagoEnCurso.current = false;
-      setPagando(false);
+      if (!saliendo) {
+        pagoEnCurso.current = false;
+        setPagando(false);
+      }
     }
   };
+
+  const regionViva = (
+    <p role="status" aria-live="polite" className="sr-only">
+      {anuncio}
+    </p>
+  );
+
+  const encabezado = (
+    <h1
+      ref={titulo}
+      tabIndex={-1}
+      className="text-secondary text-2xl font-bold outline-none sm:text-3xl"
+    >
+      Tu carrito
+    </h1>
+  );
 
   if (!cargado) {
     return (
       <SectionContainer>
-        <Titulo />
+        {regionViva}
+        {encabezado}
         {error ? (
           <Estado icono="cloud_off" titulo="No pudimos cargar tu carrito" tono="error">
             <p className="text-sm text-red-700">{error}</p>
@@ -120,96 +208,73 @@ export const CarritoPage = () => {
   if (!carrito) {
     return (
       <SectionContainer>
-        <Titulo />
-        {vencio && (
-          <p
-            role="status"
-            className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
-          >
-            <span aria-hidden className="material-symbols-outlined text-[20px]">
-              timer_off
-            </span>
-            Se terminó el tiempo para pagar y liberamos los lugares que tenías reservados. Podés
-            volver a agregarlos.
-          </p>
+        {regionViva}
+        {encabezado}
+        {avisoVencido || expirado ? (
+          <Estado icono="timer_off" titulo="Tu carrito venció">
+            <p role="status" className="text-secondary/70 max-w-md text-sm">
+              Se terminó el tiempo para pagar y liberamos los lugares que tenías reservados. Podés
+              volver a buscarlos y agregarlos.
+            </p>
+            <BuscarDeNuevo />
+          </Estado>
+        ) : (
+          <Estado icono="shopping_cart" titulo="Tu carrito está vacío">
+            <p className="text-secondary/70 max-w-sm text-sm">
+              Sumá un vuelo, una estadía o los dos y pagalos juntos en un solo paso.
+            </p>
+            <BuscarDeNuevo />
+          </Estado>
         )}
-        <Estado icono="shopping_cart" titulo="Tu carrito está vacío">
-          <p className="text-secondary/70 max-w-sm text-sm">
-            Sumá un vuelo, una estadía o los dos y pagalos juntos en un solo paso.
-          </p>
-          <div className="mt-2 flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-            <Link
-              to="/"
-              className={cn(
-                'bg-primary hover:bg-primary/90 flex min-h-11 items-center justify-center gap-2 rounded-xl px-6 font-bold text-white transition-colors',
-                FOCO,
-              )}
-            >
-              <span aria-hidden className="material-symbols-outlined text-[20px]">
-                flight
-              </span>
-              Buscar vuelos
-            </Link>
-            <Link to="/hoteles" className={cn(BOTON_BORDE, FOCO)}>
-              <span aria-hidden className="material-symbols-outlined text-[20px]">
-                hotel
-              </span>
-              Buscar hoteles
-            </Link>
-          </div>
-        </Estado>
       </SectionContainer>
     );
   }
 
   const estadias = estadiasActivas(carrito);
+  const vuelo = carrito.vuelo;
 
   return (
-    <SectionContainer className="pt-8 sm:pt-12">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Titulo />
-        {venceEn !== null && (
-          <CuentaRegresiva
-            key={venceEn}
-            venceEn={venceEn}
-            segundosIniciales={carrito.segundosRestantes}
-            onVencido={alVencer}
-          />
-        )}
-      </div>
-      {error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </p>
-      )}
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="flex min-w-0 flex-col gap-6">
-          {carrito.vuelo && <VueloEnCarrito carrito={carrito} vuelo={carrito.vuelo} />}
-          {estadias.map((e) => (
-            <EstadiaEnCarrito key={e.id} estadia={e} />
-          ))}
-          {carrito.vuelo && (
-            <PasajerosForm
-              key={carrito.vuelo.flightIds.join()}
-              carrito={carrito}
-              vuelo={carrito.vuelo}
-            />
-          )}
-          <TitularesForm carrito={carrito} />
-          {cargando && (
-            <p role="status" className="text-secondary/60 text-sm">
-              Actualizando...
-            </p>
+    <CarritoUiContext.Provider value={ui}>
+      <SectionContainer className="pt-8 sm:pt-12">
+        {regionViva}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {encabezado}
+          {venceEn !== null && (
+            <CuentaRegresiva key={venceEn} venceEn={venceEn} onVencido={alVencer} />
           )}
         </div>
-        <ResumenCarrito carrito={carrito} />
-      </div>
-      <BarraPago
-        carrito={carrito}
-        pagando={pagando}
-        error={errorPago}
-        onPagar={() => void pagar()}
-      />
-    </SectionContainer>
+        {error && (
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="flex min-w-0 flex-col gap-6">
+            {vuelo && <VueloEnCarrito carrito={carrito} vuelo={vuelo} />}
+            {estadias.map((e) => (
+              <EstadiaEnCarrito key={e.id} estadia={e} />
+            ))}
+            {vuelo && (
+              <PasajerosForm
+                key={`${vuelo.flightIds.join()}|${vuelo.fareIds.join()}|${vuelo.cantidadPasajeros}`}
+                carrito={carrito}
+                vuelo={vuelo}
+              />
+            )}
+            <TitularesForm carrito={carrito} />
+            {cargando && <p className="text-secondary/60 text-sm">Actualizando...</p>}
+          </div>
+          <ResumenCarrito carrito={carrito} />
+        </div>
+        <BarraPago
+          carrito={carrito}
+          pagando={pagando}
+          editando={edicion.pasajeros || edicion.titulares}
+          vencido={vencioEn !== null && vencioEn === venceEn}
+          error={errorPago}
+          onPagar={() => void pagar()}
+        />
+      </SectionContainer>
+    </CarritoUiContext.Provider>
   );
 };

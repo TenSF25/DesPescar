@@ -3,10 +3,12 @@ import type {
   AgregarEstadiaRequest,
   Carrito,
   ErrorApi,
+  PasajeroRequest,
   TitularRequest,
 } from '@/features/cart/cart.types';
 import { leerErrorApi } from '@/features/cart/carrito';
 import * as carritoService from '@/features/cart/services/carritoService';
+import { useFlightStore } from './useFlightStore';
 
 type Resultado = { ok: true } | { ok: false; error: ErrorApi };
 
@@ -18,6 +20,11 @@ interface CarritoState {
   cargado: boolean;
   cargando: boolean;
   error: string | null;
+  /**
+   * El carrito venció: el servidor respondió 410 o el carrito vigente desapareció al llegar su
+   * vencimiento. /carrito lo muestra como aviso. Lo borran un carrito nuevo y limpiar().
+   */
+  expirado: boolean;
   /** Guarda un carrito recibido de cualquier endpoint (o null si quedó vacío). */
   setCarrito: (carrito: Carrito | null) => void;
   recargar: () => Promise<void>;
@@ -25,6 +32,8 @@ interface CarritoState {
   quitarEstadia: (estadiaId: number) => Promise<Resultado>;
   quitarVuelo: () => Promise<Resultado>;
   cargarTitulares: (titulares: TitularRequest[]) => Promise<Resultado>;
+  /** PUT de pasajeros (responde sin cuerpo) y después el carrito actualizado. */
+  cargarPasajeros: (pasajeros: PasajeroRequest[]) => Promise<Resultado>;
   limpiar: () => void;
 }
 
@@ -33,6 +42,17 @@ const SESION_CAMBIADA: ErrorApi = {
   codigo: 'SESION_CAMBIADA',
   mensaje: 'Tu sesión cambió. Volvé a intentarlo.',
 };
+
+/**
+ * Margen para decidir que un carrito que desapareció venció (reloj del navegador contra el del
+ * servidor, erratas 12). Si desaparece mucho antes de su vencimiento es que se pagó o se cerró.
+ */
+const MARGEN_VENCIMIENTO_MS = 15_000;
+
+const vigente = (c: Carrito | null): c is Carrito =>
+  c !== null &&
+  (c.estadoGeneral === 'INICIADA' || c.estadoGeneral === 'PENDIENTE_PAGO') &&
+  c.segundosRestantes > 0;
 
 const vencimiento = (c: Carrito | null) => (c ? Date.now() + c.segundosRestantes * 1000 : null);
 
@@ -47,6 +67,14 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
    */
   let generacion = 0;
 
+  /** Marca el vencimiento y olvida los asientos elegidos: el servidor ya los liberó. */
+  const marcarVencido = () => {
+    set({ carrito: null, venceEn: null, cargado: true, error: null, expirado: true });
+    useFlightStore.getState().limpiarCompra();
+  };
+
+  const esVencimiento = (err: unknown) => leerErrorApi(err, '').status === 410;
+
   const accion = async (
     llamada: () => Promise<Carrito | null>,
     porDefecto: string,
@@ -59,6 +87,10 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
       return { ok: true };
     } catch (err: unknown) {
       if (g !== generacion) return { ok: false, error: SESION_CAMBIADA };
+      if (esVencimiento(err)) {
+        marcarVencido();
+        void get().recargar();
+      }
       return { ok: false, error: leerErrorApi(err, porDefecto) };
     }
   };
@@ -69,18 +101,33 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
     cargado: false,
     cargando: false,
     error: null,
+    expirado: false,
     setCarrito: (carrito) =>
-      set({ carrito, venceEn: vencimiento(carrito), cargado: true, error: null }),
+      set({
+        carrito,
+        venceEn: vencimiento(carrito),
+        cargado: true,
+        error: null,
+        ...(carrito ? { expirado: false } : {}),
+      }),
     recargar: async () => {
       const g = generacion;
       set({ cargando: true, error: null });
       try {
+        const { carrito: previo, venceEn } = get();
         const carrito = await carritoService.obtenerCarrito();
-        if (g === generacion) get().setCarrito(carrito);
+        if (g !== generacion) return;
+        const vencio =
+          carrito === null &&
+          vigente(previo) &&
+          venceEn !== null &&
+          Date.now() >= venceEn - MARGEN_VENCIMIENTO_MS;
+        if (vencio) marcarVencido();
+        else get().setCarrito(carrito);
       } catch (err: unknown) {
-        if (g === generacion) {
-          set({ error: leerErrorApi(err, 'No pudimos cargar tu carrito.').mensaje });
-        }
+        if (g !== generacion) return;
+        if (esVencimiento(err)) marcarVencido();
+        else set({ error: leerErrorApi(err, 'No pudimos cargar tu carrito.').mensaje });
       } finally {
         if (g === generacion) set({ cargando: false });
       }
@@ -99,9 +146,25 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
         'No pudimos guardar los titulares.',
       );
     },
+    cargarPasajeros: async (pasajeros) => {
+      const c = get().carrito;
+      if (!c)
+        return { ok: false, error: { status: null, codigo: null, mensaje: 'No hay carrito.' } };
+      return accion(async () => {
+        await carritoService.cargarPasajeros(c.idCarrito, pasajeros);
+        return carritoService.obtenerCarrito();
+      }, 'No pudimos guardar los pasajeros.');
+    },
     limpiar: () => {
       generacion += 1;
-      set({ carrito: null, venceEn: null, cargado: false, cargando: false, error: null });
+      set({
+        carrito: null,
+        venceEn: null,
+        cargado: false,
+        cargando: false,
+        error: null,
+        expirado: false,
+      });
     },
   };
 });

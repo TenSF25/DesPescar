@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Carrito, EstadiaCarrito, VueloCarrito } from './cart.types';
 import {
+  estadoBarraPago,
   esperaParaReconsultar,
   armarPasajeros,
   armarTitulares,
@@ -332,5 +333,56 @@ describe('esperaParaReconsultar', () => {
   it('si el carrito llegó ya vencido espera al menos 5 segundos', () => {
     expect(esperaParaReconsultar(4_000, 4_000)).toBe(5_000);
     expect(esperaParaReconsultar(1_000, 4_000)).toBe(5_000);
+  });
+});
+
+describe('estadoBarraPago', () => {
+  const listo = carrito({
+    estadoGeneral: 'PENDIENTE_PAGO',
+    datosCompletos: true,
+    vuelo: vuelo({ pasajerosCargados: true }),
+    estadias: [estadia({ titularNombre: 'Ana Pérez' })],
+  });
+  const opciones = { pagando: false, editando: false, vencido: false };
+
+  it('con todo cargado habilita Pagar y muestra los ítems', () => {
+    expect(estadoBarraPago(listo, opciones)).toEqual({
+      habilitado: true,
+      ayuda: '2 ítems · ARS',
+    });
+  });
+
+  it('mientras paga no se puede volver a pagar', () => {
+    expect(estadoBarraPago(listo, { ...opciones, pagando: true }).habilitado).toBe(false);
+  });
+
+  it('lista lo que falta cargar', () => {
+    expect(estadoBarraPago(carrito(), opciones)).toEqual({
+      habilitado: false,
+      ayuda: 'Falta: datos de los pasajeros y titular de cada estadía',
+    });
+  });
+
+  it('con un formulario en edición pide guardar o cancelar', () => {
+    expect(estadoBarraPago(listo, { ...opciones, editando: true })).toEqual({
+      habilitado: false,
+      ayuda: 'Guardá o cancelá los cambios para pagar',
+    });
+  });
+
+  it('vencido avisa que el carrito venció', () => {
+    expect(estadoBarraPago(listo, { ...opciones, vencido: true })).toEqual({
+      habilitado: false,
+      ayuda: 'Tu carrito venció',
+    });
+    expect(estadoBarraPago({ ...listo, estadoGeneral: 'EXPIRADA' }, opciones).ayuda).toBe(
+      'Tu carrito venció',
+    );
+  });
+
+  it('sin faltantes pero sin poder pagar todavía, avisa que se está revisando', () => {
+    expect(
+      estadoBarraPago({ ...listo, estadoGeneral: 'INICIADA', datosCompletos: false }, opciones),
+    ).toEqual({ habilitado: false, ayuda: 'Revisando el carrito…' });
   });
 });

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { SectionContainer } from '@/components/ui/SectionContainer';
-import { Button } from '@/components/ui/Button';
+import { cn } from '@/utils/cn';
 import { useBarraInferior } from '@/hooks/useBarraInferior';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { useFlightStore } from '@/store/useFlightStore';
@@ -13,31 +13,60 @@ import { useSeats } from '../hooks/useSeats';
 const FOCO =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary';
 
+const BOTON_BORDE =
+  'border-secondary text-secondary hover:bg-secondary flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-5 font-bold transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50';
+
 export const SeatSelection = () => {
   useBarraInferior();
   const { initBooking, reemplazarVuelo, isLoading, error } = useBooking();
   const { seatsMap, selectedSeats, isLoading: seatsLoading, error: seatsError } = useSeats();
   const passengers = useFlightStore((state) => state.passengers);
-  const setBookingId = useFlightStore((state) => state.setBookingId);
+  const limpiarCompra = useFlightStore((state) => state.limpiarCompra);
   const recargarCarrito = useCarritoStore((state) => state.recargar);
   const navigate = useNavigate();
   const passengerCount = Math.max(1, Number(passengers) || 1);
   const [yaTieneVuelo, setYaTieneVuelo] = useState(false);
+  // Evita dos POST /init por doble clic antes de que se vuelva a pintar el botón.
+  const enCurso = useRef(false);
+  const botonAgregar = useRef<HTMLButtonElement>(null);
+  const botonReemplazar = useRef<HTMLButtonElement>(null);
 
-  const alCarrito = async (resultado: Promise<ResultadoInit>) => {
-    const r = await resultado;
-    if (r.success) {
-      setBookingId(r.reservationId);
-      await recargarCarrito();
-      navigate('/carrito');
-      return;
+  // El diálogo de reemplazo toma el foco al abrirse.
+  useEffect(() => {
+    if (yaTieneVuelo) botonReemplazar.current?.focus();
+  }, [yaTieneVuelo]);
+
+  const cerrarDialogo = () => {
+    setYaTieneVuelo(false);
+    // Se devuelve el foco al botón que abrió el diálogo, ya habilitado en el próximo pintado.
+    window.setTimeout(() => botonAgregar.current?.focus(), 0);
+  };
+
+  const alCarrito = async (resultado: () => Promise<ResultadoInit>) => {
+    if (enCurso.current) return;
+    enCurso.current = true;
+    try {
+      const r = await resultado();
+      if (r.success) {
+        await recargarCarrito();
+        navigate('/carrito');
+        return;
+      }
+      setYaTieneVuelo(r.codigo === 'CARRITO_YA_TIENE_VUELO');
+    } finally {
+      enCurso.current = false;
     }
-    setYaTieneVuelo(r.codigo === 'CARRITO_YA_TIENE_VUELO');
   };
 
   const handleClick = () => {
     if (isLoading || selectedSeats.length !== passengerCount) return;
-    void alCarrito(initBooking());
+    void alCarrito(initBooking);
+  };
+
+  /** Ir al carrito sin reemplazar: los asientos recién elegidos no se van a usar. */
+  const verCarrito = () => {
+    limpiarCompra();
+    navigate('/carrito');
   };
 
   return (
@@ -55,9 +84,10 @@ export const SeatSelection = () => {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-4 sm:gap-12">
-            <Button
-              variant="secondary"
-              className={`min-h-11 rounded-full px-5 disabled:cursor-not-allowed disabled:opacity-50 ${FOCO}`}
+            <button
+              ref={botonAgregar}
+              type="button"
+              className={cn(BOTON_BORDE, 'w-auto', FOCO)}
               onClick={handleClick}
               aria-busy={isLoading}
               disabled={
@@ -68,16 +98,25 @@ export const SeatSelection = () => {
                 selectedSeats.length !== passengerCount
               }
             >
-              <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+              <span aria-hidden className="material-symbols-outlined text-[20px]">
+                add_shopping_cart
+              </span>
               {isLoading ? 'Agregando...' : 'Agregar al carrito'}
-            </Button>
+            </button>
           </div>
         </div>
         {yaTieneVuelo && (
           <div
             role="alertdialog"
+            aria-modal="false"
             aria-labelledby="ya-tiene-vuelo"
             aria-describedby="ya-tiene-vuelo-ayuda"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.stopPropagation();
+                cerrarDialogo();
+              }
+            }}
             className="absolute right-3 bottom-full left-3 mb-2 flex flex-col gap-3 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-lg sm:left-auto sm:max-w-md"
           >
             <div className="flex items-start justify-between gap-3">
@@ -86,37 +125,43 @@ export const SeatSelection = () => {
                   Tu carrito ya tiene un vuelo
                 </p>
                 <p id="ya-tiene-vuelo-ayuda" className="text-secondary/70 text-sm">
-                  ¿Querés reemplazarlo por este? Las estadías que tengas en el carrito se mantienen.
+                  ¿Querés reemplazarlo por este? Las estadías del carrito se mantienen. Si vas al
+                  carrito sin reemplazarlo, los asientos que elegiste recién no se van a usar.
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setYaTieneVuelo(false)}
+                onClick={cerrarDialogo}
                 aria-label="Cerrar y seguir eligiendo asientos"
-                className={`text-secondary/70 hover:bg-secondary/5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${FOCO}`}
+                className={cn(
+                  'text-secondary/70 hover:bg-secondary/5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+                  FOCO,
+                )}
               >
-                <span className="material-symbols-outlined">close</span>
+                <span aria-hidden className="material-symbols-outlined">
+                  close
+                </span>
               </button>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button
-                variant="secondary"
-                className={`bg-secondary min-h-11 rounded-full text-white hover:opacity-90 ${FOCO}`}
+              <button
+                ref={botonReemplazar}
+                type="button"
+                className={cn(
+                  'bg-secondary flex min-h-11 w-full items-center justify-center rounded-full px-5 font-bold text-white hover:opacity-90 disabled:opacity-50',
+                  FOCO,
+                )}
                 disabled={isLoading}
                 onClick={() => {
                   setYaTieneVuelo(false);
-                  void alCarrito(reemplazarVuelo());
+                  void alCarrito(reemplazarVuelo);
                 }}
               >
                 Reemplazar vuelo
-              </Button>
-              <Button
-                variant="secondary"
-                className={`min-h-11 rounded-full ${FOCO}`}
-                onClick={() => navigate('/carrito')}
-              >
+              </button>
+              <button type="button" className={cn(BOTON_BORDE, FOCO)} onClick={verCarrito}>
                 Ver carrito
-              </Button>
+              </button>
             </div>
           </div>
         )}

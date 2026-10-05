@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Carrito } from '@/features/cart/cart.types';
 import * as carritoService from '@/features/cart/services/carritoService';
 import { useCarritoStore } from './useCarritoStore';
+import { useFlightStore } from './useFlightStore';
 
 vi.mock('@/features/cart/services/carritoService', () => ({
   obtenerCarrito: vi.fn(),
@@ -9,6 +10,7 @@ vi.mock('@/features/cart/services/carritoService', () => ({
   quitarEstadia: vi.fn(),
   quitarVuelo: vi.fn(),
   cargarTitulares: vi.fn(),
+  cargarPasajeros: vi.fn(),
 }));
 
 const carritoDe = (idCarrito: number): Carrito => ({
@@ -34,7 +36,7 @@ const diferida = <T>() => {
 
 describe('useCarritoStore', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     useCarritoStore.getState().limpiar();
   });
 
@@ -94,5 +96,116 @@ describe('useCarritoStore', () => {
     const r = await accion;
     expect(r.ok).toBe(false);
     expect(useCarritoStore.getState().carrito).toBeNull();
+  });
+
+  describe('expirado', () => {
+    const error410 = {
+      isAxiosError: true,
+      message: 'Gone',
+      response: { status: 410, data: { codigo: 'CARRITO_EXPIRADO', mensaje: 'Venció.' } },
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-10-05T12:00:00Z'));
+      useFlightStore.setState({ selectedSeats: ['asiento-1'] });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('una acción con 410 marca el carrito vencido, lo recarga y olvida los asientos', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.mocked(carritoService.quitarVuelo).mockRejectedValueOnce(error410);
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce(null);
+      const r = await useCarritoStore.getState().quitarVuelo();
+      expect(r.ok).toBe(false);
+      const s = useCarritoStore.getState();
+      expect(s.expirado).toBe(true);
+      expect(s.carrito).toBeNull();
+      expect(carritoService.obtenerCarrito).toHaveBeenCalledTimes(1);
+      expect(useFlightStore.getState().selectedSeats).toEqual([]);
+    });
+
+    it('cargar pasajeros guarda el carrito actualizado y un 410 lo marca vencido', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.mocked(carritoService.cargarPasajeros).mockResolvedValueOnce(undefined);
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce({
+        ...carritoDe(1),
+        montoTotal: 2000,
+      });
+      const pasajeros = [
+        {
+          nombreCompleto: 'Ana Pérez',
+          dniPasaporte: '30111222',
+          asientoIda: 'a1',
+          asientoVuelta: null,
+          tarifaId: 'f1',
+          tarifaNombre: 'Light',
+        },
+      ];
+      expect((await useCarritoStore.getState().cargarPasajeros(pasajeros)).ok).toBe(true);
+      expect(carritoService.cargarPasajeros).toHaveBeenCalledWith(1, pasajeros);
+      expect(useCarritoStore.getState().carrito?.montoTotal).toBe(2000);
+
+      vi.mocked(carritoService.cargarPasajeros).mockRejectedValueOnce(error410);
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce(null);
+      const r = await useCarritoStore.getState().cargarPasajeros(pasajeros);
+      expect(r.ok).toBe(false);
+      expect(useCarritoStore.getState().expirado).toBe(true);
+    });
+
+    it('recargar con 410 marca el carrito vencido', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.mocked(carritoService.obtenerCarrito).mockRejectedValueOnce(error410);
+      await useCarritoStore.getState().recargar();
+      const s = useCarritoStore.getState();
+      expect(s.expirado).toBe(true);
+      expect(s.carrito).toBeNull();
+      expect(s.error).toBeNull();
+      expect(useFlightStore.getState().selectedSeats).toEqual([]);
+    });
+
+    it('un carrito vigente que desaparece al llegar su vencimiento se marca vencido', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.setSystemTime(Date.now() + 600_000);
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce(null);
+      await useCarritoStore.getState().recargar();
+      expect(useCarritoStore.getState().expirado).toBe(true);
+      expect(useFlightStore.getState().selectedSeats).toEqual([]);
+    });
+
+    it('si desaparece mucho antes de vencer (se pagó) no se marca vencido', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce(null);
+      await useCarritoStore.getState().recargar();
+      expect(useCarritoStore.getState().expirado).toBe(false);
+      expect(useFlightStore.getState().selectedSeats).toEqual(['asiento-1']);
+    });
+
+    it('vaciar el carrito quitando ítems no lo marca vencido', async () => {
+      useCarritoStore.getState().setCarrito(carritoDe(1));
+      vi.mocked(carritoService.quitarEstadia).mockResolvedValueOnce(null);
+      await useCarritoStore.getState().quitarEstadia(3);
+      expect(useCarritoStore.getState().expirado).toBe(false);
+    });
+
+    it('sin carrito previo, un 204 no es un vencimiento', async () => {
+      vi.mocked(carritoService.obtenerCarrito).mockResolvedValueOnce(null);
+      await useCarritoStore.getState().recargar();
+      expect(useCarritoStore.getState().expirado).toBe(false);
+    });
+
+    it('un carrito nuevo o limpiar borran la marca', async () => {
+      vi.mocked(carritoService.obtenerCarrito).mockRejectedValueOnce(error410);
+      await useCarritoStore.getState().recargar();
+      useCarritoStore.getState().setCarrito(carritoDe(2));
+      expect(useCarritoStore.getState().expirado).toBe(false);
+      vi.mocked(carritoService.obtenerCarrito).mockRejectedValueOnce(error410);
+      await useCarritoStore.getState().recargar();
+      useCarritoStore.getState().limpiar();
+      expect(useCarritoStore.getState().expirado).toBe(false);
+    });
   });
 });

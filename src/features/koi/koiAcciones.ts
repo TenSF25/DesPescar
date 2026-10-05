@@ -83,7 +83,6 @@ export const planDeCarrito = (opcion: KoiOpcion, accion: AccionKoi): PlanCarrito
 /** Estado de useFlightStore para entrar a /booking/seats con el vuelo de KOI. */
 export const estadoDeAsientos = (vuelo: VueloParaAsientos) => ({
   ...vuelo,
-  bookingId: null,
   selectedSeats: [] as string[],
 });
 

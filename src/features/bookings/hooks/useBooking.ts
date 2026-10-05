@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import type { IniciarVueloRequest } from '@/features/cart/cart.types';
 import { leerErrorApi } from '@/features/cart/carrito';
 import { iniciarVuelo } from '@/features/cart/services/carritoService';
@@ -23,7 +24,15 @@ export const useBooking = () => {
     passengers,
     selectedDepartureFare,
     selectedReturnFare,
-  } = useFlightStore();
+  } = useFlightStore(
+    useShallow((s) => ({
+      selectedDepartureFlight: s.selectedDepartureFlight,
+      selectedReturnFlight: s.selectedReturnFlight,
+      passengers: s.passengers,
+      selectedDepartureFare: s.selectedDepartureFare,
+      selectedReturnFare: s.selectedReturnFare,
+    })),
+  );
   const quitarVueloDelCarrito = useCarritoStore((s) => s.quitarVuelo);
 
   const armarPedido = (): IniciarVueloRequest | string => {

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
+import { useCarritoUi } from './carritoUi';
 import { FOCO } from './estilos';
 
 interface Props {
@@ -7,13 +8,34 @@ interface Props {
   que: string;
   /** Devuelve el mensaje de error o null si salió bien. */
   onQuitar: () => Promise<string | null>;
+  /** Lo que se anuncia al quitarlo: "Quitamos el vuelo". */
+  anuncio: string;
 }
 
 /** "Quitar" en dos pasos: pide confirmación en el lugar, sin modal. */
-export const QuitarItem = ({ que, onQuitar }: Props) => {
+export const QuitarItem = ({ que, onQuitar, anuncio }: Props) => {
+  const { itemQuitado } = useCarritoUi();
   const [confirmando, setConfirmando] = useState(false);
   const [quitando, setQuitando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const botonQuitar = useRef<HTMLButtonElement>(null);
+  const botonSi = useRef<HTMLButtonElement>(null);
+  // Tras cerrar la confirmación sin quitar, el foco vuelve a "Quitar".
+  const volverFoco = useRef(false);
+
+  useEffect(() => {
+    if (confirmando) {
+      botonSi.current?.focus();
+    } else if (volverFoco.current) {
+      volverFoco.current = false;
+      botonQuitar.current?.focus();
+    }
+  }, [confirmando]);
+
+  const cerrar = () => {
+    volverFoco.current = true;
+    setConfirmando(false);
+  };
 
   const quitar = async () => {
     if (quitando) return;
@@ -23,7 +45,10 @@ export const QuitarItem = ({ que, onQuitar }: Props) => {
     setQuitando(false);
     if (e) {
       setError(e);
-      setConfirmando(false);
+      cerrar();
+    } else {
+      // El ítem desaparece: la página anuncia el cambio y lleva el foco a su título.
+      itemQuitado(anuncio);
     }
   };
 
@@ -33,10 +58,14 @@ export const QuitarItem = ({ que, onQuitar }: Props) => {
         <div
           role="group"
           aria-label={`Confirmar: quitar ${que}`}
+          onKeyDown={(ev) => {
+            if (ev.key === 'Escape' && !quitando) cerrar();
+          }}
           className="flex flex-wrap items-center justify-end gap-x-1 gap-y-0.5 text-sm"
         >
           <span className="text-secondary/80 pr-1 font-medium">¿Quitar?</span>
           <button
+            ref={botonSi}
             type="button"
             onClick={quitar}
             disabled={quitando}
@@ -50,7 +79,7 @@ export const QuitarItem = ({ que, onQuitar }: Props) => {
           </button>
           <button
             type="button"
-            onClick={() => setConfirmando(false)}
+            onClick={cerrar}
             disabled={quitando}
             className={cn(
               'text-secondary hover:bg-secondary/5 min-h-10 rounded-lg px-3 font-semibold disabled:opacity-60',
@@ -62,6 +91,7 @@ export const QuitarItem = ({ que, onQuitar }: Props) => {
         </div>
       ) : (
         <button
+          ref={botonQuitar}
           type="button"
           onClick={() => setConfirmando(true)}
           aria-label={`Quitar ${que}`}

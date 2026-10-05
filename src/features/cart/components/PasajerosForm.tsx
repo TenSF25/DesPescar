@@ -1,17 +1,19 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import { Link } from 'react-router';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { useFlightStore } from '@/store/useFlightStore';
 import { cn } from '@/utils/cn';
 import type { Carrito, PasajeroInput, VueloCarrito } from '../cart.types';
-import {
-  armarPasajeros,
-  estadoAsientos,
-  leerErrorApi,
-  pasajerosIniciales,
-  validarPasajero,
-} from '../carrito';
-import { cargarPasajeros } from '../services/carritoService';
+import { armarPasajeros, estadoAsientos, pasajerosIniciales, validarPasajero } from '../carrito';
+import { useFocoFormulario } from '../hooks/useFocoFormulario';
+import { useCarritoUi } from './carritoUi';
 import { BOTON_BORDE, BOTON_LLENO, CARD, FOCO } from './estilos';
 
 export const inputClass =
@@ -30,13 +32,23 @@ export const DatosCargados = ({
   texto,
   accion,
   onCambiar,
+  botonRef,
+  seccionRef,
 }: {
   texto: string;
   accion: string;
   onCambiar?: () => void;
+  botonRef?: Ref<HTMLButtonElement>;
+  seccionRef?: Ref<HTMLElement>;
 }) => (
   <section
-    className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', CARD)}
+    ref={seccionRef}
+    tabIndex={-1}
+    aria-label={texto}
+    className={cn(
+      'flex flex-col gap-3 outline-none sm:flex-row sm:items-center sm:justify-between',
+      CARD,
+    )}
   >
     <div className="flex items-center gap-2">
       <span aria-hidden className="material-symbols-outlined text-success">
@@ -45,7 +57,7 @@ export const DatosCargados = ({
       <p className="text-secondary font-semibold">{texto}</p>
     </div>
     {onCambiar && (
-      <button type="button" className={cn(BOTON_BORDE, FOCO)} onClick={onCambiar}>
+      <button ref={botonRef} type="button" className={cn(BOTON_BORDE, FOCO)} onClick={onCambiar}>
         <span aria-hidden className="material-symbols-outlined text-[20px]">
           edit
         </span>
@@ -55,6 +67,34 @@ export const DatosCargados = ({
   </section>
 );
 
+/** Campo de texto con su error asociado por aria-describedby. */
+export const Campo = ({
+  id,
+  label,
+  error,
+  ...input
+}: {
+  id: string;
+  label: string;
+  error?: string;
+} & InputHTMLAttributes<HTMLInputElement>) => (
+  <div className="text-secondary flex flex-col gap-1 text-sm font-medium">
+    <label htmlFor={id}>{label}</label>
+    <input
+      id={id}
+      aria-invalid={Boolean(error)}
+      aria-describedby={error ? `${id}-error` : undefined}
+      className={inputClass}
+      {...input}
+    />
+    {error && (
+      <span id={`${id}-error`} className="text-alert text-xs">
+        {error}
+      </span>
+    )}
+  </div>
+);
+
 /**
  * Datos de los pasajeros (D26: antes en Booking.tsx). Asientos de useFlightStore, en orden.
  * Un PUT repetido reemplaza los pasajeros, así que una vez cargados se pueden cambiar.
@@ -62,17 +102,37 @@ export const DatosCargados = ({
 export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: VueloCarrito }) => {
   const vueloElegido = useFlightStore((s) => s.selectedDepartureFlight);
   const asientos = useFlightStore((s) => s.selectedSeats);
-  const recargar = useCarritoStore((s) => s.recargar);
+  const cargarPasajeros = useCarritoStore((s) => s.cargarPasajeros);
+  const { anunciar, marcarEdicion } = useCarritoUi();
+  const { formRef, botonRef, seccionRef, enfocarDespues, enfocarPrimerError } = useFocoFormulario();
   const [form, setForm] = useState<PasajeroInput[]>(() => pasajerosIniciales(carrito));
   const [editando, setEditando] = useState(false);
   const [errores, setErrores] = useState<Errores[]>([]);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<{ mensaje: string; elegirAsientos: boolean } | null>(null);
 
+  useEffect(() => {
+    marcarEdicion('pasajeros', editando);
+    return () => marcarEdicion('pasajeros', false);
+  }, [editando, marcarEdicion]);
+
   const estado = estadoAsientos(vuelo, vueloElegido, asientos);
 
   const cambiar = (i: number, campo: keyof PasajeroInput, valor: string) =>
     setForm((actual) => actual.map((p, j) => (j === i ? { ...p, [campo]: valor } : p)));
+
+  const empezarEdicion = () => {
+    setForm(pasajerosIniciales(carrito));
+    setErrores([]);
+    setError(null);
+    enfocarDespues('formulario');
+    setEditando(true);
+  };
+
+  const cancelar = () => {
+    enfocarDespues('cambiar');
+    setEditando(false);
+  };
 
   const enviar = async (ev: FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
@@ -80,23 +140,27 @@ export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vue
     setError(null);
     const nuevos = form.map(validarPasajero);
     setErrores(nuevos);
-    if (nuevos.some((e) => Object.keys(e).length > 0)) return;
+    if (nuevos.some((e) => Object.keys(e).length > 0)) {
+      enfocarPrimerError();
+      return;
+    }
     const pedido = armarPasajeros(form, asientos, vuelo);
     if (!pedido) {
       setError({ mensaje: 'Elegí un asiento para cada pasajero.', elegirAsientos: true });
       return;
     }
     setEnviando(true);
-    try {
-      await cargarPasajeros(carrito.idCarrito, pedido);
+    const r = await cargarPasajeros(pedido);
+    setEnviando(false);
+    if (r.ok) {
+      enfocarDespues('cambiar');
       setEditando(false);
-      await recargar();
-    } catch (err: unknown) {
-      const e = leerErrorApi(err, 'No pudimos guardar los pasajeros.');
-      setError({ mensaje: e.mensaje, elegirAsientos: e.codigo === 'ASIENTO_NO_BLOQUEADO' });
-      if (e.status === 410) await recargar();
-    } finally {
-      setEnviando(false);
+      anunciar('Datos de los pasajeros guardados.');
+    } else {
+      setError({
+        mensaje: r.error.mensaje,
+        elegirAsientos: r.error.codigo === 'ASIENTO_NO_BLOQUEADO',
+      });
     }
   };
 
@@ -105,7 +169,9 @@ export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vue
       <DatosCargados
         texto="Datos de los pasajeros cargados"
         accion="Cambiar pasajeros"
-        onCambiar={estado === 'ok' ? () => setEditando(true) : undefined}
+        onCambiar={estado === 'ok' ? empezarEdicion : undefined}
+        botonRef={botonRef}
+        seccionRef={seccionRef}
       />
     );
   }
@@ -124,7 +190,7 @@ export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vue
           volvé a buscarlo para elegir asientos.
         </Aviso>
       ) : (
-        <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
+        <form ref={formRef} onSubmit={enviar} noValidate className="flex flex-col gap-4">
           {form.map((p, i) => (
             <fieldset
               key={i}
@@ -132,33 +198,23 @@ export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vue
             >
               <legend className="text-secondary px-1 font-semibold">Pasajero {i + 1}</legend>
               <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-secondary flex flex-col gap-1 text-sm font-medium">
-                  Nombre completo
-                  <input
-                    autoComplete={i === 0 ? 'name' : 'off'}
-                    value={p.nombreCompleto}
-                    maxLength={100}
-                    onChange={(e) => cambiar(i, 'nombreCompleto', e.target.value)}
-                    aria-invalid={Boolean(errores[i]?.nombreCompleto)}
-                    className={inputClass}
-                  />
-                  {errores[i]?.nombreCompleto && (
-                    <span className="text-alert text-xs">{errores[i].nombreCompleto}</span>
-                  )}
-                </label>
-                <label className="text-secondary flex flex-col gap-1 text-sm font-medium">
-                  DNI o pasaporte
-                  <input
-                    value={p.dniPasaporte}
-                    maxLength={20}
-                    onChange={(e) => cambiar(i, 'dniPasaporte', e.target.value)}
-                    aria-invalid={Boolean(errores[i]?.dniPasaporte)}
-                    className={inputClass}
-                  />
-                  {errores[i]?.dniPasaporte && (
-                    <span className="text-alert text-xs">{errores[i].dniPasaporte}</span>
-                  )}
-                </label>
+                <Campo
+                  id={`pasajero-${i}-nombre`}
+                  label="Nombre completo"
+                  autoComplete={i === 0 ? 'name' : 'off'}
+                  value={p.nombreCompleto}
+                  maxLength={100}
+                  onChange={(e) => cambiar(i, 'nombreCompleto', e.target.value)}
+                  error={errores[i]?.nombreCompleto}
+                />
+                <Campo
+                  id={`pasajero-${i}-documento`}
+                  label="DNI o pasaporte"
+                  value={p.dniPasaporte}
+                  maxLength={20}
+                  onChange={(e) => cambiar(i, 'dniPasaporte', e.target.value)}
+                  error={errores[i]?.dniPasaporte}
+                />
               </div>
             </fieldset>
           ))}
@@ -193,7 +249,7 @@ export const PasajerosForm = ({ carrito, vuelo }: { carrito: Carrito; vuelo: Vue
               <button
                 type="button"
                 className={cn(BOTON_BORDE, 'min-h-12', FOCO)}
-                onClick={() => setEditando(false)}
+                onClick={cancelar}
               >
                 Cancelar
               </button>

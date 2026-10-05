@@ -68,6 +68,26 @@ export const puedePagar = (c: Carrito) =>
   c.segundosRestantes > 0 &&
   c.montoTotal > 0;
 
+/** Texto de ayuda y estado del botón Pagar de la barra fija. */
+export const estadoBarraPago = (
+  c: Carrito,
+  { pagando, editando, vencido }: { pagando: boolean; editando: boolean; vencido: boolean },
+): { habilitado: boolean; ayuda: string } => {
+  if (vencido || c.estadoGeneral === 'EXPIRADA' || c.segundosRestantes <= 0) {
+    return { habilitado: false, ayuda: 'Tu carrito venció' };
+  }
+  const pendientes = faltantes(c);
+  if (pendientes.length > 0) {
+    return { habilitado: false, ayuda: `Falta: ${pendientes.join(' y ').toLowerCase()}` };
+  }
+  if (editando) return { habilitado: false, ayuda: 'Guardá o cancelá los cambios para pagar' };
+  if (!puedePagar(c)) return { habilitado: false, ayuda: 'Revisando el carrito…' };
+  return {
+    habilitado: !pagando,
+    ayuda: `${c.cantidadItems} ${c.cantidadItems === 1 ? 'ítem' : 'ítems'} · ARS`,
+  };
+};
+
 // ---------- pasajeros ----------
 
 /** D25: sin pasajeros cargados se muestra "Pasajero N" (nunca el UUID del asiento). */

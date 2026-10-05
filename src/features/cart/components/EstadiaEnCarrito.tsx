@@ -38,7 +38,11 @@ export const EstadiaEnCarrito = ({ estadia: e }: { estadia: EstadiaCarrito }) =>
             <p className="text-secondary/60 text-sm">{e.ciudad}</p>
           </div>
         </div>
-        <QuitarItem que={`la estadía en ${e.hotelNombre}`} onQuitar={quitar} />
+        <QuitarItem
+          que={`la estadía en ${e.hotelNombre}`}
+          anuncio={`Quitamos la estadía en ${e.hotelNombre}.`}
+          onQuitar={quitar}
+        />
       </header>
 
       <div className="text-secondary/80 flex flex-col gap-1.5 text-sm">

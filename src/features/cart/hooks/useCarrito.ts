@@ -41,6 +41,7 @@ export const useCarrito = () => {
       cargado: s.cargado,
       cargando: s.cargando,
       error: s.error,
+      expirado: s.expirado,
       recargar: s.recargar,
     })),
   );

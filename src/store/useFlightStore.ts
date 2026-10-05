@@ -7,8 +7,6 @@ interface FlightStoreDate {
   selectedDepartureFare: string | null;
   selectedReturnFare: string | null;
   passengers: number | null;
-  /** Id del carrito al que entró el vuelo (POST /init). */
-  bookingId: number | null;
   /** UUIDs de los asientos de ida bloqueados por el usuario, en orden de pasajero. */
   selectedSeats: string[];
   setSelectedDepartureFlight: (flightId: string | null) => void;
@@ -16,9 +14,8 @@ interface FlightStoreDate {
   setSelectedDepartureFare: (fare: string | null) => void;
   setSelectedReturnFare: (fare: string | null) => void;
   setPassengers: (passengers: number | null) => void;
-  setBookingId: (bookingId: number | null) => void;
   setSelectedSeats: (seatIds: string[]) => void;
-  /** El vuelo salió del carrito (se quitó o se pagó): olvida el carrito y los asientos. */
+  /** El vuelo salió del carrito (se quitó, se pagó o venció) o se cerró sesión: olvida los asientos. */
   limpiarCompra: () => void;
   clearSearch: () => void;
 }
@@ -31,12 +28,10 @@ export const useFlightStore = create<FlightStoreDate>()(
       selectedDepartureFare: null,
       selectedReturnFare: null,
       passengers: null,
-      bookingId: null,
       selectedSeats: [],
       setSelectedDepartureFlight: (flight) =>
         set({
           selectedDepartureFlight: flight,
-          bookingId: null,
           selectedSeats: [],
         }),
       setSelectedReturnFlight: (flight) => set({ selectedReturnFlight: flight }),
@@ -46,9 +41,8 @@ export const useFlightStore = create<FlightStoreDate>()(
         set({
           passengers: passengers,
         }),
-      setBookingId: (bookingId) => set({ bookingId }),
       setSelectedSeats: (seatIds) => set({ selectedSeats: seatIds }),
-      limpiarCompra: () => set({ bookingId: null, selectedSeats: [] }),
+      limpiarCompra: () => set({ selectedSeats: [] }),
       clearSearch: () =>
         set({
           selectedDepartureFlight: null,
@@ -56,7 +50,6 @@ export const useFlightStore = create<FlightStoreDate>()(
           selectedDepartureFare: null,
           selectedReturnFare: null,
           passengers: null,
-          bookingId: null,
           selectedSeats: [],
         }),
     }),
