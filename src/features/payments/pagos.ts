@@ -154,7 +154,7 @@ export const resultadoParte = (pago: Pago, grupo: Grupo | null): ResultadoPago =
         detalle:
           faltan === null
             ? 'Cuando paguen todos, la reserva se confirma sola.'
-            : `Faltan ${faltan} ${faltan === 1 ? 'parte' : 'partes'}. Cuando paguen todos, la reserva se confirma sola.`,
+            : `${faltan === 1 ? 'Falta 1 parte' : `Faltan ${faltan} partes`}. Cuando paguen todos, la reserva se confirma sola.`,
         seguirConsultando: false,
         reintentar: false,
       };
