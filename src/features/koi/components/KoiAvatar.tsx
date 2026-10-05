@@ -8,17 +8,16 @@ interface KoiAvatarProps {
 const AVATAR_STYLES = `
   @keyframes koi-typing-bob {
     0% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-2px) rotate(-1deg); }
+    50% { transform: translateY(-1.5px) rotate(-1deg); }
     100% { transform: translateY(0) rotate(0deg); }
   }
   @keyframes koi-spark {
-    0%, 100% { opacity: 0; transform: scale(0.3); }
-    40% { opacity: 1; transform: scale(1); }
-    70% { opacity: 0.2; transform: scale(0.6); }
+    0%, 100% { opacity: 0; transform: scale(0.6); }
+    50% { opacity: 1; transform: scale(1); }
   }
   @keyframes koi-click {
     0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.2); }
-    70%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
   }
   @keyframes koi-dizzy-spin {
     0% { transform: rotate(0deg) scale(1); }
@@ -26,7 +25,7 @@ const AVATAR_STYLES = `
     100% { transform: rotate(360deg) scale(1); }
   }
 
-  .koi-avatar-bob { animation: koi-typing-bob 0.7s steps(2, jump-none) infinite; }
+  .koi-avatar-bob { animation: koi-typing-bob 1.4s ease-in-out infinite; }
   .koi-avatar-spark {
     position: absolute;
     width: 6px;
@@ -35,7 +34,7 @@ const AVATAR_STYLES = `
     background: #fbbf24;
     box-shadow: 0 0 5px 1px #f97316;
     opacity: 0;
-    animation: koi-spark 0.9s ease-in-out infinite;
+    animation: koi-spark 1.5s ease-in-out infinite;
   }
   .koi-avatar-click {
     position: absolute;
@@ -46,11 +45,11 @@ const AVATAR_STYLES = `
     border: 1.5px solid #fde68a;
     border-radius: 9999px;
     opacity: 0;
-    animation: koi-click 1.4s ease-out infinite;
+    animation: koi-click 1.6s ease-out infinite;
   }
-  .koi-avatar-working .koi-avatar-bob { animation-duration: 0.35s; }
-  .koi-avatar-working .koi-avatar-spark { animation-duration: 0.45s; }
-  .koi-avatar-working .koi-avatar-click { animation-duration: 0.7s; }
+  .koi-avatar-working .koi-avatar-bob { animation-duration: 0.9s; }
+  .koi-avatar-working .koi-avatar-spark { animation-duration: 0.9s; }
+  .koi-avatar-working .koi-avatar-click { animation-duration: 1s; }
   .koi-avatar-dizzy { animation: koi-dizzy-spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
 
   @media (prefers-reduced-motion: reduce) {
@@ -73,12 +72,12 @@ export default function KoiAvatar({ working = false, dizzy = false }: KoiAvatarP
         <span
           aria-hidden="true"
           className="koi-avatar-spark"
-          style={{ left: '15%', top: '79%', animationDelay: '0.3s' }}
+          style={{ left: '15%', top: '79%', animationDelay: '0.5s' }}
         />
         <span
           aria-hidden="true"
           className="koi-avatar-spark"
-          style={{ left: '21%', top: '73%', animationDelay: '0.6s' }}
+          style={{ left: '21%', top: '73%', animationDelay: '1s' }}
         />
         <span aria-hidden="true" className="koi-avatar-click" />
       </span>
