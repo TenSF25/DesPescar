@@ -64,6 +64,15 @@ export interface Carrito {
   vuelo: VueloCarrito | null;
   estadias: EstadiaCarrito[];
   asientos: AsientoCarrito[];
+  creadoEn?: string | null;
+  /** Solo en reservas canceladas. */
+  motivoCancelacion?: string | null;
+  /** Si la canceló su dueño: cuándo, cuánto se devuelve y si el reembolso todavía no salió. */
+  canceladaEn?: string | null;
+  montoReembolsado?: number | null;
+  reembolsoPendiente?: boolean | null;
+  /** Se pagó entre varios: el reembolso vuelve a cada pagador en proporción. */
+  pagoEnGrupo?: boolean | null;
 }
 
 export interface AgregarEstadiaRequest {
