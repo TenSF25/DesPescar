@@ -28,7 +28,7 @@ export const DateCarousel = ({
 
   return (
     <section className="w-full min-w-0">
-      <header className="relative flex h-18 items-center justify-between gap-3 overflow-hidden">
+      <header className="relative flex h-18 items-center justify-between gap-2 overflow-hidden sm:gap-3">
         <button
           className={`${isBaseDateToday && count === 0 ? 'bg-secondary/40' : 'bg-secondary'} flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-white`}
           onClick={() => {
@@ -41,7 +41,7 @@ export const DateCarousel = ({
         </button>
 
         <div
-          className="flex h-full flex-1 snap-x snap-mandatory scrollbar-none gap-4 overflow-x-auto py-1"
+          className="flex h-full flex-1 snap-x snap-mandatory scrollbar-none gap-2 overflow-x-auto py-1 lg:gap-4"
           ref={containerDates}
         >
           {dates.map((day) => {
@@ -52,16 +52,17 @@ export const DateCarousel = ({
                 key={day.id}
                 type="button"
                 onClick={() => cambiarFecha(day.formatted)}
-                className={`flex min-w-0 shrink-0 cursor-pointer snap-center flex-col items-center justify-center gap-1 rounded-xl border p-3 transition-colors ${
+                className={`flex w-30 min-w-0 shrink-0 cursor-pointer snap-center flex-col items-center justify-center gap-1 rounded-xl border p-2 transition-colors md:w-[calc((100%-3rem)/4)] md:p-3 lg:w-[calc((100%-6rem)/7)] ${
                   isSelected
                     ? 'border-primary text-primary bg-primary/5 font-bold'
                     : 'text-secondary border-black/15'
                 }`}
-                style={{ width: 'calc((100% - (6 * 1rem)) / 7)' }}
                 ref={isSelected ? dateActive : null}
               >
-                <span className="text-sm font-semibold capitalize">{day.formatted}</span>
-                <span className="text-xs">Desde $&nbsp;1.050</span>
+                <span className="text-sm font-semibold whitespace-nowrap capitalize">
+                  {day.formatted}
+                </span>
+                <span className="text-xs whitespace-nowrap">Desde $&nbsp;1.050</span>
               </button>
             );
           })}
