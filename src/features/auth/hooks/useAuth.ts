@@ -6,6 +6,17 @@ import { api, gatewayBaseUrl } from '@/config/api';
 import axios from 'axios';
 import { getPostLoginPath } from '../postLoginPath';
 
+const SIN_CONEXION = 'No pudimos conectar con el servidor. Probá de nuevo en unos segundos.';
+
+/** Convierte cualquier fallo de la API en algo que el formulario pueda mostrar. */
+const errorParaMostrar = (err: unknown): errorAuth => {
+  if (axios.isAxiosError(err) && err.response?.data && typeof err.response.data === 'object') {
+    const data = err.response.data as Partial<errorAuth>;
+    if (data.message || data.errors) return { ...data, message: data.message ?? '' } as errorAuth;
+  }
+  return { status: 0, message: SIN_CONEXION, errors: undefined, timestapm: '' };
+};
+
 export const useAuth = () => {
   const [errorAuth, setErrAuth] = useState<errorAuth>();
   const navigate = useNavigate();
@@ -17,12 +28,12 @@ export const useAuth = () => {
     try {
       const res = await api.post(`${gatewayBaseUrl}/api/auth/register`, datos);
       // Quien llegó desde una página protegida (por ejemplo una invitación) vuelve ahí al iniciar sesión.
-      navigate('/login', { state: location.state });
+      // El login muestra el aviso de cuenta creada y deja el correo cargado.
+      const estadoPrevio = (location.state ?? {}) as Record<string, unknown>;
+      navigate('/login', { state: { ...estadoPrevio, cuentaCreada: datos.email } });
       return res.data;
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setErrAuth(err.response?.data as errorAuth);
-      }
+      setErrAuth(errorParaMostrar(err));
     }
   };
 
@@ -50,9 +61,7 @@ export const useAuth = () => {
       navigate(getPostLoginPath(location.state, userData.role), { replace: true });
       return tokens;
     } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        setErrAuth(err.response?.data as errorAuth);
-      }
+      setErrAuth(errorParaMostrar(err));
     }
   };
 
@@ -77,6 +86,7 @@ export const useAuth = () => {
     executeLogin,
     currentUser,
     errorAuth,
+    setErrAuth,
     clearFieldError,
   };
 };
