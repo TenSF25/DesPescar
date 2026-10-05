@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router';
+import { Footer } from './Footer';
 import { Nav } from './Nav';
 import KoiChat from '@/features/koi/pages/KoiChat';
 
@@ -9,6 +10,7 @@ export const MainLayout = () => {
       <main className="flex w-full flex-1 flex-col">
         <Outlet />
       </main>
+      <Footer />
       <KoiChat></KoiChat>
     </div>
   );

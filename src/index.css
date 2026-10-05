@@ -72,3 +72,7 @@ body[data-barra-inferior] .koi-fab ~ div {
   bottom: 12rem;
   max-height: calc(100dvh - 14rem);
 }
+
+body[data-barra-inferior] footer {
+  padding-bottom: 6rem;
+}

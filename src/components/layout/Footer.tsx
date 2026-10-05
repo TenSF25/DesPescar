@@ -1,36 +1,115 @@
+import { Marca } from './Marca';
+
+const informacion = [
+  'Sobre nosotros',
+  'Preguntas frecuentes',
+  'Términos y condiciones',
+  'Políticas de privacidad',
+  'Noticias',
+];
+
+const servicios = [
+  'Buscar vuelos',
+  'Buscar hoteles',
+  'Mis reservas',
+  'Equipaje',
+  'Check-in',
+  'Estado de vuelos',
+];
+
+const redes = [
+  { nombre: 'Facebook', icono: 'fa-facebook-f' },
+  { nombre: 'Instagram', icono: 'fa-instagram' },
+  { nombre: 'X', icono: 'fa-x-twitter' },
+  { nombre: 'YouTube', icono: 'fa-youtube' },
+];
+
+const contacto = [
+  { icono: 'call', lineas: ['0810-999-1234'] },
+  { icono: 'mail', lineas: ['soporte@despescar.com'] },
+  { icono: 'chat', lineas: ['Chat en vivo'] },
+  {
+    icono: 'schedule',
+    lineas: ['Lun a Vie de 09:00 a 21:00', 'Sáb y Dom de 10:00 a 18:00'],
+  },
+];
+
+const Columna = ({ titulo, items }: { titulo: string; items: string[] }) => (
+  <div className="flex flex-col gap-3">
+    <h6 className="font-bold text-white">{titulo}</h6>
+    <ul className="flex flex-col gap-2 text-sm text-white/70">
+      {items.map((item) => (
+        <li key={item} className="cursor-default">
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 export const Footer = () => {
   return (
-    <footer className="mx-auto grid w-full grid-cols-4 bg-[#031636] p-[60px_30px] text-white/70">
-      <div className="w-full max-w-70">
-        <h5 className="text-alert text-2xl font-bold">DesPescar</h5>
-        <p>© 2026 DesPescar Aeronáutica. Sistema de Gestión de Precisión.</p>
-      </div>
-      <div className="flex w-full flex-col gap-3">
-        <h6 className="font-bold">Legal</h6>
-        <a href="" className="hover:text-white">
-          Términos Legales
-        </a>
-        <a href="" className="hover:text-white">
-          Privacidad
-        </a>
-      </div>
-      <div className="flex w-full flex-col gap-3">
-        <h6 className="font-bold">Plataforma</h6>
-        <a href="" className="hover:text-white">
-          Términos Legales
-        </a>
-        <a href="" className="hover:text-white">
-          Privacidad
-        </a>
-      </div>
-      <div className="flex w-full flex-col gap-3">
-        <h6 className="font-bold">Empresa</h6>
-        <a href="" className="hover:text-white">
-          Términos Legales
-        </a>
-        <a href="" className="hover:text-white">
-          Privacidad
-        </a>
+    <footer className="w-full bg-[#031636] text-white">
+      <div className="mx-auto max-w-370 px-4 py-12 sm:px-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col gap-4">
+            <Marca variante="oscuro" tamano="sm" />
+            <p className="max-w-xs text-sm text-white/70">
+              Te acompañamos a descubrir el mundo con las mejores experiencias de viaje.
+            </p>
+            <div className="flex gap-3">
+              {redes.map((red) => (
+                <span
+                  key={red.nombre}
+                  role="img"
+                  aria-label={red.nombre}
+                  className="flex h-9 w-9 cursor-default items-center justify-center rounded-lg bg-white/10"
+                >
+                  <i aria-hidden="true" className={`fa-brands ${red.icono} text-sm`} />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <Columna titulo="Información" items={informacion} />
+          <Columna titulo="Servicios" items={servicios} />
+
+          <div className="flex flex-col gap-3">
+            <h6 className="font-bold text-white">Atención al cliente</h6>
+            <ul className="flex flex-col gap-3 text-sm text-white/70">
+              {contacto.map((c) => (
+                <li key={c.icono} className="flex cursor-default items-start gap-2">
+                  <span aria-hidden="true" className="material-symbols-outlined text-lg">
+                    {c.icono}
+                  </span>
+                  <span className="flex flex-col">
+                    {c.lineas.map((l) => (
+                      <span key={l}>{l}</span>
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-4 border-t border-white/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-white/70">© 2026 Despescar. Todos los derechos reservados.</p>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
+            <span className="rounded bg-white px-2 py-1 text-[#1a1f71] italic">VISA</span>
+            <span
+              aria-label="Mastercard"
+              className="flex items-center rounded bg-white/10 px-2 py-1.5"
+            >
+              <span className="h-4 w-4 rounded-full bg-red-600" />
+              <span className="-ml-1.5 h-4 w-4 rounded-full bg-orange-400/90" />
+            </span>
+            <span className="rounded bg-[#016fd0] px-2 py-1 text-white">AMEX</span>
+            <span className="rounded bg-sky-300 px-2 py-1 text-[#1a3a6b] lowercase">
+              mercado pago
+            </span>
+          </div>
+        </div>
       </div>
     </footer>
   );
