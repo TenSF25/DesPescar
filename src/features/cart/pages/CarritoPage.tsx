@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { SectionContainer } from '@/components/ui/SectionContainer';
+import { DividirPago } from '@/features/grupo/components/DividirPago';
+import { PanelGrupo } from '@/features/grupo/components/PanelGrupo';
+import { puedeDividir } from '@/features/grupo/grupo';
+import type { FuenteGrupo } from '@/features/grupo/grupo.types';
 import { crearPago } from '@/features/payments/services/pagosService';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { useFlightStore } from '@/store/useFlightStore';
 import { cn } from '@/utils/cn';
 import { destinoPago } from '@/utils/destinoPago';
-import { estadiasActivas, leerErrorApi } from '../carrito';
+import { enGrupo, estadiasActivas, leerErrorApi } from '../carrito';
 import { CarritoUiContext, type CarritoUi, type Formulario } from '../components/carritoUi';
 import { CuentaRegresiva } from '../components/CuentaRegresiva';
 import { EstadiaEnCarrito } from '../components/EstadiaEnCarrito';
@@ -98,6 +102,13 @@ export const CarritoPage = () => {
   useEffect(() => {
     if (enfocarTitulo > 0) titulo.current?.focus();
   }, [enfocarTitulo]);
+
+  // El carrito que se paga en grupo (D-b17): el panel lee el grupo como organizador.
+  const fuenteGrupo = useMemo<FuenteGrupo | null>(
+    () =>
+      carrito && enGrupo(carrito) ? { tipo: 'organizador', reservaId: carrito.idCarrito } : null,
+    [carrito],
+  );
 
   const ui = useMemo<CarritoUi>(() => {
     const anunciar = (texto: string) => {
@@ -233,6 +244,27 @@ export const CarritoPage = () => {
   const estadias = estadiasActivas(carrito);
   const vuelo = carrito.vuelo;
 
+  // Carrito congelado por el pago en grupo: sin formularios, sin quitar ítems y sin barra de pago.
+  if (fuenteGrupo !== null) {
+    return (
+      <SectionContainer className="pt-8 sm:pt-12">
+        {regionViva}
+        {encabezado}
+        {error && (
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="flex min-w-0 flex-col gap-6">
+            <PanelGrupo fuente={fuenteGrupo} />
+          </div>
+          <ResumenCarrito carrito={carrito} />
+        </div>
+      </SectionContainer>
+    );
+  }
+
   return (
     <CarritoUiContext.Provider value={ui}>
       <SectionContainer className="pt-8 sm:pt-12">
@@ -262,6 +294,16 @@ export const CarritoPage = () => {
               />
             )}
             <TitularesForm carrito={carrito} />
+            {puedeDividir(carrito) && !(edicion.pasajeros || edicion.titulares) && (
+              <DividirPago
+                carrito={carrito}
+                onIniciado={(g) => {
+                  ui.anunciar(`Pago en grupo creado con ${g.cantidadPartes} partes.`);
+                  void recargar();
+                }}
+                onCarritoCambio={() => void recargar()}
+              />
+            )}
             {cargando && <p className="text-secondary/60 text-sm">Actualizando...</p>}
           </div>
           <ResumenCarrito carrito={carrito} />
