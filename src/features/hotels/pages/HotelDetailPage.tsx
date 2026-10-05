@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { Estrellas } from '../components/Estrellas';
+import { AgregarAlCarrito } from '../components/Detail/AgregarAlCarrito';
 import { ElegirFechas } from '../components/Detail/ElegirFechas';
 import { HabitacionCard } from '../components/Detail/HabitacionCard';
 import { HotelGallery } from '../components/Detail/HotelGallery';
@@ -95,7 +96,16 @@ export const HotelDetailPage = () => {
               </>
             )}
             {hotel.habitaciones.map((h) => (
-              <HabitacionCard key={h.id} habitacion={h} noches={hotel.noches} />
+              <HabitacionCard
+                key={h.id}
+                habitacion={h}
+                noches={hotel.noches}
+                accion={
+                  conFechas ? (
+                    <AgregarAlCarrito hotelId={hotel.id} habitacion={h} params={params} />
+                  ) : undefined
+                }
+              />
             ))}
           </section>
         </div>
