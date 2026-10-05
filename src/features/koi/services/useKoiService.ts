@@ -24,6 +24,8 @@ export const useKoiChat = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+  // Mientras se recupera o crea la sesión inicial; si falla, el chat igual queda usable
+  const [iniciando, setIniciando] = useState(true);
   // StrictMode monta dos veces en desarrollo: sin esto se crearían dos sesiones
   const iniciado = useRef(false);
 
@@ -59,19 +61,27 @@ export const useKoiChat = () => {
       }
     };
 
-    void iniciar();
+    void iniciar().finally(() => setIniciando(false));
   }, [empezarDeCero]);
 
   const sendMessage = useCallback(
     async (userText: string) => {
       const texto = userText.trim();
-      if (!texto || !sessionId) return;
+      if (!texto) return;
 
       setMessages((prev) => [...prev, { role: 'user', text: texto, opciones: [] }]);
       setLoading(true);
 
       try {
-        const respuesta = await enviarMensajeKoi(sessionId, texto);
+        // Si KOI no estaba disponible al abrir la página, la sesión se crea recién ahora
+        let id = sessionId;
+        if (!id) {
+          const nueva = await crearSesionKoi();
+          guardarSessionId(nueva.sessionId);
+          setSessionId(nueva.sessionId);
+          id = nueva.sessionId;
+        }
+        const respuesta = await enviarMensajeKoi(id, texto);
         setMessages((prev) => [...prev, mensajeDeRespuesta(respuesta)]);
       } catch (error) {
         const status = statusDe(error);
@@ -99,6 +109,6 @@ export const useKoiChat = () => {
     messages,
     sendMessage,
     loading,
-    isReady: sessionId !== null,
+    isReady: !iniciando,
   };
 };
