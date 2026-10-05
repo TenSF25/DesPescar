@@ -19,10 +19,10 @@ export const Baggage = () => {
   } = useBaggage();
 
   return (
-    <SectionContainer>
+    <SectionContainer className="pb-32 sm:pb-28">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col">
-          <div className="flex items-center gap-3 text-3xl text-[#323439]">
+          <div className="flex flex-wrap items-center gap-x-3 text-2xl text-[#323439] sm:text-3xl">
             <h2 className="font-medium">{flight?.originAirport.city} </h2>
             <span className="material-symbols-outlined">sync_alt</span>
             <h2 className="font-semibold">{flight?.destinationAirport.city}</h2>
@@ -35,9 +35,9 @@ export const Baggage = () => {
             </p>
           </div>
         </div>
-        <div className="border-primary/40 flex max-h-17.5 items-center justify-between rounded-lg border p-2">
-          <div className="flex h-full items-center divide-x divide-gray-300 font-medium">
-            <div className="flex items-center gap-2 px-3">
+        <div className="border-primary/40 flex flex-col gap-3 rounded-lg border p-2 lg:max-h-17.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex h-full flex-col divide-y divide-gray-300 font-medium sm:flex-row sm:items-center sm:divide-x sm:divide-y-0">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:py-0">
               <img
                 src={flightDepartureId?.airline.logoUrl}
                 alt={flightDepartureId?.airline.name}
@@ -53,7 +53,7 @@ export const Baggage = () => {
                 {formatDate(flightDepartureId?.departureTime || '')}
               </h4>
             </div>
-            <div className="flex items-center gap-2 px-3">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:py-0">
               <img
                 src={flightReturnId?.airline.logoUrl}
                 alt={flightReturnId?.airline.name}
@@ -70,18 +70,21 @@ export const Baggage = () => {
               </h4>
             </div>
           </div>
-          <Button className="max-w-30 rounded-full border-none" variant="secondary">
+          <Button
+            className="w-full rounded-full border-none sm:w-auto lg:max-w-30"
+            variant="secondary"
+          >
             Ver detalle
           </Button>
         </div>
       </div>
       <div className="flex w-full flex-col justify-between gap-6 text-[#323439]">
-        <div className="flex w-full items-center justify-between text-[#323439]">
-          <h2 className="text-3xl font-semibold">Seleccioná tu tarifa</h2>
+        <div className="flex w-full flex-col gap-1 text-[#323439] sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-2xl font-semibold sm:text-3xl">Seleccioná tu tarifa</h2>
           <p>{flight?.fares?.length} tarifas disponibles</p>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6 md:flex-row">
           {flight?.fares?.map((tarifa: Fare) => (
             <BaggageCard
               key={tarifa.id}
@@ -95,12 +98,12 @@ export const Baggage = () => {
           ))}
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 flex w-full justify-center border-t border-[#3234392d]">
-        <div className="flex w-360 items-center justify-between p-4">
-          <h3 className="text-xl font-semibold text-[#323439]">
+      <div className="fixed bottom-0 left-0 z-10 flex w-full justify-center border-t border-[#3234392d] bg-white">
+        <div className="flex w-full max-w-360 items-center justify-between gap-3 p-3 sm:p-4">
+          <h3 className="min-w-0 truncate text-base font-semibold text-[#323439] sm:text-xl">
             Tu viaje a {flight?.destinationAirport?.city}
           </h3>
-          <div className="flex items-center gap-12">
+          <div className="flex shrink-0 items-center gap-4 sm:gap-12">
             <div className="flex flex-col">
               <h5 className="text-xs font-semibold">Precio final</h5>
               <div className="flex gap-0.5">
