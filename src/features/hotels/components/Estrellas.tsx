@@ -1,13 +1,12 @@
+/** Estrellas del hotel (Font Awesome: Material Symbols se carga sin la variante rellena). */
 export const Estrellas = ({ cantidad }: { cantidad: number }) => (
-  <span className="flex text-[#F5A524]" aria-label={`${cantidad} estrellas`}>
+  <span
+    className="flex gap-0.5 text-[13px] text-[#F5A524]"
+    role="img"
+    aria-label={`${cantidad} estrellas`}
+  >
     {Array.from({ length: cantidad }, (_, i) => (
-      <span
-        key={i}
-        className="material-symbols-outlined text-[16px]"
-        style={{ fontVariationSettings: "'FILL' 1" }}
-      >
-        star
-      </span>
+      <i key={i} className="fa-solid fa-star" aria-hidden="true" />
     ))}
   </span>
 );
