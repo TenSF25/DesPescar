@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Pago } from './payments.types';
-import { leerRetornoPago, resultadoPago, ultimoPago } from './pagos';
+import {
+  ESPERA_MAXIMA_MS,
+  leerRetornoPago,
+  resultadoPago,
+  seguirConsultando,
+  ultimoPago,
+} from './pagos';
 
 const pago = (cambios: Partial<Pago> = {}): Pago => ({
   id: 'p1',
@@ -101,5 +107,16 @@ describe('resultadoPago', () => {
 
   it('cancelado: error', () => {
     expect(resultadoPago(pago({ status: 'CANCELLED' }), 'PENDIENTE_PAGO').tono).toBe('error');
+  });
+});
+
+describe('seguirConsultando', () => {
+  it('consulta mientras siga pendiente y no pase el máximo', () => {
+    expect(seguirConsultando(true, 0, 1000)).toBe(true);
+    expect(seguirConsultando(true, 1000, 1000 + ESPERA_MAXIMA_MS - 1)).toBe(true);
+  });
+  it('se detiene con un estado final o al pasar el máximo', () => {
+    expect(seguirConsultando(false, 0, 1000)).toBe(false);
+    expect(seguirConsultando(true, 1000, 1000 + ESPERA_MAXIMA_MS)).toBe(false);
   });
 });

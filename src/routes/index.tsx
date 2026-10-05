@@ -32,6 +32,8 @@ import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages
 import { HotelDetailPage } from '@/features/hotels/pages/HotelDetailPage';
 import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
 import { CarritoPage } from '@/features/cart/pages/CarritoPage';
+import { PagoResultadoPage } from '@/features/payments/pages/PagoResultadoPage';
+import { PagoSimuladoPage } from '@/features/payments/pages/PagoSimuladoPage';
 import { createBrowserRouter, Navigate } from 'react-router';
 
 export const router = createBrowserRouter([
@@ -89,10 +91,6 @@ export const router = createBrowserRouter([
             path: 'checkout',
             element: <Navigate to="/carrito" replace />,
           },
-          {
-            path: 'checkout/travelers-data',
-            element: <h1>HOLA</h1>,
-          },
         ],
       },
       {
@@ -101,6 +99,14 @@ export const router = createBrowserRouter([
           {
             path: '/carrito',
             element: <CarritoPage />,
+          },
+          {
+            path: '/pago/simulado',
+            element: <PagoSimuladoPage />,
+          },
+          {
+            path: '/pago/resultado',
+            element: <PagoResultadoPage />,
           },
         ],
       },

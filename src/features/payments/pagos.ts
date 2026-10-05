@@ -40,7 +40,7 @@ export const resultadoPago = (pago: Pago, estadoReserva: EstadoCarrito): Resulta
       return estadoReserva === 'CONFIRMADA'
         ? {
             tono: 'exito',
-            titulo: '¡Listo! Tu reserva está confirmada',
+            titulo: '¡Reserva confirmada!',
             detalle: 'Te enviamos el detalle por correo. Los lugares ya quedaron a tu nombre.',
             seguirConsultando: false,
             reintentar: false,
@@ -89,3 +89,12 @@ export const resultadoPago = (pago: Pago, estadoReserva: EstadoCarrito): Resulta
       };
   }
 };
+
+/** Cada cuánto se vuelve a consultar un pago pendiente. */
+export const ESPERA_CONSULTA_MS = 4000;
+/** Después de este tiempo se deja de consultar solo y se ofrece actualizar a mano. */
+export const ESPERA_MAXIMA_MS = 2 * 60 * 1000;
+
+/** Si hay que programar otra consulta: el estado sigue pendiente y no se pasó el máximo. */
+export const seguirConsultando = (pendiente: boolean, inicio: number, ahora: number) =>
+  pendiente && ahora - inicio < ESPERA_MAXIMA_MS;
