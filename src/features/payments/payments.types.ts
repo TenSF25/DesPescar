@@ -15,11 +15,13 @@ export interface Pago {
   paymentDate: string | null;
   currency: string;
   createdAt: string;
+  /** Número de parte si el pago es de un pago en grupo (CB4). */
+  parteNumero: number | null;
 }
 
 /** Lo que trae /pago/resultado en la URL (C6). */
 export type RetornoPago =
-  | { tipo: 'mock'; reservaId: number }
+  | { tipo: 'mock'; reservaId: number; parte: number | null }
   | { tipo: 'mercadopago'; pagoId: string; mpPaymentId: string | null; estadoMp: string | null };
 
 export type Tono = 'exito' | 'pendiente' | 'error';

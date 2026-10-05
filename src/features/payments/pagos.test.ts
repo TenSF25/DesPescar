@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { Grupo } from '@/features/grupo/grupo.types';
 import type { Pago } from './payments.types';
 import {
   debeConciliar,
@@ -7,6 +8,7 @@ import {
   mensajePasarela,
   leerRetornoPago,
   resultadoPago,
+  resultadoParte,
   seguirConsultando,
   ultimoPago,
 } from './pagos';
@@ -24,7 +26,27 @@ const pago = (cambios: Partial<Pago> = {}): Pago => ({
   paymentDate: null,
   currency: 'ARS',
   createdAt: '2026-10-05T10:00:00',
+  parteNumero: null,
   ...cambios,
+});
+
+const grupoDe = (estado: Grupo['estado'], motivoCierre: Grupo['motivoCierre']): Grupo => ({
+  reservaId: 12,
+  estado,
+  venceEn: '2026-10-06T15:00:00',
+  segundosRestantes: estado === 'ABIERTO' ? 86100 : 0,
+  montoTotal: 1060000,
+  moneda: 'ARS',
+  montoPagado: 0,
+  cantidadPartes: 3,
+  partesPagadas: 0,
+  soyOrganizador: false,
+  miParte: 2,
+  enlaceToken: 'a'.repeat(43),
+  puedeEditarMontos: false,
+  motivoCierre,
+  partes: [],
+  viaje: { vuelo: null, estadias: [] },
 });
 
 describe('leerRetornoPago', () => {
@@ -32,6 +54,7 @@ describe('leerRetornoPago', () => {
     expect(leerRetornoPago(new URLSearchParams('reserva=12'))).toEqual({
       tipo: 'mock',
       reservaId: 12,
+      parte: null,
     });
   });
 
@@ -175,5 +198,89 @@ describe('ultimoPago con fechas', () => {
     const dos = pago({ id: 'dos', createdAt: '2026-10-05T10:00:00+02:00' });
     const utc = pago({ id: 'utc', createdAt: '2026-10-05T09:00:00Z' });
     expect(ultimoPago([dos, utc])?.id).toBe('utc');
+  });
+});
+
+describe('partes', () => {
+  it('lee &parte=<n> en el retorno del mock y lo ignora si no es 1..10', () => {
+    expect(leerRetornoPago(new URLSearchParams('reserva=12&parte=2'))).toEqual({
+      tipo: 'mock',
+      reservaId: 12,
+      parte: 2,
+    });
+    expect(leerRetornoPago(new URLSearchParams('reserva=12'))).toEqual({
+      tipo: 'mock',
+      reservaId: 12,
+      parte: null,
+    });
+    expect(leerRetornoPago(new URLSearchParams('reserva=12&parte=0'))).toEqual({
+      tipo: 'mock',
+      reservaId: 12,
+      parte: null,
+    });
+    expect(leerRetornoPago(new URLSearchParams('reserva=12&parte=x'))).toEqual({
+      tipo: 'mock',
+      reservaId: 12,
+      parte: null,
+    });
+  });
+
+  it('el último pago se busca entre los de la parte pedida', () => {
+    const entero = pago({ id: 'a', createdAt: '2026-10-05T10:00:00', parteNumero: null });
+    const parte2 = pago({ id: 'b', createdAt: '2026-10-05T09:00:00', parteNumero: 2 });
+    expect(ultimoPago([entero, parte2])?.id).toBe('a');
+    expect(ultimoPago([entero, parte2], 2)?.id).toBe('b');
+    expect(ultimoPago([entero, parte2], 3)).toBeNull();
+  });
+
+  it('resultado de una parte según el pago y el grupo', () => {
+    const abierto = grupoDe('ABIERTO', null);
+    expect(resultadoParte(pago({ status: 'APPROVED', parteNumero: 2 }), abierto)).toMatchObject({
+      tono: 'exito',
+      titulo: 'Tu parte está paga',
+      seguirConsultando: false,
+      reintentar: false,
+    });
+    expect(
+      resultadoParte(pago({ status: 'APPROVED', parteNumero: 2 }), grupoDe('CONFIRMADO', null)),
+    ).toMatchObject({
+      tono: 'exito',
+      titulo: '¡Reserva confirmada!',
+    });
+    expect(
+      resultadoParte(pago({ status: 'APPROVED', parteNumero: 2 }), grupoDe('COMPLETO', null)),
+    ).toMatchObject({
+      tono: 'pendiente',
+      titulo: 'Confirmando la reserva',
+      seguirConsultando: true,
+    });
+    expect(
+      resultadoParte(
+        pago({ status: 'REFUNDED', parteNumero: 2 }),
+        grupoDe('VENCIDO', 'PAGO_EN_GRUPO_VENCIDO'),
+      ),
+    ).toMatchObject({
+      tono: 'error',
+      titulo: 'Te devolvimos tu parte',
+    });
+    expect(resultadoParte(pago({ status: 'REJECTED', parteNumero: 2 }), abierto)).toMatchObject({
+      tono: 'error',
+      reintentar: true,
+    });
+    expect(
+      resultadoParte(
+        pago({ status: 'REJECTED', parteNumero: 2 }),
+        grupoDe('CANCELADO', 'GRUPO_CANCELADO'),
+      ),
+    ).toMatchObject({
+      reintentar: false,
+    });
+    expect(resultadoParte(pago({ status: 'PENDING', parteNumero: 2 }), abierto)).toMatchObject({
+      tono: 'pendiente',
+      seguirConsultando: true,
+    });
+    expect(resultadoParte(pago({ status: 'PENDING', parteNumero: 2 }), null)).toMatchObject({
+      tono: 'pendiente',
+    });
   });
 });

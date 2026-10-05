@@ -1,4 +1,6 @@
 import type { EstadoCarrito } from '@/features/cart/cart.types';
+import { estadoGrupoTexto } from '@/features/grupo/grupo';
+import type { Grupo } from '@/features/grupo/grupo.types';
 import type { EstadoPago, Pago, ResultadoPago, RetornoPago } from './payments.types';
 
 const valor = (sp: URLSearchParams, clave: string) => {
@@ -19,18 +21,30 @@ export const leerRetornoPago = (sp: URLSearchParams): RetornoPago | null => {
     };
   }
   const reservaId = Number(valor(sp, 'reserva'));
-  return Number.isInteger(reservaId) && reservaId > 0 ? { tipo: 'mock', reservaId } : null;
+  if (!Number.isInteger(reservaId) || reservaId <= 0) return null;
+  const parte = Number(valor(sp, 'parte'));
+  return {
+    tipo: 'mock',
+    reservaId,
+    parte: Number.isInteger(parte) && parte >= 1 && parte <= 10 ? parte : null,
+  };
 };
 
-/** El pago más reciente de una reserva (GET /api/payments/reservation/{id} trae todos). */
-export const ultimoPago = (pagos: Pago[]): Pago | null =>
-  pagos.reduce<Pago | null>((ultimo, p) => {
-    if (!ultimo) return p;
-    const a = Date.parse(p.createdAt);
-    const b = Date.parse(ultimo.createdAt);
-    if (a !== b) return a > b ? p : ultimo;
-    return p.id > ultimo.id ? p : ultimo;
-  }, null);
+/**
+ * El pago más reciente de una reserva (GET /api/payments/reservation/{id} trae todos los del
+ * usuario). Con `parte`, solo entre los pagos de esa parte del grupo.
+ */
+export const ultimoPago = (pagos: Pago[], parte?: number): Pago | null =>
+  (parte === undefined ? pagos : pagos.filter((p) => p.parteNumero === parte)).reduce<Pago | null>(
+    (ultimo, p) => {
+      if (!ultimo) return p;
+      const a = Date.parse(p.createdAt);
+      const b = Date.parse(ultimo.createdAt);
+      if (a !== b) return a > b ? p : ultimo;
+      return p.id > ultimo.id ? p : ultimo;
+    },
+    null,
+  );
 
 export const carritoVigente = (estado: EstadoCarrito) =>
   estado === 'INICIADA' || estado === 'PENDIENTE_PAGO';
@@ -89,6 +103,92 @@ export const resultadoPago = (pago: Pago, estadoReserva: EstadoCarrito): Resulta
         detalle: 'Si ya pagaste, en unos segundos se actualiza. No cierres esta página.',
         seguirConsultando: true,
         reintentar,
+      };
+  }
+};
+
+const estadoGrupoDetalle = (g: Grupo) => estadoGrupoTexto(g).detalle;
+
+/** Qué mostrar para el pago de una parte según el pago y el grupo (null si no se pudo leer). */
+export const resultadoParte = (pago: Pago, grupo: Grupo | null): ResultadoPago => {
+  const estado = grupo?.estado ?? null;
+  const abierto = estado === 'ABIERTO' && (grupo?.segundosRestantes ?? 0) > 0;
+  const faltan = grupo ? grupo.cantidadPartes - grupo.partesPagadas : null;
+  switch (pago.status) {
+    case 'APPROVED':
+      if (estado === 'CONFIRMADO') {
+        return {
+          tono: 'exito',
+          titulo: '¡Reserva confirmada!',
+          detalle: 'Pagaron todos. Los lugares ya quedaron a nombre del grupo.',
+          seguirConsultando: false,
+          reintentar: false,
+        };
+      }
+      if (estado === 'COMPLETO') {
+        return {
+          tono: 'pendiente',
+          titulo: 'Confirmando la reserva',
+          detalle: 'Ya pagaron todos. Esto puede tardar unos segundos.',
+          seguirConsultando: true,
+          reintentar: false,
+        };
+      }
+      if (estado === 'CANCELADO' || estado === 'VENCIDO') {
+        return {
+          tono: 'pendiente',
+          titulo: 'Tu parte está paga, pero el grupo se cerró',
+          detalle:
+            'Estamos devolviendo tu dinero por el mismo medio. En unos minutos vas a verlo acá.',
+          seguirConsultando: true,
+          reintentar: false,
+        };
+      }
+      return {
+        tono: 'exito',
+        titulo: 'Tu parte está paga',
+        detalle:
+          faltan === null
+            ? 'Cuando paguen todos, la reserva se confirma sola.'
+            : `Faltan ${faltan} ${faltan === 1 ? 'parte' : 'partes'}. Cuando paguen todos, la reserva se confirma sola.`,
+        seguirConsultando: false,
+        reintentar: false,
+      };
+    case 'REFUNDED':
+      return {
+        tono: 'error',
+        titulo: 'Te devolvimos tu parte',
+        detalle: grupo
+          ? estadoGrupoDetalle(grupo)
+          : 'El pago en grupo no se pudo completar. Te devolvimos el dinero por el mismo medio.',
+        seguirConsultando: false,
+        reintentar: false,
+      };
+    case 'REJECTED':
+      return {
+        tono: 'error',
+        titulo: 'El pago fue rechazado',
+        detalle: abierto
+          ? 'No se te cobró nada. Podés volver al grupo e intentar de nuevo.'
+          : 'No se te cobró nada. El pago en grupo ya no está abierto.',
+        seguirConsultando: false,
+        reintentar: abierto,
+      };
+    case 'CANCELLED':
+      return {
+        tono: 'error',
+        titulo: 'El pago se canceló',
+        detalle: 'No se te cobró nada.',
+        seguirConsultando: false,
+        reintentar: abierto,
+      };
+    default:
+      return {
+        tono: 'pendiente',
+        titulo: 'Estamos esperando la confirmación del pago',
+        detalle: 'Si ya pagaste, en unos segundos se actualiza. No cierres esta página.',
+        seguirConsultando: true,
+        reintentar: abierto,
       };
   }
 };

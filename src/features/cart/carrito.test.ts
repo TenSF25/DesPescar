@@ -7,6 +7,8 @@ import {
   armarTitulares,
   cantidadEnCarrito,
   capacidadSuficiente,
+  carritoAbierto,
+  enGrupo,
   estadoAsientos,
   faltantes,
   formatCuentaRegresiva,
@@ -118,6 +120,24 @@ describe('estado del carrito', () => {
     expect(puedePagar({ ...listo, datosCompletos: false })).toBe(false);
     expect(puedePagar({ ...listo, segundosRestantes: 0 })).toBe(false);
     expect(puedePagar({ ...listo, montoTotal: 0 })).toBe(false);
+  });
+
+  it('un carrito esperando pagadores sigue abierto: cuenta ítems, está en grupo y no se puede pagar entero', () => {
+    const c = carrito({
+      estadoGeneral: 'ESPERANDO_PAGADORES',
+      segundosRestantes: 86100,
+      cantidadItems: 2,
+    });
+    expect(carritoAbierto(c)).toBe(true);
+    expect(enGrupo(c)).toBe(true);
+    expect(cantidadEnCarrito(c)).toBe(2);
+    expect(puedePagar(c)).toBe(false);
+    expect(estadoBarraPago(c, { pagando: false, editando: false, vencido: false })).toEqual({
+      habilitado: false,
+      ayuda: 'Pago en grupo en curso',
+    });
+    expect(carritoAbierto(carrito({ estadoGeneral: 'CONFIRMADA' }))).toBe(false);
+    expect(enGrupo(carrito())).toBe(false);
   });
 });
 

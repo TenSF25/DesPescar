@@ -6,7 +6,7 @@ import type {
   PasajeroRequest,
   TitularRequest,
 } from '@/features/cart/cart.types';
-import { leerErrorApi } from '@/features/cart/carrito';
+import { carritoAbierto, leerErrorApi } from '@/features/cart/carrito';
 import * as carritoService from '@/features/cart/services/carritoService';
 import { useFlightStore } from './useFlightStore';
 
@@ -48,11 +48,6 @@ const SESION_CAMBIADA: ErrorApi = {
  * servidor, erratas 12). Si desaparece mucho antes de su vencimiento es que se pagó o se cerró.
  */
 const MARGEN_VENCIMIENTO_MS = 15_000;
-
-const vigente = (c: Carrito | null): c is Carrito =>
-  c !== null &&
-  (c.estadoGeneral === 'INICIADA' || c.estadoGeneral === 'PENDIENTE_PAGO') &&
-  c.segundosRestantes > 0;
 
 const vencimiento = (c: Carrito | null) => (c ? Date.now() + c.segundosRestantes * 1000 : null);
 
@@ -119,7 +114,8 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
         if (g !== generacion) return;
         const vencio =
           carrito === null &&
-          vigente(previo) &&
+          previo !== null &&
+          carritoAbierto(previo) &&
           venceEn !== null &&
           Date.now() >= venceEn - MARGEN_VENCIMIENTO_MS;
         if (vencio) marcarVencido();

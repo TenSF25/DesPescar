@@ -44,12 +44,19 @@ export const urgencia = (segundos: number): Urgencia =>
 
 // ---------- estado del carrito ----------
 
-const vigente = (c: Carrito) =>
-  (c.estadoGeneral === 'INICIADA' || c.estadoGeneral === 'PENDIENTE_PAGO') &&
+/** Carrito que todavía ocupa lugares: armándose, listo para pagar o esperando a los pagadores del grupo. */
+export const carritoAbierto = (c: Carrito) =>
+  (c.estadoGeneral === 'INICIADA' ||
+    c.estadoGeneral === 'PENDIENTE_PAGO' ||
+    c.estadoGeneral === 'ESPERANDO_PAGADORES') &&
   c.segundosRestantes > 0;
 
+/** Se está pagando en grupo (D-b17): congelado, se muestra el panel del grupo. */
+export const enGrupo = (c: Carrito) => c.estadoGeneral === 'ESPERANDO_PAGADORES';
+
 /** Lo que muestra el ícono del Nav. */
-export const cantidadEnCarrito = (c: Carrito | null) => (c && vigente(c) ? c.cantidadItems : 0);
+export const cantidadEnCarrito = (c: Carrito | null) =>
+  c && carritoAbierto(c) ? c.cantidadItems : 0;
 
 export const estadiasActivas = (c: Carrito): EstadiaCarrito[] =>
   c.estadias.filter((e) => e.estado === 'ACTIVA');
@@ -76,6 +83,7 @@ export const estadoBarraPago = (
   if (vencido || c.estadoGeneral === 'EXPIRADA' || c.segundosRestantes <= 0) {
     return { habilitado: false, ayuda: 'Tu carrito venció' };
   }
+  if (enGrupo(c)) return { habilitado: false, ayuda: 'Pago en grupo en curso' };
   const pendientes = faltantes(c);
   if (pendientes.length > 0) {
     return { habilitado: false, ayuda: `Falta: ${pendientes.join(' y ').toLowerCase()}` };

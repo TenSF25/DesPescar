@@ -3,9 +3,12 @@ import type { Pago } from '../payments.types';
 
 const BASE = '/api/payments';
 
-/** Crea (o reutiliza, D19) el pago del carrito. El monto lo pone el servidor. */
-export const crearPago = async (reservationId: number): Promise<Pago> => {
-  const res = await api.post<Pago>(BASE, { reservationId });
+/** Crea (o reutiliza, D19) el pago del carrito o, con parteNumero, el de esa parte del grupo (CB4). El monto lo pone el servidor. */
+export const crearPago = async (reservationId: number, parteNumero?: number): Promise<Pago> => {
+  const res = await api.post<Pago>(
+    BASE,
+    parteNumero ? { reservationId, parteNumero } : { reservationId },
+  );
   return res.data;
 };
 
