@@ -53,7 +53,7 @@ export const Footer = () => {
       <div className="mx-auto max-w-370 px-4 py-12 sm:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4">
-            <Marca variante="oscuro" tamano="sm" />
+            <Marca variante="oscuro" tamano="xl" />
             <p className="max-w-xs text-sm text-white/70">
               Te acompañamos a descubrir el mundo con las mejores experiencias de viaje.
             </p>

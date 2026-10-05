@@ -1,29 +1,46 @@
 interface MarcaProps {
   variante?: 'claro' | 'oscuro';
-  tamano?: 'sm' | 'lg';
+  tamano?: 'sm' | 'lg' | 'xl';
 }
+
+const estilos = {
+  sm: {
+    gap: 'gap-2',
+    img: 'h-8',
+    palabra: 'text-xl',
+    bajada: 'flex text-[9px]',
+  },
+  lg: {
+    gap: 'gap-2 sm:gap-3',
+    img: 'h-8 sm:h-11',
+    palabra: 'text-xl sm:text-3xl',
+    bajada: 'hidden sm:flex text-[9px]',
+  },
+  xl: {
+    gap: 'gap-3 sm:gap-4',
+    img: 'h-11 sm:h-14',
+    palabra: 'text-2xl sm:text-4xl',
+    bajada: 'flex text-[10px] sm:text-xs',
+  },
+};
 
 export const Marca = ({ variante = 'claro', tamano = 'lg' }: MarcaProps) => {
   const oscuro = variante === 'oscuro';
-  const grande = tamano === 'lg';
+  const e = estilos[tamano];
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3">
-      <img
-        src="/despescar-isotipo.webp"
-        alt=""
-        className={grande ? 'h-8 w-auto sm:h-11' : 'h-8 w-auto'}
-      />
+    <div className={`flex items-center ${e.gap}`}>
+      <img src="/despescar-isotipo.webp" alt="" className={`${e.img} w-auto`} />
       <div className="flex flex-col items-start">
         <h3
-          className={`${grande ? 'text-xl sm:text-3xl' : 'text-xl'} leading-none font-bold tracking-widest ${
+          className={`${e.palabra} leading-none font-bold tracking-widest ${
             oscuro ? 'text-white' : 'text-secondary'
           }`}
         >
           DESPESCAR
         </h3>
         <span
-          className={`${grande ? 'hidden sm:flex' : 'flex'} text-primary mt-1 items-center gap-1.5 text-[9px] font-semibold tracking-[0.2em] uppercase`}
+          className={`${e.bajada} text-primary mt-1.5 items-center gap-1.5 font-semibold tracking-[0.2em] uppercase`}
         >
           <span aria-hidden="true" className="bg-primary h-px w-3" />
           Vuela diferente
