@@ -4,7 +4,7 @@ export interface SeatsWebSockets {
   flightId: string;
   id: string;
   numberSeat: string;
-  statusSeat: 'DISPONIBLE' | 'BLOQUEADO' | 'RESERVADO_TEMPORAL';
+  statusSeat: 'DISPONIBLE' | 'OCUPADO' | 'RESERVADO_TEMPORAL';
 }
 
 export interface FareClassDetail {
@@ -20,7 +20,7 @@ export interface SeatItem {
   seatUuid: string;
   displayNumber: string;
   fareClass: string;
-  status: 'DISPONIBLE' | 'BLOQUEADO' | 'RESERVADO_TEMPORAL' | 'select';
+  status: 'DISPONIBLE' | 'OCUPADO' | 'RESERVADO_TEMPORAL' | 'select';
   blockedByUserId?: number;
 }
 

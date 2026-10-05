@@ -44,4 +44,16 @@ describe('useFlightStore', () => {
     // El id del carrito lo informa useCarritoStore; el store de vuelos ya no lo guarda.
     expect('bookingId' in s).toBe(false);
   });
+  it('permite guardar y recuperar el reservationId', () => {
+    useFlightStore.getState().setReservationId(12345);
+    const s = useFlightStore.getState();
+    expect(s.reservationId).toBe(12345);
+  });
+
+  it('limpiarCompra reinicia también el reservationId', () => {
+    useFlightStore.getState().setReservationId(12345);
+    useFlightStore.getState().limpiarCompra();
+    const s = useFlightStore.getState();
+    expect(s.reservationId).toBeNull();
+  });
 });

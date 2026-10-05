@@ -28,7 +28,7 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
   }
 
   const isOccupiedByOther =
-    data.status === 'BLOQUEADO' ||
+    data.status === 'OCUPADO' ||
     (data.status === 'RESERVADO_TEMPORAL' && data.blockedByUserId !== myUserId);
 
   const isSelectedByMe = data.status === 'RESERVADO_TEMPORAL' && data.blockedByUserId === myUserId;

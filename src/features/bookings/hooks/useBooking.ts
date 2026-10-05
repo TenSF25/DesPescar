@@ -19,6 +19,7 @@ export const useBooking = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const {
+    setReservationId,
     selectedDepartureFlight,
     selectedReturnFlight,
     passengers,
@@ -26,6 +27,7 @@ export const useBooking = () => {
     selectedReturnFare,
   } = useFlightStore(
     useShallow((s) => ({
+      setReservationId: s.setReservationId,
       selectedDepartureFlight: s.selectedDepartureFlight,
       selectedReturnFlight: s.selectedReturnFlight,
       passengers: s.passengers,
@@ -34,6 +36,7 @@ export const useBooking = () => {
     })),
   );
   const quitarVueloDelCarrito = useCarritoStore((s) => s.quitarVuelo);
+  const { setSelectedSeats } = useFlightStore();
 
   const armarPedido = (): IniciarVueloRequest | string => {
     if (!selectedDepartureFlight) return 'Elegí un vuelo antes de continuar.';
@@ -64,6 +67,11 @@ export const useBooking = () => {
         return { success: false, codigo: null, error: pedido };
       }
       const res = await iniciarVuelo(pedido);
+
+      if (res.bookingId) {
+        setReservationId(res.bookingId);
+      }
+
       return { success: true, reservationId: res.bookingId };
     } catch (err: unknown) {
       const e = leerErrorApi(err, 'No pudimos agregar el vuelo al carrito.');
@@ -80,6 +88,7 @@ export const useBooking = () => {
     setIsLoading(true);
     setError(null);
     const r = await quitarVueloDelCarrito();
+    setSelectedSeats([]);
     setIsLoading(false);
     if (!r.ok && !nadaQueQuitar(r.error.status, r.error.codigo)) {
       setError(r.error.mensaje);
