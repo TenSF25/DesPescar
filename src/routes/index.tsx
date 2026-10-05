@@ -32,6 +32,7 @@ import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages
 import { HotelDetailPage } from '@/features/hotels/pages/HotelDetailPage';
 import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
 import { CarritoPage } from '@/features/cart/pages/CarritoPage';
+import { GrupoInvitacionPage } from '@/features/grupo/pages/GrupoInvitacionPage';
 import { PagoResultadoPage } from '@/features/payments/pages/PagoResultadoPage';
 import { PagoSimuladoPage } from '@/features/payments/pages/PagoSimuladoPage';
 import { createBrowserRouter, Navigate } from 'react-router';
@@ -107,6 +108,10 @@ export const router = createBrowserRouter([
           {
             path: '/pago/resultado',
             element: <PagoResultadoPage />,
+          },
+          {
+            path: '/grupo/:token',
+            element: <GrupoInvitacionPage />,
           },
         ],
       },

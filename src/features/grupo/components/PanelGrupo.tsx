@@ -87,13 +87,20 @@ interface Props {
   onGrupo?: (grupo: Grupo) => void;
   /** Encabezado opcional (la página de invitación pone el suyo). */
   titulo?: string;
+  /** La lectura respondió 404: el usuario ya no tiene parte (se la liberaron) o el grupo no existe. */
+  onSinAcceso?: () => void;
 }
 
 /**
  * El grupo completo: estado, plazo, enlace, partes, acciones y el viaje. Lo usan /carrito,
  * /grupo/:token y el resultado del pago de una parte.
  */
-export const PanelGrupo = ({ fuente, onGrupo, titulo = 'Pago en grupo' }: Props) => {
+export const PanelGrupo = ({
+  fuente,
+  onGrupo,
+  titulo = 'Pago en grupo',
+  onSinAcceso,
+}: Props) => {
   const { grupo, leidoEn, cargando, error, anuncio, recargar, aplicar } = useGrupo(fuente);
   const navigate = useNavigate();
   const recargarCarrito = useCarritoStore((s) => s.recargar);
@@ -119,6 +126,11 @@ export const PanelGrupo = ({ fuente, onGrupo, titulo = 'Pago en grupo' }: Props)
     }
     estadoPrevio.current = grupo.estado;
   }, [grupo, onGrupo, recargarCarrito]);
+
+  const sinAcceso = error?.status === 404;
+  useEffect(() => {
+    if (sinAcceso) onSinAcceso?.();
+  }, [sinAcceso, onSinAcceso]);
 
   useEffect(() => {
     if (confirmandoCancelar) botonConfirmar.current?.focus();

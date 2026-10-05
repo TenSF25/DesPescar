@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
 import type { errorAuth, InterfaceAuth } from '../auth.types';
 
 export const LoginForm = () => {
   const { executeLogin, errorAuth, clearFieldError } = useAuth();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,7 +75,7 @@ export const LoginForm = () => {
       </div>
       <div className="flex flex-col items-center gap-4 text-[#df6a17]">
         <h3 className="cursor-pointer font-medium">¿Olvidaste tu contraseña?</h3>
-        <Link to="/register">
+        <Link to="/register" state={location.state}>
           <h3 className="cursor-pointer font-medium">¿No tienes cuenta? Registrate</h3>
         </Link>
       </div>

@@ -3,6 +3,7 @@ import type { Carrito } from '@/features/cart/cart.types';
 import type { Grupo, ParteGrupo } from './grupo.types';
 import {
   aCentavos,
+  apodoValido,
   cambiosGrupo,
   deCentavos,
   debeConsultarGrupo,
@@ -297,5 +298,24 @@ describe('errores', () => {
       mensaje: 'No tenés permisos para esta acción.',
     });
     expect(leerErrorGrupo(new Error('x'), 'por defecto').mensaje).toBe('por defecto');
+  });
+});
+
+describe('apodoValido', () => {
+  it('acepta vacío, letras con acentos, números, espacios y . \' -', () => {
+    expect(apodoValido('')).toBe(true);
+    expect(apodoValido('Juli')).toBe(true);
+    expect(apodoValido("María José O'Brien-2 Jr.")).toBe(true);
+    expect(apodoValido('ñandú 10')).toBe(true);
+  });
+  it('rechaza símbolos, emojis y más de 30 caracteres', () => {
+    expect(apodoValido('juli@mail.com')).toBe(false);
+    expect(apodoValido('<b>Juli</b>')).toBe(false);
+    expect(apodoValido('Juli 🎉')).toBe(false);
+    expect(apodoValido('a'.repeat(31))).toBe(false);
+    expect(apodoValido('a'.repeat(30))).toBe(true);
+  });
+  it('mide el apodo sin los espacios de las puntas', () => {
+    expect(apodoValido(`  ${'a'.repeat(30)}  `)).toBe(true);
   });
 });

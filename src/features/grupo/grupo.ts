@@ -204,6 +204,10 @@ export const tokenValido = (token: string) => TOKEN.test(token);
 export const enlaceInvitacion = (token: string, origen: string) =>
   `${origen.replace(/\/$/, '')}/grupo/${token}`;
 
+/** Apodo opcional para que el grupo sepa quién es quién (D-b7): hasta 30 letras, números, espacios y . ' - */
+const APODO = /^[\p{L}\p{N} .'-]{0,30}$/u;
+export const apodoValido = (texto: string) => APODO.test(texto.trim());
+
 export const ESPERA_CONSULTA_GRUPO_MS = 15_000;
 export const debeConsultarGrupo = (estado: EstadoGrupo, visible: boolean) =>
   visible && (estado === 'ABIERTO' || estado === 'COMPLETO');
