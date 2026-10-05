@@ -11,7 +11,7 @@ export default function KoiChat() {
   const [input, setInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isDizzy, setIsDizzy] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const listaRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const cerrarChat = useCallback(() => setIsOpen(false), []);
   const carrito = useKoiCarrito(cerrarChat);
@@ -33,7 +33,9 @@ export default function KoiChat() {
   }, [location.pathname]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // scrollIntoView también desplazaba la ventana del chat (overflow-hidden) y escondía el encabezado
+    const lista = listaRef.current;
+    lista?.scrollTo({ top: lista.scrollHeight, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -188,7 +190,10 @@ export default function KoiChat() {
           </button>
         </div>
 
-        <div className="flex-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent space-y-4 overflow-y-auto bg-slate-50 p-4">
+        <div
+          ref={listaRef}
+          className="relative min-h-0 flex-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent space-y-4 overflow-y-auto bg-slate-50 p-4"
+        >
           {!isReady && (
             <div className="flex justify-center py-4">
               <span className="animate-pulse text-sm text-gray-500">
@@ -296,9 +301,7 @@ export default function KoiChat() {
           )}
 
           {carrito.estado.tipo === 'agregado' && (
-            <div
-              className="flex items-center justify-between gap-3 rounded-2xl rounded-bl-none border border-green-200 bg-green-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
-            >
+            <div className="flex items-center justify-between gap-3 rounded-2xl rounded-bl-none border border-green-200 bg-green-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm">
               <span>
                 Agregado al carrito ·{' '}
                 <Link
@@ -318,15 +321,15 @@ export default function KoiChat() {
                 aria-label="Cerrar aviso"
                 className="text-gray-400 hover:text-gray-600"
               >
-                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                  close
+                </span>
               </button>
             </div>
           )}
 
           {carrito.estado.tipo === 'error' && (
-            <div
-              className="flex items-start justify-between gap-3 rounded-2xl rounded-bl-none border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-800 shadow-sm"
-            >
+            <div className="flex items-start justify-between gap-3 rounded-2xl rounded-bl-none border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-800 shadow-sm">
               <span>{carrito.estado.texto}</span>
               <button
                 type="button"
@@ -334,11 +337,12 @@ export default function KoiChat() {
                 aria-label="Cerrar aviso"
                 className="text-red-400 hover:text-red-600"
               >
-                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                  close
+                </span>
               </button>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         <div className="border-t bg-white p-3">
