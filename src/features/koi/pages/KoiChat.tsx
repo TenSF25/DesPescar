@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useKoiChat } from '../services/useKoiService';
 import KoiAvatar from '../components/KoiAvatar';
+import { KoiOpcionCard } from '../components/KoiOpcionCard';
 
 export default function KoiChat() {
   const { messages, sendMessage, loading, isReady } = useKoiChat();
@@ -185,7 +186,7 @@ export default function KoiChat() {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex w-full flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`max-w-[85%] px-4 py-3 text-[14px] leading-relaxed shadow-sm ${
@@ -196,6 +197,13 @@ export default function KoiChat() {
               >
                 {msg.text}
               </div>
+              {msg.opciones.length > 0 && (
+                <div className="flex w-full flex-col gap-3">
+                  {msg.opciones.map((opcion) => (
+                    <KoiOpcionCard key={opcion.optionId} opcion={opcion} />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
