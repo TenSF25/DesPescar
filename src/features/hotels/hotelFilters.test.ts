@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { HotelResumen } from './hotels.types';
-import { FILTROS_INICIALES, filtrarHoteles, ordenarHoteles } from './hotelFilters';
+import {
+  FILTROS_INICIALES,
+  contarFiltrosActivos,
+  filtrarHoteles,
+  ordenarHoteles,
+} from './hotelFilters';
 
 const hotel = (over: Partial<HotelResumen>): HotelResumen => ({
   id: over.nombre ?? 'x',
@@ -116,5 +121,22 @@ describe('ordenarHoteles', () => {
     const lista = [a, b, c];
     ordenarHoteles(lista, 'precio_asc');
     expect(lista.map((h) => h.nombre)).toEqual(['A', 'B', 'C']);
+  });
+});
+
+describe('contarFiltrosActivos', () => {
+  it('es cero con los filtros iniciales', () => {
+    expect(contarFiltrosActivos(FILTROS_INICIALES)).toBe(0);
+  });
+  it('suma cada filtro aplicado', () => {
+    expect(
+      contarFiltrosActivos({
+        estrellas: [4, 5],
+        servicios: ['wifi' as never],
+        precioMax: 50000,
+        calificacionMin: 4,
+        soloAllInclusive: true,
+      }),
+    ).toBe(6);
   });
 });

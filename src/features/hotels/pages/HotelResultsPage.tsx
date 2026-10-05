@@ -5,6 +5,8 @@ import { HotelSearchForm } from '../components/HotelSearchForm';
 import { HotelFiltersPanel } from '../components/Results/HotelFiltersPanel';
 import { HotelList } from '../components/Results/HotelList';
 import { HotelResultsHeader } from '../components/Results/HotelResultsHeader';
+import { ResponsiveFilters } from '@/components/ui/ResponsiveFilters';
+import { contarFiltrosActivos } from '../hotelFilters';
 import { useHotelResults } from '../hooks/useHotelResults';
 
 export const HotelResultsPage = () => {
@@ -17,8 +19,12 @@ export const HotelResultsPage = () => {
       <SectionContainer className="py-8">
         <HotelResultsHeader params={params} onModificar={() => setModificar(true)} />
 
-        <div className="mt-6 flex w-full flex-col-reverse gap-6 lg:grid lg:grid-cols-[1fr_320px]">
-          <div className="flex min-w-0 flex-col gap-6">
+        <div className="mt-6 flex w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_320px]">
+          <ResponsiveFilters className="lg:order-2" activos={contarFiltrosActivos(filtros)}>
+            <HotelFiltersPanel hoteles={hoteles} filtros={filtros} onChange={setFiltros} />
+          </ResponsiveFilters>
+
+          <div className="flex min-w-0 flex-col gap-6 lg:order-1">
             {isLoading ? (
               <div className="flex h-64 w-full flex-col items-center justify-center gap-3 rounded-2xl border border-black/10 bg-white">
                 <span className="material-symbols-outlined animate-spin text-4xl text-[#00205B]">
@@ -40,10 +46,6 @@ export const HotelResultsPage = () => {
               />
             )}
           </div>
-
-          <aside className="w-full">
-            <HotelFiltersPanel hoteles={hoteles} filtros={filtros} onChange={setFiltros} />
-          </aside>
         </div>
       </SectionContainer>
 

@@ -50,3 +50,10 @@ export const ordenarHoteles = (hoteles: HotelResumen[], orden: OrdenHotel): Hote
     (a, b) =>
       Number(a.disponible === false) - Number(b.disponible === false) || comparadores[orden](a, b),
   );
+
+export const contarFiltrosActivos = (f: HotelFiltros): number =>
+  f.estrellas.length +
+  f.servicios.length +
+  (f.precioMax !== null ? 1 : 0) +
+  (f.calificacionMin > 0 ? 1 : 0) +
+  (f.soloAllInclusive ? 1 : 0);

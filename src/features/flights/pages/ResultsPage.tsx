@@ -8,6 +8,8 @@ import { useFlights } from '../hooks/useFlights';
 import type { FiltroEscala, Flight } from '../flights.types';
 import { ModifySearch } from '../components/Results/ModifySearch';
 import { ScheduleHeader } from '../components/Results/ScheduleHeader';
+import { ResponsiveFilters } from '@/components/ui/ResponsiveFilters';
+import { contarFiltrosVuelo } from '../flightFilterCount';
 import { useFlightStore } from '@/store/useFlightStore';
 
 export const ResultsPage = () => {
@@ -103,8 +105,33 @@ export const ResultsPage = () => {
           </div>
         )}
 
-        <div className="mt-6 flex w-full flex-col-reverse gap-6 lg:grid lg:grid-cols-[1fr_320px]">
-          <div className="flex min-w-0 flex-col gap-6">
+        <div className="mt-6 flex w-full flex-col gap-6 lg:grid lg:grid-cols-[1fr_320px]">
+          <ResponsiveFilters
+            className="lg:order-2"
+            activos={contarFiltrosVuelo({
+              escala: escalaFiltro,
+              aerolineas: aerolineasFiltro,
+              equipaje: equipajeFiltro,
+              horarioMin,
+              horarioMax,
+            })}
+          >
+            <FlightFilters
+              escalaFiltro={escalaFiltro as FiltroEscala}
+              onEscalaChange={setEscalaFiltro}
+              aerolineas={pasoActual === 'IDA' ? aerolineasIda : aerolineasVuelta}
+              aerolineasFiltro={aerolineasFiltro}
+              onToggleAerolinea={toggleAerolinea}
+              equipajeFiltro={equipajeFiltro}
+              onEquipajeChange={setEquipajeFiltro}
+              horarioMin={horarioMin}
+              horarioMax={horarioMax}
+              onHorarioMinChange={setHorarioMin}
+              onHorarioMaxChange={setHorarioMax}
+              onLimpiar={handleLimpiarFiltros}
+            />
+          </ResponsiveFilters>
+          <div className="flex min-w-0 flex-col gap-6 lg:order-1">
             <DateCarousel
               activeDate={pasoActual === 'IDA' ? formatDepartureDate : formatReturnDate}
               paramKey={pasoActual === 'IDA' ? 'departureDate' : 'returnDate'}
@@ -131,23 +158,6 @@ export const ResultsPage = () => {
               />
             )}
           </div>
-
-          <aside className="w-full">
-            <FlightFilters
-              escalaFiltro={escalaFiltro as FiltroEscala}
-              onEscalaChange={setEscalaFiltro}
-              aerolineas={pasoActual === 'IDA' ? aerolineasIda : aerolineasVuelta}
-              aerolineasFiltro={aerolineasFiltro}
-              onToggleAerolinea={toggleAerolinea}
-              equipajeFiltro={equipajeFiltro}
-              onEquipajeChange={setEquipajeFiltro}
-              horarioMin={horarioMin}
-              horarioMax={horarioMax}
-              onHorarioMinChange={setHorarioMin}
-              onHorarioMaxChange={setHorarioMax}
-              onLimpiar={handleLimpiarFiltros}
-            />
-          </aside>
         </div>
       </SectionContainer>
 

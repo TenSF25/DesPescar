@@ -36,3 +36,20 @@ body {
 .rdp-day_range_middle {
   border-radius: 0 !important;
 }
+
+.filtros-drawer {
+  animation: filtros-drawer-in 0.25s ease-out;
+}
+@keyframes filtros-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filtros-drawer {
+    animation: none;
+  }
+}
