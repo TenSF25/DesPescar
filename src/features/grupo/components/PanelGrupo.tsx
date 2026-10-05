@@ -95,12 +95,7 @@ interface Props {
  * El grupo completo: estado, plazo, enlace, partes, acciones y el viaje. Lo usan /carrito,
  * /grupo/:token y el resultado del pago de una parte.
  */
-export const PanelGrupo = ({
-  fuente,
-  onGrupo,
-  titulo = 'Pago en grupo',
-  onSinAcceso,
-}: Props) => {
+export const PanelGrupo = ({ fuente, onGrupo, titulo = 'Pago en grupo', onSinAcceso }: Props) => {
   const { grupo, leidoEn, cargando, error, anuncio, recargar, aplicar } = useGrupo(fuente);
   const navigate = useNavigate();
   const recargarCarrito = useCarritoStore((s) => s.recargar);
@@ -185,7 +180,9 @@ export const PanelGrupo = ({
       }
     } catch (err: unknown) {
       const e = leerErrorApi(err, 'No pudimos iniciar el pago de tu parte.');
-      setErrorAccion(e.mensaje);
+      setErrorAccion(
+        e.status === 403 ? 'Esta parte ya no es tuya. Actualizamos el grupo.' : e.mensaje,
+      );
       if (e.status === 409 || e.status === 403) recargar();
     } finally {
       if (!saliendo) setOcupado(false);

@@ -5,22 +5,21 @@ import type { Carrito } from '@/features/cart/cart.types';
 import { estadiasActivas, leerErrorApi } from '@/features/cart/carrito';
 import { BOTON_BORDE, BOTON_LLENO, FOCO } from '@/features/cart/components/estilos';
 import { obtenerReserva } from '@/features/cart/services/carritoService';
+import { ResultadoParte } from '@/features/grupo/components/ResultadoParte';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { useFlightStore } from '@/store/useFlightStore';
 import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
 import {
-  debeConciliar,
   ESPERA_CONSULTA_MS,
   leerRetornoPago,
   limpiarAlConfirmar,
   resultadoPago,
   seguirConsultando,
-  ultimoPago,
 } from '../pagos';
 import type { Pago, RetornoPago } from '../payments.types';
 import type { EstadoPago } from '../payments.types';
-import { conciliarPago, obtenerPago, pagosDeReserva } from '../services/pagosService';
+import { leerPagoDeRetorno } from '../services/pagosService';
 
 const ICONO = { exito: 'check_circle', pendiente: 'hourglass_top', error: 'cancel' } as const;
 const COLOR = { exito: 'text-success', pendiente: 'text-amber-600', error: 'text-alert' } as const;
@@ -34,20 +33,10 @@ const consultar = async (
   retorno: RetornoPago,
   estadoPrevio: EstadoPago | null,
 ): Promise<{ pago: Pago; reserva: Carrito | null }> => {
-  let pago: Pago | null;
-  if (retorno.tipo === 'mock') {
-    pago = ultimoPago(await pagosDeReserva(retorno.reservaId));
-  } else if (debeConciliar(estadoPrevio, retorno.mpPaymentId)) {
-    try {
-      pago = await conciliarPago(retorno.pagoId, retorno.mpPaymentId ?? '');
-    } catch {
-      // Si MP todavía no lo informa o no corresponde, se muestra el estado guardado.
-      pago = await obtenerPago(retorno.pagoId);
-    }
-  } else {
-    pago = await obtenerPago(retorno.pagoId);
-  }
+  const pago = await leerPagoDeRetorno(retorno, estadoPrevio);
   if (!pago) throw new Error('Esta reserva no tiene pagos.');
+  // El pago de una parte lo muestra ResultadoParte: la reserva es de quien organiza (D-b21).
+  if (pago.parteNumero !== null) return { pago, reserva: null };
   try {
     return { pago, reserva: await obtenerReserva(pago.reservationId) };
   } catch {
@@ -85,8 +74,10 @@ export const PagoResultadoPage = () => {
 
   // Una consulta por intento. El próximo intento se programa recién cuando termina esta, así
   // las consultas no se pisan, y el temporizador se cancela al salir de la página.
+  // La vuelta del mock con parte no se consulta acá: la muestra ResultadoParte.
+  const esParteMock = retorno?.tipo === 'mock' && retorno.parte !== null;
   useEffect(() => {
-    if (!retorno) return;
+    if (!retorno || esParteMock) return;
     let activo = true;
     let timer: number | undefined;
     const programar = (seguir: boolean) => {
@@ -100,6 +91,12 @@ export const PagoResultadoPage = () => {
       try {
         const d = await consultar(retorno, estadoPago.current);
         if (!activo) return;
+        if (d.pago.parteNumero !== null) {
+          // Pago de una parte (Mercado Pago): desde acá sigue ResultadoParte.
+          setDatos(d);
+          setError(null);
+          return;
+        }
         const r = resultadoPago(d.pago, d.reserva?.estadoGeneral ?? 'EXPIRADA');
         estadoPago.current = d.pago.status;
         seguirRef.current = r.seguirConsultando;
@@ -129,7 +126,7 @@ export const PagoResultadoPage = () => {
       activo = false;
       window.clearTimeout(timer);
     };
-  }, [retorno, intento, inicio, recargarCarrito]);
+  }, [retorno, esParteMock, intento, inicio, recargarCarrito]);
 
   // El foco pasa al título cuando llega el resultado (o cambia).
   const tituloTexto = resultado?.titulo;
@@ -152,6 +149,14 @@ export const PagoResultadoPage = () => {
             Ir al carrito
           </Link>
         </p>
+      </SectionContainer>
+    );
+  }
+
+  if (esParteMock || (datos && datos.pago.parteNumero !== null)) {
+    return (
+      <SectionContainer className="max-w-3xl">
+        <ResultadoParte retorno={retorno} pagoInicial={datos?.pago ?? null} />
       </SectionContainer>
     );
   }

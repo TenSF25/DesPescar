@@ -3,6 +3,7 @@ import type { Grupo } from '@/features/grupo/grupo.types';
 import type { Pago } from './payments.types';
 import {
   debeConciliar,
+  urlResultado,
   ESPERA_MAXIMA_MS,
   limpiarAlConfirmar,
   mensajePasarela,
@@ -281,6 +282,25 @@ describe('partes', () => {
     });
     expect(resultadoParte(pago({ status: 'PENDING', parteNumero: 2 }), null)).toMatchObject({
       tono: 'pendiente',
+    });
+  });
+});
+
+describe('urlResultado', () => {
+  it('lleva la reserva y, si el pago es de una parte, la parte', () => {
+    expect(urlResultado(pago({ reservationId: 12, parteNumero: null }))).toBe(
+      '/pago/resultado?reserva=12',
+    );
+    expect(urlResultado(pago({ reservationId: 12, parteNumero: 2 }))).toBe(
+      '/pago/resultado?reserva=12&parte=2',
+    );
+  });
+  it('lo que arma se vuelve a leer igual', () => {
+    const url = urlResultado(pago({ reservationId: 12, parteNumero: 3 }));
+    expect(leerRetornoPago(new URLSearchParams(url.split('?')[1]))).toEqual({
+      tipo: 'mock',
+      reservaId: 12,
+      parte: 3,
     });
   });
 });

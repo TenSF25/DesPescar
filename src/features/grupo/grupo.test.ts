@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Carrito } from '@/features/cart/cart.types';
-import type { Grupo, ParteGrupo } from './grupo.types';
+import type { Grupo, GrupoResumen, ParteGrupo } from './grupo.types';
 import {
   aCentavos,
   apodoValido,
@@ -19,6 +19,7 @@ import {
   progresoGrupo,
   puedeDividir,
   repartoIgual,
+  resumenGrupoTexto,
   tokenValido,
   urgenciaPlazo,
   validarMontos,
@@ -302,7 +303,7 @@ describe('errores', () => {
 });
 
 describe('apodoValido', () => {
-  it('acepta vacío, letras con acentos, números, espacios y . \' -', () => {
+  it("acepta vacío, letras con acentos, números, espacios y . ' -", () => {
     expect(apodoValido('')).toBe(true);
     expect(apodoValido('Juli')).toBe(true);
     expect(apodoValido("María José O'Brien-2 Jr.")).toBe(true);
@@ -317,5 +318,52 @@ describe('apodoValido', () => {
   });
   it('mide el apodo sin los espacios de las puntas', () => {
     expect(apodoValido(`  ${'a'.repeat(30)}  `)).toBe(true);
+  });
+});
+
+describe('resumenGrupoTexto', () => {
+  const resumen = (cambios: Partial<GrupoResumen> = {}): GrupoResumen => ({
+    reservaId: 12,
+    enlaceToken: 'a'.repeat(43),
+    estado: 'ABIERTO',
+    venceEn: '2026-10-06T15:00:00',
+    segundosRestantes: 23 * 3600 + 40 * 60,
+    soyOrganizador: false,
+    miParte: 2,
+    monto: 353333.33,
+    estadoParte: 'TOMADA',
+    destino: 'Córdoba',
+    ...cambios,
+  });
+  const limpio = (s: string) => s.replace(/\s/g, ' ');
+
+  it('parte sin pagar en un grupo abierto: monto, plazo y acceso a pagar', () => {
+    const r = resumenGrupoTexto(resumen());
+    expect(r.titulo).toBe('Viaje a Córdoba');
+    expect(limpio(r.detalle)).toBe('Tu parte: $ 353.333,33 · quedan 23 h 40 min');
+    expect(r.estado).toEqual({ texto: 'Falta pagar', tono: 'aviso' });
+    expect(r.accion).toBe('Pagar mi parte');
+  });
+  it('parte pagada: se espera al resto', () => {
+    const r = resumenGrupoTexto(resumen({ estadoParte: 'PAGADA' }));
+    expect(r.estado.texto).toBe('Pagada');
+    expect(limpio(r.detalle)).toBe('Tu parte: $ 353.333,33 · quedan 23 h 40 min');
+    expect(r.accion).toBe('Ver el grupo');
+  });
+  it('grupo completo: se está confirmando', () => {
+    const r = resumenGrupoTexto(resumen({ estado: 'COMPLETO', estadoParte: 'PAGADA' }));
+    expect(limpio(r.detalle)).toBe('Tu parte: $ 353.333,33 · confirmando la reserva');
+    expect(r.accion).toBe('Ver el grupo');
+  });
+  it('sin destino usa el número de reserva, y dice si lo organizás', () => {
+    expect(resumenGrupoTexto(resumen({ destino: null })).titulo).toBe('Reserva #12');
+    expect(resumenGrupoTexto(resumen({ soyOrganizador: true })).titulo).toBe(
+      'Viaje a Córdoba · lo organizás vos',
+    );
+  });
+  it('con el plazo vencido no ofrece pagar', () => {
+    const r = resumenGrupoTexto(resumen({ segundosRestantes: 0 }));
+    expect(r.accion).toBe('Ver el grupo');
+    expect(limpio(r.detalle)).toBe('Tu parte: $ 353.333,33 · plazo vencido');
   });
 });

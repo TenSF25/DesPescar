@@ -1,6 +1,6 @@
 import type { Carrito, ErrorApi } from '@/features/cart/cart.types';
 import { leerErrorApi } from '@/features/cart/carrito';
-import type { EstadoGrupo, Grupo, ParteGrupo } from './grupo.types';
+import type { EstadoGrupo, Grupo, GrupoResumen, ParteGrupo } from './grupo.types';
 
 // ---------- centavos (D-b24) ----------
 
@@ -100,7 +100,9 @@ export const nombreParte = (p: ParteGrupo) => {
 
 export type TonoEstado = 'neutro' | 'aviso' | 'exito' | 'error';
 
-export const estadoParteTexto = (p: ParteGrupo): { texto: string; tono: TonoEstado } => {
+export const estadoParteTexto = (
+  p: Pick<ParteGrupo, 'estado'>,
+): { texto: string; tono: TonoEstado } => {
   if (p.estado === 'PAGADA') return { texto: 'Pagada', tono: 'exito' };
   if (p.estado === 'TOMADA') return { texto: 'Falta pagar', tono: 'aviso' };
   return { texto: 'Libre', tono: 'neutro' };
@@ -195,6 +197,30 @@ export const cambiosGrupo = (previo: Grupo | null, actual: Grupo): string[] => {
     else if (p.estado === 'LIBRE') avisos.push(`La parte ${p.numero} quedó libre.`);
   }
   return avisos;
+};
+
+/** Un grupo en curso donde el usuario tiene parte, para el aviso de /carrito (D-b19). */
+export const resumenGrupoTexto = (
+  g: GrupoResumen,
+): {
+  titulo: string;
+  detalle: string;
+  estado: { texto: string; tono: TonoEstado };
+  accion: string;
+} => {
+  const enPlazo = g.estado === 'ABIERTO' && g.segundosRestantes > 0;
+  const plazo =
+    g.estado === 'COMPLETO'
+      ? 'confirmando la reserva'
+      : enPlazo
+        ? `quedan ${formatPlazo(g.segundosRestantes)}`
+        : 'plazo vencido';
+  return {
+    titulo: `${g.destino ? `Viaje a ${g.destino}` : `Reserva #${g.reservaId}`}${g.soyOrganizador ? ' · lo organizás vos' : ''}`,
+    detalle: `Tu parte: ${formatMonto(g.monto)} · ${plazo}`,
+    estado: estadoParteTexto({ estado: g.estadoParte }),
+    accion: enPlazo && g.estadoParte === 'TOMADA' ? 'Pagar mi parte' : 'Ver el grupo',
+  };
 };
 
 // ---------- enlace y consulta (D-b6, D-b19) ----------

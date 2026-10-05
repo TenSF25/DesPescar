@@ -30,6 +30,10 @@ export const leerRetornoPago = (sp: URLSearchParams): RetornoPago | null => {
   };
 };
 
+/** A dónde vuelve la pasarela de prueba: la reserva y, si el pago es de una parte, la parte (D-b21). */
+export const urlResultado = (pago: Pick<Pago, 'reservationId' | 'parteNumero'>) =>
+  `/pago/resultado?reserva=${pago.reservationId}${pago.parteNumero ? `&parte=${pago.parteNumero}` : ''}`;
+
 /**
  * El pago más reciente de una reserva (GET /api/payments/reservation/{id} trae todos los del
  * usuario). Con `parte`, solo entre los pagos de esa parte del grupo.

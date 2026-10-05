@@ -5,11 +5,9 @@ import { leerErrorApi } from '@/features/cart/carrito';
 import { BOTON_BORDE, BOTON_LLENO, FOCO } from '@/features/cart/components/estilos';
 import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { mensajePasarela } from '../pagos';
+import { mensajePasarela, urlResultado } from '../pagos';
 import type { Pago } from '../payments.types';
 import { obtenerPago, simularPago } from '../services/pagosService';
-
-const resultadoUrl = (pago: Pago) => `/pago/resultado?reserva=${pago.reservationId}`;
 
 /**
  * Pasarela de prueba (proveedor mock). No pide datos de tarjeta: aprueba o rechaza el pago con
@@ -32,7 +30,7 @@ export const PagoSimuladoPage = () => {
         const p = await obtenerPago(pagoId);
         if (!activo) return;
         if (p.status !== 'PENDING') {
-          navigate(resultadoUrl(p), { replace: true });
+          navigate(urlResultado(p), { replace: true });
           return;
         }
         setPago(p);
@@ -57,11 +55,11 @@ export const PagoSimuladoPage = () => {
     setError(null);
     try {
       const p = await simularPago(pago.id, aprobado);
-      navigate(resultadoUrl(p), { replace: true });
+      navigate(urlResultado(p), { replace: true });
     } catch (err: unknown) {
       const e = leerErrorApi(err, 'No pudimos procesar el pago.');
       if (e.status === 409) {
-        navigate(resultadoUrl(pago), { replace: true });
+        navigate(urlResultado(pago), { replace: true });
         return;
       }
       // 502: reservation-service no respondió; el pago sigue PENDING y se puede reintentar.
@@ -103,9 +101,19 @@ export const PagoSimuladoPage = () => {
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-xl bg-[#F8FAFC] p-4 text-sm">
             <dt className="text-secondary/60">Reserva</dt>
             <dd className="text-secondary text-right font-semibold">#{pago.reservationId}</dd>
+            {pago.parteNumero !== null && (
+              <>
+                <dt className="text-secondary/60">Parte</dt>
+                <dd className="text-secondary text-right font-semibold">
+                  {pago.parteNumero} del pago en grupo
+                </dd>
+              </>
+            )}
             <dt className="text-secondary/60">Moneda</dt>
             <dd className="text-secondary text-right font-semibold">{pago.currency}</dd>
-            <dt className="text-secondary self-center font-bold">Total a pagar</dt>
+            <dt className="text-secondary self-center font-bold">
+              {pago.parteNumero !== null ? 'Tu parte' : 'Total a pagar'}
+            </dt>
             <dd className="text-primary text-right text-2xl font-bold">
               {formatCurrency(pago.amount)}
             </dd>

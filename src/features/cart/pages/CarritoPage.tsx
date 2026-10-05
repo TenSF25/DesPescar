@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { SectionContainer } from '@/components/ui/SectionContainer';
+import { AvisoPartesPendientes } from '@/features/grupo/components/AvisoPartesPendientes';
 import { DividirPago } from '@/features/grupo/components/DividirPago';
 import { PanelGrupo } from '@/features/grupo/components/PanelGrupo';
 import { puedeDividir } from '@/features/grupo/grupo';
@@ -221,6 +222,7 @@ export const CarritoPage = () => {
       <SectionContainer>
         {regionViva}
         {encabezado}
+        <AvisoPartesPendientes />
         {avisoVencido || expirado ? (
           <Estado icono="timer_off" titulo="Tu carrito venció">
             <p role="status" className="text-secondary/70 max-w-md text-sm">
@@ -250,6 +252,7 @@ export const CarritoPage = () => {
       <SectionContainer className="pt-8 sm:pt-12">
         {regionViva}
         {encabezado}
+        <AvisoPartesPendientes omitirReserva={carrito.idCarrito} />
         {error && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {error}
@@ -275,6 +278,7 @@ export const CarritoPage = () => {
             <CuentaRegresiva key={venceEn} venceEn={venceEn} onVencido={alVencer} />
           )}
         </div>
+        <AvisoPartesPendientes omitirReserva={carrito.idCarrito} />
         {error && (
           <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {error}
