@@ -119,6 +119,8 @@ const DETALLE_CIERRE: Record<string, string> = {
     'Algún lugar dejó de estar disponible antes de confirmar. Devolvemos cada parte pagada por el mismo medio.',
   PAGO_TARDIO_SIN_DISPONIBILIDAD:
     'Algún lugar dejó de estar disponible antes de confirmar. Devolvemos cada parte pagada por el mismo medio.',
+  CONFIRMACION_FALLIDA:
+    'No pudimos confirmar la reserva del grupo. Cancelamos todo y les devolvimos el dinero a quienes ya habían pagado.',
 };
 
 export const estadoGrupoTexto = (

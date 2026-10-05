@@ -7,7 +7,8 @@ export type MotivoCierre =
   | 'PAGO_EN_GRUPO_VENCIDO'
   | 'MONTO_NO_COINCIDE'
   | 'SIN_DISPONIBILIDAD'
-  | 'PAGO_TARDIO_SIN_DISPONIBILIDAD';
+  | 'PAGO_TARDIO_SIN_DISPONIBILIDAD'
+  | 'CONFIRMACION_FALLIDA';
 
 export interface ParteGrupo {
   numero: number;

@@ -193,6 +193,17 @@ describe('textos', () => {
     ).toBe('El grupo se canceló');
   });
 
+  it('explica el cierre cuando la reserva del grupo no se pudo confirmar', () => {
+    const fallida = estadoGrupoTexto(
+      grupo({ estado: 'CANCELADO', motivoCierre: 'CONFIRMACION_FALLIDA' }),
+    );
+    expect(fallida.titulo).toBe('No pudimos confirmar la reserva');
+    expect(fallida.detalle).toBe(
+      'No pudimos confirmar la reserva del grupo. Cancelamos todo y les devolvimos el dinero a quienes ya habían pagado.',
+    );
+    expect(fallida.tono).toBe('error');
+  });
+
   it('formatea el plazo en horas y minutos', () => {
     expect(formatPlazo(86100)).toBe('23 h 55 min');
     expect(formatPlazo(3600)).toBe('1 h');
