@@ -70,3 +70,12 @@ export const mensajeDeErrorKoi = (status: number | undefined): string => {
   }
   return 'Disculpá, tuve un error al procesar tu mensaje. ¿Podrías repetirlo?';
 };
+
+/**
+ * Milisegundos que KOI se toma "pensando" antes de mostrar una respuesta: entre 1,4 s y 2,6 s,
+ * un poco más para mensajes largos. `azar` (0..1) se inyecta para poder probarlo.
+ */
+export const pausaParaPensar = (largoMensaje: number, azar: number = Math.random()): number => {
+  const base = 1400 + Math.min(Math.max(largoMensaje, 0), 120) * 5;
+  return Math.round(base + azar * 600);
+};

@@ -10,6 +10,7 @@ import {
   olvidarSessionId,
 } from '../koiSesion';
 import { crearSesionKoi, enviarMensajeKoi, obtenerHistorialKoi } from './koiService';
+import { pausaParaPensar } from '../koiSesion';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export type { ChatMessage } from '../koi.types';
@@ -22,6 +23,8 @@ const statusDe = (error: unknown) =>
  * historial (con las opciones de cada mensaje) se trae del servidor. El historial no se manda:
  * lo guarda el servidor (spec 4.9).
  */
+const esperar = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
 export const useKoiChat = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -95,7 +98,11 @@ export const useKoiChat = () => {
           setSessionId(nueva.sessionId);
           id = nueva.sessionId;
         }
-        const respuesta = await enviarMensajeKoi(id, texto);
+        // KOI "piensa" un momento: la respuesta nunca aparece antes de la pausa mínima
+        const [respuesta] = await Promise.all([
+          enviarMensajeKoi(id, texto),
+          esperar(pausaParaPensar(texto.length)),
+        ]);
         setMessages((prev) => [...prev, mensajeDeRespuesta(respuesta)]);
       } catch (error) {
         const status = statusDe(error);

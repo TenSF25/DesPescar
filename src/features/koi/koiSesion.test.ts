@@ -119,3 +119,13 @@ describe('mensajes del chat', () => {
     expect(mensajeDeErrorKoi(undefined)).toMatch(/repetirlo/);
   });
 });
+
+describe('pausaParaPensar', () => {
+  it('siempre espera al menos 1,4 s y nunca más de 2,6 s', async () => {
+    const { pausaParaPensar } = await import('./koiSesion');
+    expect(pausaParaPensar(0, 0)).toBe(1400);
+    expect(pausaParaPensar(7, 0.5)).toBe(1735);
+    expect(pausaParaPensar(5000, 1)).toBe(2600);
+    expect(pausaParaPensar(-3, 0)).toBe(1400);
+  });
+});
