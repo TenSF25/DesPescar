@@ -42,7 +42,9 @@ export const Nav = () => {
               VUELOS
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
-              INSPIRACIONES
+              <Link to="/hoteles" className="block">
+                HOTELES
+              </Link>
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
               OFERTAS
@@ -52,7 +54,10 @@ export const Nav = () => {
             <UserMenu />
           ) : (
             <Link to={path}>
-              <Button variant="secondary" className="hidden w-40 justify-center text-[14px] md:flex">
+              <Button
+                variant="secondary"
+                className="hidden w-40 justify-center text-[14px] md:flex"
+              >
                 {label}
               </Button>
             </Link>

@@ -26,7 +26,9 @@ export const NavMobile = ({ open }: NavMobile) => {
               VUELOS
             </li>
             <li className="hover:bg-secondary border-b p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
-              INSPIRACIONES
+              <Link to="/hoteles" className="block">
+                HOTELES
+              </Link>
             </li>
             <li className="hover:bg-secondary p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
               OFERTAS
