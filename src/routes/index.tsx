@@ -77,13 +77,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        // Equipaje no necesita sesión: solo lee el vuelo elegido del store local.
+        path: '/booking/baggage',
+        element: <Baggage />,
+      },
+      {
+        // Asientos reserva lugares a nombre del usuario (websocket autenticado): acá se pide
+        // iniciar sesión y se vuelve con el vuelo todavía seleccionado.
         path: '/booking',
         element: <ProtectedRoute />,
         children: [
-          {
-            path: 'baggage',
-            element: <Baggage />,
-          },
           {
             path: 'seats',
             element: <SeatSelection />,
