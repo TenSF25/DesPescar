@@ -6,9 +6,16 @@ interface DateRangePickerProps {
   range: DateRange | undefined;
   onRangeChange: (range: DateRange | undefined) => void;
   error: boolean;
+  /** Rótulos de los dos extremos. Vuelos usa Ida/Vuelta; hoteles, Check-in/Check-out. */
+  labels?: { desde: string; hasta: string };
 }
 
-export const DateRangePicker = ({ range, onRangeChange, error }: DateRangePickerProps) => {
+export const DateRangePicker = ({
+  range,
+  onRangeChange,
+  error,
+  labels = { desde: 'Ida', hasta: 'Vuelta' },
+}: DateRangePickerProps) => {
   const {
     containerRef,
     handleOpen,
@@ -43,7 +50,7 @@ export const DateRangePicker = ({ range, onRangeChange, error }: DateRangePicker
                   : 'h-0 translate-y-2 overflow-hidden opacity-0'
               }`}
             >
-              Ida
+              {labels.desde}
             </span>
 
             <span
@@ -56,7 +63,7 @@ export const DateRangePicker = ({ range, onRangeChange, error }: DateRangePicker
               {!displayRange?.from && (
                 <span className="material-symbols-outlined">calendar_today</span>
               )}
-              {formatItem(displayRange?.from, 'Ida')}
+              {formatItem(displayRange?.from, labels.desde)}
             </span>
           </div>
         </button>
@@ -76,7 +83,7 @@ export const DateRangePicker = ({ range, onRangeChange, error }: DateRangePicker
                   : 'h-0 translate-y-2 overflow-hidden opacity-0'
               }`}
             >
-              Vuelta
+              {labels.hasta}
             </span>
 
             <span
@@ -89,7 +96,7 @@ export const DateRangePicker = ({ range, onRangeChange, error }: DateRangePicker
               {!displayRange?.to && (
                 <span className="material-symbols-outlined">calendar_today</span>
               )}
-              {formatItem(displayRange?.to, 'Vuelta')}
+              {formatItem(displayRange?.to, labels.hasta)}
             </span>
           </div>
         </button>

@@ -69,21 +69,42 @@ body {
   }
 }
 
-/* Con una barra de acciones fija abajo (alta ~77px en escritorio y ~117px en celular), el chat flotante
-   sube por encima de ella para no tapar su botón; el panel abierto sube con él. */
-html[data-sticky-bar] .koi-fab {
+.filtros-drawer {
+  animation: filtros-drawer-in 0.25s ease-out;
+}
+@keyframes filtros-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filtros-drawer {
+    animation: none;
+  }
+}
+
+/* La burbuja ya tiene transition-all, por eso el fundido es suave. */
+body[data-calendario-abierto] .koi-fab {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s 0.3s;
+}
+
+/* Paginas con barra fija inferior: la burbuja y la ventana de KOI quedan por encima. */
+body[data-barra-inferior] .koi-fab {
   bottom: 6.5rem;
 }
-html[data-sticky-bar] .koi-panel {
-  bottom: 13rem;
-  height: min(34.375rem, calc(100dvh - 14rem));
+body[data-barra-inferior] .koi-fab ~ div {
+  bottom: 12rem;
+  max-height: calc(100dvh - 14rem);
 }
-@media (max-width: 639px) {
-  html[data-sticky-bar] .koi-fab {
-    bottom: 9rem;
-  }
-  html[data-sticky-bar] .koi-panel {
-    bottom: 14.5rem;
-    height: min(34.375rem, calc(100dvh - 15.5rem));
-  }
+
+body[data-barra-inferior] footer {
+  padding-bottom: 6rem;
 }

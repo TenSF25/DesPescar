@@ -1,3 +1,4 @@
+import { precioAsiento } from '../precios';
 import { cn } from '@/utils/cn';
 import { useSeats } from '../hooks/useSeats';
 import { getColorSettings } from './Plane/ColorSettings';
@@ -65,7 +66,7 @@ export const DetailSelectionSeats = () => {
                     )}
                   >
                     <h4 className="text-sm font-semibold whitespace-nowrap">{value.name}</h4>
-                    <h5 className="text-sm">${value.price}</h5>
+                    <h5 className="text-sm">{precioAsiento(value.price)}</h5>
                   </div>
                 </div>
               );

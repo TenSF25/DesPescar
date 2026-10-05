@@ -30,15 +30,15 @@ export const CabinAmenity = ({ type, metadata }: CabinAmenityProps) => {
 
   if (type === 'columns') {
     return (
-      <div className="flex w-full items-center justify-between px-2 font-bold text-gray-400">
+      <div className="flex w-full items-center justify-between px-0 font-bold text-gray-400 sm:px-2">
         {/* Aquí puedes mapear dinámicamente o dejarlo fijo si tu avión siempre es 3-3 */}
-        <div className="w-12 text-center">A</div>
-        <div className="w-12 text-center">B</div>
-        <div className="w-12 text-center">C</div>
-        <div className="w-12 text-center"></div> {/* Pasillo */}
-        <div className="w-12 text-center">D</div>
-        <div className="w-12 text-center">E</div>
-        <div className="w-12 text-center">F</div>
+        <div className="w-10 text-center sm:w-12">A</div>
+        <div className="w-10 text-center sm:w-12">B</div>
+        <div className="w-10 text-center sm:w-12">C</div>
+        <div className="w-10 text-center sm:w-12"></div> {/* Pasillo */}
+        <div className="w-10 text-center sm:w-12">D</div>
+        <div className="w-10 text-center sm:w-12">E</div>
+        <div className="w-10 text-center sm:w-12">F</div>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export const CabinAmenity = ({ type, metadata }: CabinAmenityProps) => {
             {metadata?.icons?.[0] || 'wc'}
           </span>
         </div>
-        <div className="min-w-[3rem]"></div> {/* Espacio pasillo */}
+        <div className="min-w-10 sm:min-w-12"></div> {/* Espacio pasillo */}
         <div className="flex w-full justify-center rounded-lg border-2 border-dashed border-gray-300 px-3 py-2 text-center">
           <span className="material-symbols-outlined text-[28px] text-gray-400">
             {metadata?.icons?.[1] || 'coffee'}

@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn';
 import { logoutSession } from '@/features/auth/logout';
 import { Card } from '@/features/profile/components/FormParts';
 import { profileStore } from '@/features/profile/store/useProfileStore';
-import { reservationsStore } from '@/features/reservations/store/useReservationsStore';
+import { useMisReservasStore } from '@/features/reservations/store/useMisReservasStore';
 import { useSettingsStore, type Settings } from '@/features/settings/store/useSettingsStore';
 
 interface SwitchRowProps {
@@ -69,8 +69,8 @@ const descargarDatos = () => {
   const datos = {
     exportadoEl: new Date().toISOString(),
     perfil: profileStore.getSnapshot(),
-    proximosViajes: reservationsStore.getSnapshot(),
-    viajesCancelados: reservationsStore.getCancelledSnapshot(),
+    // Las reservas ya consultadas en esta sesión (Mis reservas las pide al servidor).
+    reservas: useMisReservasStore.getState().reservas,
   };
   const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

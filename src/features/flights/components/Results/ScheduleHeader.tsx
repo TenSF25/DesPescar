@@ -15,9 +15,9 @@ export const ScheduleHeader = ({
   handleModificarBusqueda,
 }: ScheduleProps) => {
   return (
-    <header className="bg-secondary flex w-full flex-col items-start justify-between gap-5 rounded-xl p-5 text-white sm:flex-row sm:items-center">
+    <header className="bg-secondary flex w-full flex-col items-start justify-between gap-5 rounded-xl p-4 text-white sm:flex-row sm:items-center sm:p-5">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold">Cronograma de vuelos</h2>
+        <h2 className="text-xl font-bold sm:text-2xl">Cronograma de vuelos</h2>
         <div>
           <p className="text-sm text-white/60">Elegí el vuelo que mejor se adapte a tu viaje.</p>
           <p className="text-sm font-medium text-white/80">
@@ -27,13 +27,15 @@ export const ScheduleHeader = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-4 sm:gap-6">
+      <div className="flex max-w-full min-w-0 items-center gap-3 sm:gap-6">
         <div className="flex flex-col text-right">
-          <h2 className="text-3xl font-bold tracking-wider">{origin}</h2>
+          <h2 className="text-2xl font-bold tracking-wider break-words sm:text-3xl">{origin}</h2>
         </div>
         <span className="material-symbols-outlined text-primary text-3xl">flight</span>
         <div className="flex flex-col text-left">
-          <h2 className="text-3xl font-bold tracking-wider">{destination}</h2>
+          <h2 className="text-2xl font-bold tracking-wider break-words sm:text-3xl">
+            {destination}
+          </h2>
         </div>
       </div>
 

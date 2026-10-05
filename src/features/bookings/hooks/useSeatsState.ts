@@ -60,6 +60,12 @@ export const useSeatsState = () => {
   useEffect(() => {
     if (!departureId || !myUserId) return;
 
+    if (hasFetchedInitialRef.current) return;
+
+    // Se descartan los asientos guardados de una visita anterior; los que el servidor tiene
+    // bloqueados a nombre del usuario vuelven con el mapa.
+    updateSelectedSeats([]);
+
     const seatsFetch = async () => {
       setIsLoading(true);
       try {

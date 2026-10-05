@@ -1,8 +1,14 @@
 import { Search } from '@/components/ui/Search';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
 
-export const ModifySearch = ({ onClose }: { onClose: () => void }) => {
+export const ModifySearch = ({
+  onClose,
+  children,
+}: {
+  onClose: () => void;
+  children?: ReactNode;
+}) => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -36,17 +42,19 @@ export const ModifySearch = ({ onClose }: { onClose: () => void }) => {
               close
             </span>
           </div>
-          <Search
-            moodle={true}
-            onClose={onClose}
-            initialValues={{
-              origin: searchParams.get('origin') ?? undefined,
-              destination: searchParams.get('destination') ?? undefined,
-              passengers: Number(searchParams.get('passengers')) || 1,
-              departureDate: searchParams.get('departureDate') ?? undefined,
-              returnDate: searchParams.get('returnDate') ?? undefined,
-            }}
-          />
+          {children ?? (
+            <Search
+              moodle={true}
+              onClose={onClose}
+              initialValues={{
+                origin: searchParams.get('origin') ?? undefined,
+                destination: searchParams.get('destination') ?? undefined,
+                passengers: Number(searchParams.get('passengers')) || 1,
+                departureDate: searchParams.get('departureDate') ?? undefined,
+                returnDate: searchParams.get('returnDate') ?? undefined,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

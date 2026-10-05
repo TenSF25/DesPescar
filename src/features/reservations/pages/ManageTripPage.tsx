@@ -3,6 +3,7 @@ import { useParams } from 'react-router';
 import { cn } from '@/utils/cn';
 import { useReservation } from '@/features/reservations/hooks/useReservations';
 import { BackButton } from '@/features/reservations/components/BackButton';
+import { EstadoLista } from '@/features/reservations/components/EstadoLista';
 
 type Section = 'asiento' | 'equipaje' | 'servicios' | 'docs' | 'check';
 
@@ -35,38 +36,29 @@ const seatColor: Record<SeatState, string> = {
 
 export const ManageTripPage = () => {
   const { id } = useParams();
-  const flight = useReservation(id);
+  const { flight, isLoading, error, recargar } = useReservation(id);
   const [activeSection, setActiveSection] = useState<Section>('asiento');
 
-  if (!flight) {
+  if (!flight || !flight.origin || !flight.destination) {
     return (
       <div>
         <BackButton />
-        <p className="text-neutral text-sm">No se encontró ese vuelo.</p>
+        <EstadoLista isLoading={isLoading} error={error} onRetry={recargar}>
+          <p className="text-neutral text-sm">
+            {flight ? 'Esta reserva no tiene vuelo para gestionar.' : 'No se encontró esa reserva.'}
+          </p>
+        </EstadoLista>
       </div>
     );
   }
 
   const { origin, destination, flightNumber, seats, reservationCode } = flight;
   const seatList = seats.split(', ');
-  const checkInPassengers = flight.passengers
-    ? flight.passengers.map((name, i) => ({
-        label: `Pasajero ${i + 1}`,
-        name,
-        doc: seatList[i] ? `Asiento ${seatList[i]}` : 'Asiento sin asignar',
-      }))
-    : [
-        {
-          label: 'Pasajero 1',
-          name: 'Noelia Montecinos',
-          doc: 'DNI: 33.847.201 · Asiento 2C',
-        },
-        {
-          label: 'Pasajero 2',
-          name: 'Luciano Nuñez',
-          doc: 'DNI: 36.234.890 · Asiento 2E',
-        },
-      ];
+  const checkInPassengers = (flight.passengers ?? []).map((name, i) => ({
+    label: `Pasajero ${i + 1}`,
+    name,
+    doc: seatList[i] ? `Asiento ${seatList[i]}` : 'Asiento sin asignar',
+  }));
 
   return (
     <div>
@@ -96,8 +88,24 @@ export const ManageTripPage = () => {
           <div className="sm:ml-auto sm:text-right">
             <div className="text-[11px] font-semibold text-white/50">Estado</div>
             <div className="mt-1 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
-              <span className="text-sm font-extrabold text-[#22c55e]">Confirmado</span>
+              <span
+                className={cn(
+                  'h-2 w-2 rounded-full',
+                  flight.status === 'cancelled' ? 'bg-[#fca5a5]' : 'bg-[#22c55e]',
+                )}
+              />
+              <span
+                className={cn(
+                  'text-sm font-extrabold',
+                  flight.status === 'cancelled' ? 'text-[#fca5a5]' : 'text-[#22c55e]',
+                )}
+              >
+                {flight.status === 'cancelled'
+                  ? 'Cancelado'
+                  : flight.status === 'completed'
+                    ? 'Completado'
+                    : 'Confirmado'}
+              </span>
             </div>
           </div>
         </div>
@@ -185,15 +193,15 @@ export const ManageTripPage = () => {
                   <div className="mb-3 text-[13px] font-bold tracking-wide text-gray-400 uppercase">
                     Asientos actuales
                   </div>
-                  <div className="mb-4 flex gap-3">
-                    <div className="bg-primary rounded-[10px] px-4.5 py-3 text-center text-white">
-                      <div className="text-2xl leading-none font-extrabold">2C</div>
-                      <div className="mt-1 text-[10px] font-bold opacity-80">Pasillo</div>
-                    </div>
-                    <div className="bg-primary rounded-[10px] px-4.5 py-3 text-center text-white">
-                      <div className="text-2xl leading-none font-extrabold">2E</div>
-                      <div className="mt-1 text-[10px] font-bold opacity-80">Centro</div>
-                    </div>
+                  <div className="mb-4 flex flex-wrap gap-3">
+                    {seatList.filter(Boolean).map((seat) => (
+                      <div
+                        key={seat}
+                        className="bg-primary rounded-[10px] px-4.5 py-3 text-center text-white"
+                      >
+                        <div className="text-2xl leading-none font-extrabold">{seat}</div>
+                      </div>
+                    ))}
                   </div>
                   <div className="flex flex-col gap-2">
                     {[

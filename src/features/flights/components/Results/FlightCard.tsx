@@ -43,7 +43,7 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
       : `${scales.length} escala${scales.length > 1 ? 's' : ''}`;
 
   return (
-    <div className="flex w-full flex-col gap-6 rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm transition-all hover:border-[#00A3E0]/30 hover:shadow-md md:flex-row md:items-center md:justify-between">
+    <div className="flex w-full flex-col gap-4 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm transition-all hover:border-[#00A3E0]/30 hover:shadow-md sm:gap-6 sm:p-6 md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-3 md:w-48">
         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#F8FAFC]">
           {airline.logoUrl ? (
@@ -64,14 +64,16 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-between gap-4">
+      <div className="flex flex-1 items-center justify-between gap-2 sm:gap-4">
         <div className="text-center">
-          <p className="text-secondary text-2xl font-bold tracking-tight">{horaSalida}</p>
+          <p className="text-secondary text-xl font-bold tracking-tight sm:text-2xl">
+            {horaSalida}
+          </p>
           <p className="text-sm font-bold text-[#00A3E0]">{itinerary.departure.iata}</p>
         </div>
 
         <div
-          className="flex flex-1 flex-col items-center px-2"
+          className="flex min-w-0 flex-1 flex-col items-center px-1 sm:px-2"
           role="img"
           aria-label={`Duración de vuelo: ${duracionFormateada}, ${textoEscalas}`}
         >
@@ -88,7 +90,7 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
         </div>
 
         <div className="text-center">
-          <p className="text-secondary text-2xl font-bold tracking-tight">
+          <p className="text-secondary text-xl font-bold tracking-tight sm:text-2xl">
             {horaLlegada}
             {llegaOtroDia && (
               <span
@@ -137,19 +139,19 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-center gap-2 md:w-40 md:items-end">
+      <div className="flex w-full flex-col items-stretch gap-2 md:w-40 md:items-end">
         <div className="text-center md:text-right">
           <p className="text-primary text-2xl font-bold tracking-tight">
             {formatCurrency(price.transparentFinalPrice)}
           </p>
           <p className="text-secondary/50 text-[10px] font-bold tracking-wider uppercase">
-            Precio final transparente
+            Por persona · tarifa más económica
           </p>
         </div>
         <Button
           type="button"
           onClick={() => onSeleccionar?.(vuelo)}
-          className="bg-primary hover:bg-primary/90 w-full px-6 text-white md:w-auto"
+          className="bg-primary hover:bg-primary/90 min-h-11 w-full px-6 text-white md:min-h-0 md:w-auto"
         >
           Seleccionar
         </Button>

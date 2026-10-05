@@ -1,13 +1,14 @@
 import { SectionContainer } from '@/components/ui/SectionContainer';
-import { StickyActionBar } from '@/components/ui/StickyActionBar';
 import { BaggageCard } from '../components/BaggageCard';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { formatDate } from '@/utils/formatDate';
+import { useBarraInferior } from '@/hooks/useBarraInferior';
 import { useBaggage } from '../hooks/useBaggage';
 import type { Fare } from '@/features/flights/flights.types';
 
 export const Baggage = () => {
+  useBarraInferior();
   const {
     flight,
     flightDepartureId,
@@ -21,10 +22,10 @@ export const Baggage = () => {
   } = useBaggage();
 
   return (
-    <SectionContainer stickyBar>
+    <SectionContainer className="pb-32 sm:pb-28">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col">
-          <div className="flex flex-wrap items-center gap-x-3 text-xl text-[#323439] sm:text-3xl">
+          <div className="flex flex-wrap items-center gap-x-3 text-2xl text-[#323439] sm:text-3xl">
             <h2 className="font-medium">{flight?.originAirport.city} </h2>
             <span className="material-symbols-outlined">sync_alt</span>
             <h2 className="font-semibold">{flight?.destinationAirport.city}</h2>
@@ -37,9 +38,9 @@ export const Baggage = () => {
             </p>
           </div>
         </div>
-        <div className="border-primary/40 flex flex-col gap-3 rounded-lg border p-2 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col divide-y divide-gray-300 font-medium lg:h-full lg:flex-row lg:items-center lg:divide-x lg:divide-y-0">
-            <div className="flex flex-wrap items-center gap-2 px-3 py-2 lg:py-0">
+        <div className="border-primary/40 flex flex-col gap-3 rounded-lg border p-2 lg:max-h-17.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex h-full flex-col divide-y divide-gray-300 font-medium sm:flex-row sm:items-center sm:divide-x sm:divide-y-0">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:py-0">
               <img
                 src={flightDepartureId?.airline.logoUrl}
                 alt={flightDepartureId?.airline.name}
@@ -55,7 +56,7 @@ export const Baggage = () => {
                 {formatDate(flightDepartureId?.departureTime || '')}
               </h4>
             </div>
-            <div className="flex flex-wrap items-center gap-2 px-3 py-2 lg:py-0">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:py-0">
               <img
                 src={flightReturnId?.airline.logoUrl}
                 alt={flightReturnId?.airline.name}
@@ -72,7 +73,10 @@ export const Baggage = () => {
               </h4>
             </div>
           </div>
-          <Button className="rounded-full border-none lg:max-w-30" variant="secondary">
+          <Button
+            className="w-full rounded-full border-none sm:w-auto lg:max-w-30"
+            variant="secondary"
+          >
             Ver detalle
           </Button>
         </div>
@@ -83,7 +87,7 @@ export const Baggage = () => {
           <p>{flight?.fares?.length} tarifas disponibles</p>
         </div>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6 md:flex-row">
           {flight?.fares?.map((tarifa: Fare) => (
             <BaggageCard
               key={tarifa.id}
@@ -97,23 +101,25 @@ export const Baggage = () => {
           ))}
         </div>
       </div>
-      <StickyActionBar>
-        <h3 className="text-lg font-semibold text-[#323439] sm:text-xl">
-          Tu viaje a {flight?.destinationAirport?.city}
-        </h3>
-        <div className="flex items-center justify-between gap-6 sm:gap-12">
-          <div className="flex flex-col">
-            <h5 className="text-xs font-semibold">Precio final</h5>
-            <div className="flex gap-0.5">
-              <span className="material-symbols-outlined text-primary">info</span>
-              <h6 className="flex items-end gap-0.5 text-xl">{formatCurrency(priceTotal)}</h6>
+      <div className="fixed bottom-0 left-0 z-10 flex w-full justify-center border-t border-[#3234392d] bg-white">
+        <div className="flex w-full max-w-360 items-center justify-between gap-3 p-3 sm:p-4">
+          <h3 className="min-w-0 truncate text-base font-semibold text-[#323439] sm:text-xl">
+            Tu viaje a {flight?.destinationAirport?.city}
+          </h3>
+          <div className="flex shrink-0 items-center gap-4 sm:gap-12">
+            <div className="flex flex-col">
+              <h5 className="text-xs font-semibold">Precio final</h5>
+              <div className="flex gap-0.5">
+                <span className="material-symbols-outlined text-primary">info</span>
+                <h6 className="text-xl">{formatCurrency(priceTotal)}</h6>
+              </div>
             </div>
+            <Button variant="secondary" className="rounded-full px-5" onClick={handleNextStep}>
+              Continuar
+            </Button>
           </div>
-          <Button variant="secondary" className="w-auto rounded-full px-5" onClick={handleNextStep}>
-            Continuar
-          </Button>
         </div>
-      </StickyActionBar>
+      </div>
     </SectionContainer>
   );
 };

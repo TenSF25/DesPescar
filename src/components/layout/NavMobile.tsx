@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router';
-import { useAuthStore } from '@/store/useAuthStore';
 import { logoutSession } from '@/features/auth/logout';
+import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '../ui/Button';
 import { userMenuItems } from './userMenuItems';
 
@@ -26,7 +26,9 @@ export const NavMobile = ({ open }: NavMobile) => {
               VUELOS
             </li>
             <li className="hover:bg-secondary border-b p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
-              HOTELES
+              <Link to="/hoteles" className="block">
+                HOTELES
+              </Link>
             </li>
             <li className="hover:bg-secondary p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
               OFERTAS

@@ -1,8 +1,8 @@
 import type { Itinerary } from '../flights.types';
 
 /**
- * Duración del vuelo en minutos, calculada con la salida y la llegada. El backend manda un
- * `durationMinutes` fijo (120) para todos los vuelos, así que solo se usa si faltan las horas.
+ * Duración del vuelo en minutos, calculada con la salida y la llegada (coincide con el
+ * `durationMinutes` que informa el backend, que se usa si faltan las horas).
  */
 export const getDurationMinutes = (itinerary: Itinerary) => {
   const salida = new Date(itinerary.departure.dateTime).getTime();

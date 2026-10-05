@@ -12,9 +12,6 @@ import { SettingsPage } from '@/features/settings/pages/SettingsPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { Baggage } from '@/features/bookings/pages/Baggage';
-import { Booking } from '@/features/bookings/pages/Booking';
-import { PaymentPage } from '@/features/bookings/pages/PaymentPage';
-import { PaymentResultPage } from '@/features/bookings/pages/PaymentResultPage';
 import { SeatSelection } from '@/features/bookings/pages/SeatSelection';
 import { HomePage } from '@/features/flights/pages/HomePage';
 import { ResultsPage } from '@/features/flights/pages/ResultsPage';
@@ -32,7 +29,13 @@ import { HotelDashboardPage } from '@/features/admin/hotel/dashboard/pages/Hotel
 import { HotelManagementPage } from '@/features/admin/hotel/management/pages/HotelManagementPage';
 import { HotelReportsPage } from '@/features/admin/hotel/reports/pages/HotelReportsPage';
 import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages/HotelReservationsPage';
-import { createBrowserRouter } from 'react-router';
+import { HotelDetailPage } from '@/features/hotels/pages/HotelDetailPage';
+import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
+import { CarritoPage } from '@/features/cart/pages/CarritoPage';
+import { GrupoInvitacionPage } from '@/features/grupo/pages/GrupoInvitacionPage';
+import { PagoResultadoPage } from '@/features/payments/pages/PagoResultadoPage';
+import { PagoSimuladoPage } from '@/features/payments/pages/PagoSimuladoPage';
+import { createBrowserRouter, Navigate } from 'react-router';
 
 export const router = createBrowserRouter([
   {
@@ -49,6 +52,14 @@ export const router = createBrowserRouter([
           {
             path: '/vuelos',
             element: <ResultsPage />,
+          },
+          {
+            path: '/hoteles',
+            element: <HotelResultsPage />,
+          },
+          {
+            path: '/hoteles/:id',
+            element: <HotelDetailPage />,
           },
         ],
       },
@@ -67,8 +78,7 @@ export const router = createBrowserRouter([
       },
       {
         path: '/booking',
-        // Solo el cliente (USER) puede reservar y pagar: los roles admin reciben 403 del backend.
-        element: <ProtectedRoute allow={['USER']} />,
+        element: <ProtectedRoute />,
         children: [
           {
             path: 'baggage',
@@ -80,23 +90,28 @@ export const router = createBrowserRouter([
           },
           {
             path: 'checkout',
-            element: <Booking />,
+            element: <Navigate to="/carrito" replace />,
+          },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: '/carrito',
+            element: <CarritoPage />,
           },
           {
-            path: 'payment',
-            element: <PaymentPage />,
+            path: '/pago/simulado',
+            element: <PagoSimuladoPage />,
           },
           {
-            path: 'payment/success',
-            element: <PaymentResultPage result="success" />,
+            path: '/pago/resultado',
+            element: <PagoResultadoPage />,
           },
           {
-            path: 'payment/pending',
-            element: <PaymentResultPage result="pending" />,
-          },
-          {
-            path: 'payment/failure',
-            element: <PaymentResultPage result="failure" />,
+            path: '/grupo/:token',
+            element: <GrupoInvitacionPage />,
           },
         ],
       },

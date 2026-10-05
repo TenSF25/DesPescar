@@ -16,7 +16,8 @@ export const useAuth = () => {
 
     try {
       const res = await api.post(`${gatewayBaseUrl}/api/auth/register`, datos);
-      navigate('/login');
+      // Quien llegó desde una página protegida (por ejemplo una invitación) vuelve ahí al iniciar sesión.
+      navigate('/login', { state: location.state });
       return res.data;
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {

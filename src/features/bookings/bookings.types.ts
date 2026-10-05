@@ -4,12 +4,13 @@ export interface SeatsWebSockets {
   flightId: string;
   id: string;
   numberSeat: string;
-  statusSeat: 'DISPONIBLE' | 'BLOQUEADO' | 'RESERVADO_TEMPORAL';
+  statusSeat: 'DISPONIBLE' | 'OCUPADO' | 'RESERVADO_TEMPORAL';
 }
 
 export interface FareClassDetail {
   id?: string;
   name: string;
+  /** Siempre 0: elegir asiento no se cobra (D3). Se muestra con precioAsiento. */
   price: number;
   colorKey: string;
 }
@@ -19,7 +20,7 @@ export interface SeatItem {
   seatUuid: string;
   displayNumber: string;
   fareClass: string;
-  status: 'DISPONIBLE' | 'BLOQUEADO' | 'RESERVADO_TEMPORAL' | 'select';
+  status: 'DISPONIBLE' | 'OCUPADO' | 'RESERVADO_TEMPORAL' | 'select';
   blockedByUserId?: number;
 }
 
@@ -60,43 +61,4 @@ export interface FlightSeatMapResponse {
   totalSelectedLimit: number;
   fareClasses: Record<string, FareClassDetail>;
   layout: LayoutElement[];
-}
-
-export interface BookingInitResponse {
-  bookingId: number;
-  status: string;
-}
-
-export interface PaymentCreateResponse {
-  id: string;
-  reservationId: number;
-  userId: number;
-  amount: number;
-  currency: string;
-  status: string;
-  checkoutUrl: string | null;
-}
-
-export type BookingStatus =
-  'INICIADA' | 'PENDIENTE_PAGO' | 'ESPERANDO_PAGADORES' | 'CONFIRMADA' | 'EXPIRADA' | 'CANCELADA';
-
-/** Respuesta de GET /api/bookings/{id} (ReservationResponse en reservation-service). */
-export interface BookingDetail {
-  idCarrito: number;
-  vueloCodigo: string;
-  hotelId: string | null;
-  estadoGeneral: BookingStatus;
-  segundosRestantes: number | null;
-  montoTotal: number;
-  moneda: string;
-  asientos: Array<{
-    asientoIda: string | null;
-    asientoVuelta: string | null;
-    pagadorId: number | null;
-    precioCobrado: number | null;
-    estadoPago: string | null;
-    nombrePasajero: string | null;
-    dniPasaporte: string | null;
-    tarifaNombre: string | null;
-  }>;
 }

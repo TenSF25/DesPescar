@@ -1,162 +1,101 @@
 import { useState } from 'react';
-import { api } from '@/config/api';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useShallow } from 'zustand/react/shallow';
+import type { IniciarVueloRequest } from '@/features/cart/cart.types';
+import { leerErrorApi } from '@/features/cart/carrito';
+import { iniciarVuelo } from '@/features/cart/services/carritoService';
+import { useCarritoStore } from '@/store/useCarritoStore';
 import { useFlightStore } from '@/store/useFlightStore';
-import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
-import type { BookingInitResponse, PaymentCreateResponse } from '../bookings.types';
 
-/** Lo que reservation-service guarda hoy de cada pasajero: nombre completo y documento. */
-export type PassengerFormInput = {
-  nombreCompleto: string;
-  dniPasaporte: string;
-};
+export type ResultadoInit =
+  | { success: true; reservationId: number }
+  | { success: false; codigo: string | null; error: string };
 
-export type PassengerFareDetails = {
-  id: string;
-  name: string;
-  pricePerPassenger: number;
-};
+/** Al reemplazar: si el vuelo ya no está o el carrito venció, no hay nada que quitar. */
+const nadaQueQuitar = (status: number | null, codigo: string | null) =>
+  status === 410 || codigo === 'SIN_VUELO' || codigo === 'CARRITO_NO_ENCONTRADO';
 
+/** Lleva el vuelo elegido al carrito (POST /init) y, si ya tenía uno, permite reemplazarlo. */
 export const useBooking = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const myUserId = useAuthStore((state) => state.user?.id);
-  const token = useAuthStore((state) => state.tokens?.accessToken);
   const {
+    setReservationId,
     selectedDepartureFlight,
     selectedReturnFlight,
-    passengers: passengersLimit,
+    passengers,
     selectedDepartureFare,
     selectedReturnFare,
-    setPassengersAssignedBookingId,
-  } = useFlightStore();
+  } = useFlightStore(
+    useShallow((s) => ({
+      setReservationId: s.setReservationId,
+      selectedDepartureFlight: s.selectedDepartureFlight,
+      selectedReturnFlight: s.selectedReturnFlight,
+      passengers: s.passengers,
+      selectedDepartureFare: s.selectedDepartureFare,
+      selectedReturnFare: s.selectedReturnFare,
+    })),
+  );
+  const quitarVueloDelCarrito = useCarritoStore((s) => s.quitarVuelo);
+  const { setSelectedSeats } = useFlightStore();
 
-  const initBooking = async (hotelId?: string) => {
+  const armarPedido = (): IniciarVueloRequest | string => {
+    if (!selectedDepartureFlight) return 'Elegí un vuelo antes de continuar.';
+    const flightIds = [selectedDepartureFlight, selectedReturnFlight].filter((id): id is string =>
+      Boolean(id),
+    );
+    const baggageIds = [selectedDepartureFare, selectedReturnFare].filter((id): id is string =>
+      Boolean(id),
+    );
+    if (baggageIds.length !== flightIds.length) return 'Seleccioná una tarifa para cada tramo.';
+    return {
+      flightIds,
+      cantidadPasajeros: Math.max(1, Number(passengers) || 1),
+      paymentType: 'SINGLE_PAYMENT',
+      baggageIds,
+      hotelId: null,
+      packageId: null,
+    };
+  };
+
+  const initBooking = async (): Promise<ResultadoInit> => {
     setIsLoading(true);
     setError(null);
-
     try {
-      if (!myUserId || !selectedDepartureFlight || !token) {
-        throw new Error('Faltan datos de sesión, token o vuelo.');
+      const pedido = armarPedido();
+      if (typeof pedido === 'string') {
+        setError(pedido);
+        return { success: false, codigo: null, error: pedido };
+      }
+      const res = await iniciarVuelo(pedido);
+
+      if (res.bookingId) {
+        setReservationId(res.bookingId);
       }
 
-      const flightIds = [selectedDepartureFlight, selectedReturnFlight].filter(
-        (flightId): flightId is string => Boolean(flightId),
-      );
-      const baggageIds = [selectedDepartureFare, selectedReturnFare].filter(
-        (fareId): fareId is string => Boolean(fareId),
-      );
-
-      if (baggageIds.length === 0) {
-        throw new Error('Seleccioná una tarifa antes de continuar.');
-      }
-
-      const initPayload = {
-        flightIds,
-        cantidadPasajeros: Number(passengersLimit),
-        paymentType: 'SINGLE_PAYMENT',
-        hotelId: hotelId || null,
-        baggageIds,
-      };
-
-      const initResponse = await api.post<BookingInitResponse>('/api/bookings/init', initPayload);
-
-      const reservationId = initResponse.data.bookingId;
-
-      if (!reservationId) {
-        throw new Error('El servidor no devolvió el ID de la reserva.');
-      }
-
-      return { success: true, reservationId };
+      return { success: true, reservationId: res.bookingId };
     } catch (err: unknown) {
-      console.error('Error inicializando la reserva:', err);
-      const message = getApiErrorMessage(err, 'Ha ocurrido un error al inicializar la reserva.');
-      setError(message);
-      return { success: false, error: message };
+      const e = leerErrorApi(err, 'No pudimos agregar el vuelo al carrito.');
+      // El conflicto se resuelve con el diálogo de reemplazo, no como error.
+      if (e.codigo !== 'CARRITO_YA_TIENE_VUELO') setError(e.mensaje);
+      return { success: false, codigo: e.codigo, error: e.mensaje };
     } finally {
       setIsLoading(false);
     }
   };
 
-  /** Paso de datos: asigna pasajeros y asientos a la reserva (queda PENDIENTE_PAGO). */
-  const savePassengers = async (
-    reservationId: number,
-    formData: PassengerFormInput[],
-    selectedSeats: string[],
-    fareDetails: PassengerFareDetails,
-  ) => {
+  /** 409 CARRITO_YA_TIENE_VUELO: quita el vuelo del carrito y vuelve a intentar (D29). */
+  const reemplazarVuelo = async (): Promise<ResultadoInit> => {
     setIsLoading(true);
     setError(null);
-
-    try {
-      if (!token) throw new Error('No hay sesión activa.');
-      if (!reservationId || !myUserId) throw new Error('Faltan datos de la reserva o del usuario.');
-      if (formData.length !== selectedSeats.length) {
-        throw new Error('Debes completar los datos para todos los pasajeros.');
-      }
-      if (selectedSeats.length === 0 || !fareDetails.id) {
-        throw new Error('Faltan asientos o una tarifa válida para continuar.');
-      }
-
-      const pasajerosPayload = formData.map((pasajero, index) => ({
-        nombreCompleto: pasajero.nombreCompleto,
-        dniPasaporte: pasajero.dniPasaporte,
-        asientoIda: selectedSeats[index],
-        asientoVuelta: null,
-        tarifaId: fareDetails.id,
-        tarifaNombre: fareDetails.name,
-        precioTarifa: fareDetails.pricePerPassenger,
-      }));
-
-      // reservation-service acepta la asignación de pasajeros una sola vez por reserva (un segundo PUT da 400).
-      if (useFlightStore.getState().passengersAssignedBookingId !== reservationId) {
-        // El token lo agrega el interceptor de `api`.
-        await api.put(`/api/bookings/${reservationId}/passengers`, { pasajeros: pasajerosPayload });
-        setPassengersAssignedBookingId(reservationId);
-      }
-      return { success: true as const };
-    } catch (err: unknown) {
-      console.error('Error guardando los pasajeros:', err);
-      const message = getApiErrorMessage(err, 'No se pudieron guardar los datos de los pasajeros.');
-      setError(message);
-      return { success: false as const, error: message };
-    } finally {
-      setIsLoading(false);
+    const r = await quitarVueloDelCarrito();
+    setSelectedSeats([]);
+    setIsLoading(false);
+    if (!r.ok && !nadaQueQuitar(r.error.status, r.error.codigo)) {
+      setError(r.error.mensaje);
+      return { success: false, codigo: r.error.codigo, error: r.error.mensaje };
     }
+    return initBooking();
   };
 
-  /** Paso de pago: crea el pago (el importe lo toma el backend de la reserva) y devuelve el link de Mercado Pago. */
-  const startPayment = async (reservationId: number) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      if (!token) throw new Error('No hay sesión activa.');
-      if (!reservationId) throw new Error('Falta la reserva.');
-
-      const paymentResponse = await api.post<PaymentCreateResponse>('/api/payments', {
-        reservationId,
-      });
-      const paymentUrl = paymentResponse.data.checkoutUrl;
-      if (!paymentUrl) throw new Error('No se pudo generar el enlace de pago.');
-
-      return { success: true as const, paymentUrl, payment: paymentResponse.data };
-    } catch (err: unknown) {
-      console.error('Error iniciando el pago:', err);
-      const message = getApiErrorMessage(err, 'Ha ocurrido un error al procesar el pago.');
-      setError(message);
-      return { success: false as const, error: message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return {
-    initBooking,
-    savePassengers,
-    startPayment,
-    isLoading,
-    error,
-  };
+  return { initBooking, reemplazarVuelo, isLoading, error };
 };

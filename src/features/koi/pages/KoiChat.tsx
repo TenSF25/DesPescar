@@ -1,37 +1,51 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router';
 import { useKoiChat } from '../services/useKoiService';
-
-interface CuteKoiIconProps {
-  className?: string;
-}
-
-const CuteKoiIcon: React.FC<CuteKoiIconProps> = ({ className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 558 447" className={className}>
-    <path
-      fill="#FF6B35"
-      d="M200 65.6c-8.5 4.8-19.5 10.7-24.5 13.2-16.2 8.1-34.6 18.3-39.8 21.9-41.1 28.7-58.8 64.7-49.9 101.3 6.1 25.1 27.1 59 51.2 82.8 20.3 20 38.2 32.2 79.5 54.2 5.5 3 13.6 7.3 18 9.7 4.4 2.4 12.4 6.4 17.8 9 5.3 2.5 9.7 5 9.7 5.4 0 2.1-15.3 10.4-27.5 15l-5.9 2.2 7.4 3.4c33.3 15.1 70.5 13.2 97.3-5.1 2.1-1.4 4.5-2.6 5.3-2.6.8 0 6.1-.9 11.7-2.1 19.1-3.9 41.6-12.5 53-20.3 2.1-1.4 4.2-2.6 4.7-2.6 1.9 0 19.1-18 23.1-24.3l4.3-6.8 1.4 2.6c1.6 3.2 1.8 13.6.2 16.6-1.8 3.3-.5 3.3 1.9.1 3.5-5 6-11.9 6.4-17.9.3-3.4 1.9-9.1 3.8-13.8 4.5-11 4.7-19.4.5-24.9-5.9-7.8-21.4-16.7-36.6-21-9.3-2.6-25.2-3.8-39.5-2.8-19.2 1.3-51.6 1.4-63 .2-36.2-3.8-78.3-14.1-93.5-22.7-18.4-10.5-33.3-30.8-34.9-47.6l-.6-6.7-4.5 2.2c-2.4 1.2-6.9 4.6-9.9 7.5-6.1 5.9-7.1 5.6-7.1-1.7 0-14.1 9.8-32.2 26.9-50l4.4-4.5-.6 6.7c-.4 3.7-1.3 8.1-2.2 9.8-2.7 5.2-.2 3.3 6.3-5 12.7-16 19.5-35.7 22.3-64 1.1-11.8.6-26-.9-26-.4.1-7.7 3.9-16.2 8.6zm15.3-1.2c-.2 1.7-.5 7.4-.7 12.6-.5 12.1-1.7 22-2.6 22-.4 0-.5 1.1-.2 2.5.2 1.4 0 2.5-.7 2.5-.5 0-.8.7-.5 1.5.8 1.9-.4 6.7-1.5 6.1-.4-.3-.8.1-.8.9s.3 1.2.7 1c.4-.3 0 1.6-.9 4-.9 2.5-2 4.5-2.4 4.5-.5 0-.5-.5-.1-1.2s.3-.8-.4-.4c-.8.5-.9 1.3-.2 2.5.7 1.4.4 2.1-1.5 3.1-1.3.7-2.2 1.7-1.9 2.2.3.5 1.2.1 2-.9 1.3-1.6 1.3-1.5.3.9-1 2.3-1.5 2.6-2.7 1.5-1.3-1-1.4-.9-.3 1 .7 1.5.8 2.3.1 2.3-.5 0-.9.3-.9.7.4 2.3-.3 3.5-1.5 3-1-.4-1.3-.1-.9.8.3.8 1 1.2 1.7.8.6-.4.5.1-.3 1-1.7 2.2-2 2.1-3.2-.6-.9-2.1-.9-2-.4.4.3 1.6-.1 3.1-.8 3.8-1.1.8-1.3.3-1.1-2.4.2-2.6-.2-3.8-1.9-5-1.2-.8-1.8-1.5-1.3-1.5s.3-.7-.5-1.6c-1.1-1.3-.8-1.9 1.6-4 1.7-1.5 2.3-2.4 1.4-2.4-2.1 0-25.8 21.7-31.9 29.2-2.8 3.5-6.6 9.4-8.6 13.3-18 36.6 11.1 67.4 81.1 85.5 18.4 4.7 37.8 8.4 55 10.5 7.2.8 15.3 1.8 18 2.2 2.8.4 25.9.7 51.5.8 44.9.1 46.7.2 53.5 2.3 15.9 5 27.9 12 31.6 18.5 2 3.6 2 4.4 1 10-2 10.3-1.8 10.1-5.8 5.6-4.3-4.7-6.4-5.2-2.9-.6 2.4 3.1 5.6 12.9 5.6 16.9 0 2.6-1.7 2.2-2.3-.5-.7-2.6-6.5-10.7-7.8-10.7-.5 0-.5 1 0 2.3 1.1 2.7-.8 8.9-3.6 12-7.7 8.7-13.6 13.4-21.8 17.5-3.3 1.7-8.2 3.4-11 3.7-5.8.8-17.2-1.5-22.2-4.5-1.8-1.1-3.3-1.6-3.3-1.1 0 1.7 8.6 7.9 13 9.4l4.5 1.6-6.3.1c-7.6 0-12.1-2-18.5-8.5-7.8-7.8-9.5-18.7-4.4-28.5 2.1-4 2.3-4.9 1-3.9-4.1 3.2-7.6 9.2-9.3 16.1-2.3 9 3.5 20.8 13 26.3l4.8 2.8-7 2.5c-3.8 1.3-7.2 2.1-7.5 1.9-.3-.3.2-1.6 1.1-2.9 2.1-2.9 2-4.5-.3-5.7-1.5-.9-2.4-.2-5.6 4.5-7.6 11-20.5 21-34.5 26.7-17.2 7.1-40.8 7.4-61.7 1l-5.1-1.6 8.7-4.3c5-2.6 13.9-8.5 21.1-14.2 19.2-15.1 24-17.4 39.5-19.3 10.8-1.3 16.4-3.8 21.6-9.8 2.2-2.4 3.9-4.2 3.9-4 0 .2-.4 1.9-1 3.8-.5 1.9-.7 3.1-.3 2.8 1-1.1 3.2 2.6 3.3 5.5 0 1.9.5 2.8 1.6 2.8s.8.9-1.3 3.7c-1.5 2.1-3.9 4.9-5.2 6.3-1.4 1.4-1.8 1.6-1 .6 1.3-1.8 1.3-1.8-.8-.6-1.2.8-2 1.7-1.8 2 .6 1-5.8 3.7-7.9 3.4-1.9-.3-10 4.5-9.2 5.4.9.8 9.6-1.8 14.7-4.4 5.8-2.9 13.9-10.3 13.9-12.7 0-.9.5-1.7 1-1.7.6 0 1 .4 1 1 0 .5.8 1 1.8 1 1.5-.1 1.6-.2.1-1.3-3-2.3-6.1-9.6-5.4-12.9.5-2.1.4-2.8-.4-2.4-.6.4-1.1 1.4-1.1 2.2 0 .8-.4 1.4-.9 1.4s-.8-2.1-.6-4.8c.4-4 1-5.2 4.5-8.2 4.4-3.8 4.7-4.5 2.6-5.3-1.1-.4-1.3-.1-1 1.1.4 1.1-.2.8-1.6-.8-2-2.3-2.1-2.3-1-.2 1.2 2.4.5 4.6-1.1 3.7-.5-.4-1.2.1-1.5.9-.3.9-1.1 1.6-1.6 1.6-.6 0-.8-.6-.5-1.3.3-.8-.1-1.4-.9-1.4-1.2 0-1.1.5.2 2.5 1.6 2.4 1.5 2.6-.2 3.9-5.4 4.1-13 6.8-26.2 9.4-15.3 3-24 6.3-31 11.7-4.3 3.2-4.4 3.3-9 2-4-1.2-4.7-1.8-5-4.2-.2-1.7-1.9-4.3-4.3-6.6-2.9-2.7-3.9-4.5-3.9-6.8 0-4 4.2-8.9 9.4-11.2 2.3-.9 6.1-3.4 8.6-5.5 4.3-3.6 4.5-3.7 10-2.9 12 1.8 18.1-.2 18.8-6 .5-3.6-1.1-5.3-5.8-6.1-8.3-1.4-12-9.3-6.2-13.3 1.5-1.1 3.8-2.2 5.2-2.3 2.1-.3 2.6-1 2.8-4 .3-3.1-.2-4-3.2-6.2-4-3.1-9.4-3.5-14.9-1.2-5.8 2.4-9.9 1.9-15.3-1.9-10.9-7.7-11.8-8-24.2-7.9l-11.3.2-3.7-3.3c-5.9-5.2-8.4-6.6-11.9-6.6-2.5 0-3.1.3-2.6 1.5.3.9 1.3 1.5 2.2 1.3 2.4-.4 8.2 2.3 7.4 3.5-.3.5-.1.7.4.4 1-.6 7.5 4.7 6.8 5.5-.2.2 1.3.3 3.2.4 1.9 0 3.9.7 4.5 1.5.8 1.1.9 1 .4-.4-.4-1.4-.1-1.6 1.9-1.3 1.3.3 2.9-.2 3.6-1 .6-.8 2.1-1.4 3.2-1.4 1.9 0 1.8.3-1.1 2.7-3.1 2.7-3.2 3.1-3.7 12.5-.6 10.6-.7 10.4 7.8 17.5 1.9 1.7 2.7 3.2 2.7 5.5-.1 6.6-5.7 10.8-14.6 10.8-8.7 0-10.9 1.9-10.9 9.5 0 7.5-1.6 8.7-7.6 5.9-28.2-12.9-48-24.2-61.4-34.9-10.9-8.7-23.3-21.1-30.5-30.5-1.9-2.5-3.7-4.7-4-5-.7-.7-8.1-12-10.2-15.5-1-1.7-4-7.6-6.8-13.3-5.3-10.8-6.5-17.7-3.6-20.1 1-.8 1.3-2.3.9-4.7-.5-3.2-.4-3.4 2.6-4 4.7-1 6.5-5.1 5.7-13.1-.4-3.8-.2-8.8.5-12.2 1.2-5.7 1.2-6-1.4-9.1-3.2-3.8-3.4-6.3-.7-11.5 1.2-2.3 2-5.9 2-8.8 0-4.8 1.5-7.7 4.1-7.7.7 0 .9-.3.6-.7-.4-.3.1-1.2 1.1-2 1.1-.9 1.1-1.2.2-.7-1.2.5-1.2.4-.3-.6 1.3-1.4 3.7-.4 2.7 1.2-.4.7-.2.8.5.4.9-.6.9-1.1.1-2.1-.9-1.1-.7-1.9.9-3.6 1.2-1.3 2.1-2.1 2.2-1.8.5 2.5.4 4.7-.1 4.4-.3-.2-.6.5-.6 1.5s.4 1.6.8 1.4c.4-.3 1.3.4 2 1.6.7 1.1 2 2 2.8 2 1.3 0 1.3.1 0 1-1.2.8-1.1 1 .8 1 1.2 0 2.2.4 2.2 1 0 1.8-3.7 7-4.5 6.2-.4-.4-.4.4 0 1.7.5 1.6.4 2.1-.4 1.7-.7-.5-1.2.3-1.3 2.1-.4 8.3-.4 9.1.8 8.6.6-.2 1.4.3 1.7 1.1.4 1 .1 1.3-.7 1-.8-.3-1.6-.1-2 .4-.3.5.8.8 2.3.7 2.2-.1 2.8.2 2.3 1.3-.3 1-.1 1.3.6.8 2.8-1.7 4.2 9.4 2.7 19.9-.5 3.2-1.1 4.1-2.7 4.2-2.1.2-6.6-4.3-6-6 .1-.5-.3-.5-.9-.1-.7.4-1.8-.1-2.6-1.1-1.2-1.8-1.3-1.8-1.3-.1 0 1.6-.2 1.7-1.7.5s-1.6-1.2-1 .3c.4 1.1.2 1.7-.5 1.5-.6-.1-1.5 1.4-2 3.3-.4 1.9-1 4.3-1.3 5.2-.2 1 0 2 .4 2.3.5.2 1.2 2.6 1.5 5.2.4 2.7 1.4 7.3 2.3 10.3.9 3 1.7 8.7 1.7 12.6.1 6.5.4 7.6 3.3 11.1 2.5 3.2 3.1 4.9 3.1 8.6 0 5.4.5 6.2 9.5 15.6 3.7 3.9 6.7 7.5 6.7 8 0 2.3 7.7 9.9 11.8 11.6 2.9 1.3 3.8 1.2 7.5-.2 3.9-1.6 4-1.7 1.7-2.3-1.4-.4-2.9-.3-3.5.1-1.7 1.3-6.6.5-6-.9.3-.7 0-1-.5-.7-1 .6-3.9-1.6-4.3-3.2-.1-.4-.7-.7-1.4-.5-.8.2-1-.3-.6-1.4.5-1.2.3-1.5-.6-.9-1 .5-1.1.2-.7-1.2.4-1.2.1-2.5-.9-3.3-.8-.7-1.5-.9-1.5-.5s-1.1-.4-2.5-2c-2.5-2.6-2.5-2.8-1-5.2 1.6-2.4 1.6-2.4-.7-.9-1.7 1.1-2.7 1.2-3.8.5-1.2-.9-1.2-1 .3-.5 1.1.4 1.6.2 1.2-.5-.4-.6-1.3-.8-2-.5-.8.3-2.1-.6-2.9-1.9-1.7-2.6-2.1-3.9-.8-3.1.4.2.8-.4.8-1.5 0-1.8-.2-1.8-1.2-.5-1.7 2.3-2.4.9-2.4-4.9 0-3.7-.5-5.7-2-7.3-1.1-1.2-2-2.6-2-3.2 0-.5-.5-1-1.1-1-.6 0-.9-.7-.5-1.5.3-.8.1-1.5-.5-1.5s-.7-.5-.4-1c.3-.6.3-1.6-.2-2.3-.9-1.4-1.5-4.7-.9-4.7.3 0 1.7 2.6 3.3 5.7 2.6 5.4 8.7 12 25.6 28.1 3.2 3 6.8 7.7 8.3 10.8 2.8 5.8 9.5 13.4 11.8 13.4 2.1 0 4.4 3.2 7 9.5 3.1 7.7 6.5 11.8 12.1 14.5 6.6 3.2 13.6 2.5 19.8-1.9 8.5-6.1 15.6-5.2 25.5 3.3 4.1 3.5 6.2 4.6 8.8 4.6 3.4 0 4.9-1.9 1.7-2.2-4.1-.3-8.4-1.9-7.8-2.8.3-.4-.5-1-1.8-1.4-1.7-.5-1.9-.8-.8-1.5.9-.6 1-1.1.2-1.5-.6-.4-1.1-.2-1.1.4 0 .6-.5.8-1 .5-.6-.4-.8-1.1-.5-1.6.4-.5.3-.9-.2-1-2.9-.2-4.7-.9-5.3-2-.5-.6-3-1.1-6.1-1.1-6.7 0-7.8.3-10.1 2.5-1.9 1.8-4.3 2.4-3.3.8.3-.5.1-1.2-.4-1.5-.5-.4-.8.5-.7 1.8.3 2.1-.3 2.6-3.5 3.4-6.4 1.6-11.9.4-16.9-3.8-1.4-1.2-1.8-1.9-1-1.5.8.4.5-.2-.7-1.2s-3.4-4.4-4.9-7.6c-1.4-3.2-3.4-6.1-4.3-6.5-1-.4 0-.9 2.9-1.4 2.5-.3 5.7-1 7.2-1.3 2.1-.6 3.9 0 7.5 2.3 5.6 3.6 9.3 4.7 12.8 3.8 5.7-1.4 5.1-7.7-1-11-3.1-1.7-5.5-5.2-5.5-8.1 0-2.2 2.9-4.5 5.8-4.5 3.8 0 7.2-2.6 7.2-5.5 0-5.1-10.1-9.7-18-8.1-4.4.8-7.5-.7-15-7.7-4.3-4-8.4-6.8-11.2-7.7-5.1-1.7-8-3.3-13.2-7.7-2.2-1.8-4.6-3.3-5.5-3.3-.8 0-3.2-1.7-5.3-3.7l-3.8-3.7-2.4 2.3c-1.7 1.6-3.1 2.1-4.5 1.6-3.4-1.1-10.7-9.3-13.9-15.8-2.8-5.4-3.1-6.7-2.3-10.1 1.7-6.9 5.5-7.5 9.4-1.4 2 3.2 5 5 6.9 4.3 2.1-.8 3.7-6.1 4.2-14.1.6-8.8-.7-13.4-5.1-18-1.8-2-3.3-4.3-3.3-5.3 0-2.5 2-8.1 3-8.1 1.3 0 3.2-5.6 2.8-8.6-.2-2.2-1.1-3.3-3.5-4.3-1.8-.8-3.5-2.2-3.8-3.2-.7-2.2 2.6-9 7.2-14.7 1.9-2.3 3.1-4.2 2.7-4.2-1.7 0-11.9 8.8-17.6 15.1-11.1 12.4-17.8 24.2-21.3 37.4-2.3 8.8-2.9 24.8-1.2 31.5l1.5 5.5-.2-9c-.1-5 .1-10.2.5-11.8.5-1.6.4-2.7-.2-2.7-.6 0-.7-.5-.3-1.2.4-.7.8-2.1.9-3.2.4-5.1 1.8-11.7 2.6-12.2.5-.3.9-1.6.9-3 0-1.3.5-2.4 1-2.4.6 0 1-.6.9-1.3-.3-2.4.1-3.8 1-3.3.5.3 1.1-.7 1.5-2.2.7-3.4 2.3-5.9 3.2-5 .7.8-2.3 9-3.6 9.8-1.1.7 1.6 9.1 3.4 10.5 1.9 1.5 2.4 3.8 1.4 5.9-1.6 3-2 10.1-.9 14.1 1.3 4.9-.2 9-4 10.5-3.2 1.4-5.4 4.4-4.4 6.1.4.5.4 1.7 0 2.7-.5 1.4-.7 1.4-1.6.2-.8-1.2-.9-1.1-.5.5.3 1.1.1 3.7-.4 5.9-.7 3.3-.4 4.8 2.1 10.3 2.5 5.5 2.8 6.8 1.7 8.2-1.2 1.4-1.1 1.5.4.2 1.6-1.2 1.9-1 2.8 1.3.5 1.5 1.3 3.8 1.6 5.1.3 1.4 1.1 2.5 1.7 2.5.6 0 .8.3.4.6-.3.4.1 1.3.9 2.2 2.1 2.1-.4 3.7-2.7 1.6-.8-.7-2.1-1.4-2.7-1.4-1.6 0-2.4-1.8-1.1-2.6.8-.4.9-.3.5.4s-.2 1.2.4 1.2c.7 0 1-.5.8-1.1-.2-.6-.6-.9-.9-.7-.9.5-3.9-2.3-3.4-3.2.3-.4-.2-1-1-1.4-.8-.3-1.5-1-1.5-1.6 0-.6.6-.8 1.3-.5.6.4.1-.3-1.3-1.5-1.6-1.4-1.9-2-.8-1.6 1.3.4 1.5.1 1.1-1.1-.5-1.2-.3-1.4.7-.8.9.5 1.1.4.6-.4-.4-.6-1.3-.8-1.9-.4-2.6 1.6-3."
-    />
-  </svg>
-);
+import KoiAvatar from '../components/KoiAvatar';
+import { KoiOpcionCard } from '../components/KoiOpcionCard';
+import { useKoiCarrito } from '../hooks/useKoiCarrito';
+import { debeReabrirChat } from '../koiSesion';
 
 export default function KoiChat() {
   const { messages, sendMessage, loading, isReady } = useKoiChat();
   const [input, setInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isDizzy, setIsDizzy] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const listaRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const cerrarChat = useCallback(() => setIsOpen(false), []);
+  const carrito = useKoiCarrito(cerrarChat);
+
+  const dialogoRef = useRef<HTMLDivElement>(null);
+  const confirmando = carrito.estado.tipo === 'confirmarReemplazo';
+  useEffect(() => {
+    if (confirmando) dialogoRef.current?.focus();
+  }, [confirmando]);
+
+  // Volviendo del login que pidió un botón de KOI: se reabre la ventana (una sola vez).
+  // El timeout evita el setState sincrónico dentro del efecto y StrictMode lo limpia.
+  useEffect(() => {
+    if (location.pathname === '/login') return;
+    const id = window.setTimeout(() => {
+      if (debeReabrirChat()) setIsOpen(true);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // scrollIntoView también desplazaba la ventana del chat (overflow-hidden) y escondía el encabezado
+    const lista = listaRef.current;
+    lista?.scrollTo({ top: lista.scrollHeight, behavior: 'smooth' });
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, loading, carrito.estado]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
+    carrito.limpiarAvisos();
     sendMessage(input);
     setInput('');
   };
@@ -57,17 +71,6 @@ export default function KoiChat() {
         /* Animación para cuando pasas el mouse por el botón (nada más rápido) */
         .koi-swim-fast {
           animation: koi-swim-animation 1.5s ease-in-out infinite !important;
-        }
-
-        /* El chiste del mareo */
-        @keyframes dizzy-spin {
-          0% { transform: rotate(0deg) scale(1); }
-          50% { transform: rotate(180deg) scale(0.8); }
-          100% { transform: rotate(360deg) scale(1); }
-        }
-        
-        .koi-dizzy {
-          animation: dizzy-spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
         }
 
         @keyframes bubble-rise-1 {
@@ -109,7 +112,7 @@ export default function KoiChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         title={isOpen ? 'Cerrar ventana' : '¡Haz blup para hablar con KOI!'}
-        className={`koi-fab group fixed right-4 bottom-4 z-50 flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none sm:right-6 sm:bottom-6 sm:h-24 sm:w-24 ${
+        className={`koi-fab group fixed right-4 bottom-4 z-[500] flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none sm:right-6 sm:bottom-6 sm:h-24 sm:w-24 ${
           isOpen
             ? 'right-10! h-16! w-16! bg-red-500 shadow-2xl hover:bg-red-600'
             : 'fish-bowl border-2 border-white/40 bg-linear-to-br from-blue-100 via-blue-200 to-blue-400 backdrop-blur-sm'
@@ -131,7 +134,11 @@ export default function KoiChat() {
           </svg>
         ) : (
           <div className="relative flex h-full w-full items-center justify-center p-3">
-            <CuteKoiIcon className="koi-swim group-hover:koi-swim-fast h-full w-full transition-all" />
+            <img
+              src="/koi/koi.webp"
+              alt=""
+              className="koi-swim group-hover:koi-swim-fast h-full w-full object-contain transition-all"
+            />
             <div className="bubble bubble-1" />
             <div className="bubble bubble-2" />
             <div className="bubble bubble-3" />
@@ -143,7 +150,7 @@ export default function KoiChat() {
       </button>
 
       <div
-        className={`koi-panel fixed right-4 bottom-28 flex h-[min(34.375rem,calc(100dvh-8rem))] w-[min(23.75rem,calc(100vw-2rem))] origin-bottom-right flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 sm:right-6 sm:bottom-32 ${
+        className={`fixed right-4 bottom-32 left-4 z-[500] flex h-137.5 max-h-[calc(100dvh-9rem)] w-auto origin-bottom-right flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 sm:right-6 sm:left-auto sm:w-95 ${
           isOpen ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'
         }`}
       >
@@ -152,11 +159,9 @@ export default function KoiChat() {
             <button
               onClick={pokeKoi}
               title="No me toques la pecera"
-              className="flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
+              className="flex h-[4.5rem] w-[4.5rem] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
             >
-              <CuteKoiIcon
-                className={`h-10 w-10 translate-y-1 ${isDizzy ? 'koi-dizzy' : 'koi-swim'}`}
-              />
+              <KoiAvatar working={loading} dizzy={isDizzy} />
             </button>
             <div>
               <h3 className="flex items-center gap-2 text-base font-bold tracking-wide">
@@ -185,7 +190,10 @@ export default function KoiChat() {
           </button>
         </div>
 
-        <div className="flex-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent space-y-4 overflow-y-auto bg-slate-50 p-4">
+        <div
+          ref={listaRef}
+          className="relative min-h-0 flex-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent space-y-4 overflow-y-auto bg-slate-50 p-4"
+        >
           {!isReady && (
             <div className="flex justify-center py-4">
               <span className="animate-pulse text-sm text-gray-500">
@@ -206,7 +214,7 @@ export default function KoiChat() {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex w-full flex-col gap-2 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`max-w-[85%] px-4 py-3 text-[14px] leading-relaxed shadow-sm ${
@@ -217,6 +225,18 @@ export default function KoiChat() {
               >
                 {msg.text}
               </div>
+              {msg.opciones.length > 0 && (
+                <div className="flex w-full flex-col gap-3">
+                  {msg.opciones.map((opcion) => (
+                    <KoiOpcionCard
+                      key={opcion.optionId}
+                      opcion={opcion}
+                      onAccion={(o, accion) => void carrito.ejecutar(o, accion)}
+                      ocupado={carrito.estado.tipo === 'ocupado'}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
@@ -231,7 +251,98 @@ export default function KoiChat() {
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
+          <p className="sr-only" role="status" aria-live="polite">
+            {carrito.estado.tipo === 'ocupado' && 'Agregando al carrito'}
+            {carrito.estado.tipo === 'agregado' && 'Agregado al carrito'}
+            {carrito.estado.tipo === 'error' && carrito.estado.texto}
+          </p>
+          {carrito.estado.tipo === 'ocupado' && (
+            <p className="text-center text-xs text-gray-500" aria-hidden="true">
+              Agregando al carrito…
+            </p>
+          )}
+
+          {carrito.estado.tipo === 'confirmarReemplazo' && (
+            <div
+              ref={dialogoRef}
+              tabIndex={-1}
+              role="alertdialog"
+              aria-label="Reemplazar el vuelo del carrito"
+              aria-describedby="koi-reemplazo-texto"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  carrito.descartar();
+                }
+              }}
+              className="rounded-2xl rounded-bl-none border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
+            >
+              <p id="koi-reemplazo-texto">
+                Tu carrito ya tiene un vuelo. ¿Lo reemplazo por este? Se quita el vuelo actual y
+                elegís asientos del nuevo.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={carrito.confirmarReemplazo}
+                  className="bg-primary hover:bg-primary/90 min-h-10 flex-1 rounded-[10px] px-3 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Reemplazar vuelo
+                </button>
+                <button
+                  type="button"
+                  onClick={carrito.descartar}
+                  className="border-secondary/20 text-secondary min-h-10 flex-1 rounded-[10px] border bg-white px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Dejar el que tengo
+                </button>
+              </div>
+            </div>
+          )}
+
+          {carrito.estado.tipo === 'agregado' && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl rounded-bl-none border border-green-200 bg-green-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm">
+              <span>
+                Agregado al carrito ·{' '}
+                <Link
+                  to="/carrito"
+                  onClick={() => {
+                    carrito.descartar();
+                    setIsOpen(false);
+                  }}
+                  className="text-primary font-bold underline-offset-2 hover:underline"
+                >
+                  Ir al carrito
+                </Link>
+              </span>
+              <button
+                type="button"
+                onClick={carrito.descartar}
+                aria-label="Cerrar aviso"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                  close
+                </span>
+              </button>
+            </div>
+          )}
+
+          {carrito.estado.tipo === 'error' && (
+            <div className="flex items-start justify-between gap-3 rounded-2xl rounded-bl-none border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-800 shadow-sm">
+              <span>{carrito.estado.texto}</span>
+              <button
+                type="button"
+                onClick={carrito.descartar}
+                aria-label="Cerrar aviso"
+                className="text-red-400 hover:text-red-600"
+              >
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
+                  close
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="border-t bg-white p-3">

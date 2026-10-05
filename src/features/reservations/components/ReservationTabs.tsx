@@ -22,7 +22,7 @@ export const ReservationTabs = ({ active, onChange }: ReservationTabsProps) => {
           type="button"
           onClick={() => onChange(id)}
           className={cn(
-            '-mb-0.5 cursor-pointer border-b-2 border-transparent px-3 pt-2.5 pb-3 text-sm font-bold whitespace-nowrap transition-colors sm:px-5',
+            '-mb-0.5 min-h-10 cursor-pointer border-b-2 border-transparent px-3 pt-2.5 pb-3 text-sm font-bold whitespace-nowrap transition-colors sm:px-5',
             active === id ? 'border-primary text-primary' : 'hover:text-secondary text-gray-400',
           )}
         >

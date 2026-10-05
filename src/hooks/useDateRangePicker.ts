@@ -29,6 +29,14 @@ export const useDateRangePicker = ({ range, onRangeChange }: DateRangePickerProp
   }, [onRangeChange, tempRange]);
 
   useEffect(() => {
+    if (!isOpen) return;
+    document.body.dataset.calendarioAbierto = 'true';
+    return () => {
+      delete document.body.dataset.calendarioAbierto;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Solo con el calendario abierto, y sin contar la barra de scroll de la página o del modal.
       if (!isOpen || isScrollbarClick(event)) return;
