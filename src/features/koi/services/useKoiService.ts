@@ -10,10 +10,12 @@ import {
   olvidarSessionId,
 } from '../koiSesion';
 import { crearSesionKoi, enviarMensajeKoi, obtenerHistorialKoi } from './koiService';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export type { ChatMessage } from '../koi.types';
 
-const statusDe = (error: unknown) => (axios.isAxiosError(error) ? error.response?.status : undefined);
+const statusDe = (error: unknown) =>
+  axios.isAxiosError(error) ? error.response?.status : undefined;
 
 /**
  * Conversación con KOI. El sessionId se guarda en sessionStorage y, si ya había uno, el
@@ -63,6 +65,18 @@ export const useKoiChat = () => {
 
     void iniciar().finally(() => setIniciando(false));
   }, [empezarDeCero]);
+
+  // Al cambiar de cuenta (o cerrar sesión) la conversación anterior no debe quedar a la vista
+  const usuarioId = useAuthStore((state) => state.user?.id ?? null);
+  const usuarioPrevio = useRef(usuarioId);
+  useEffect(() => {
+    if (usuarioPrevio.current === usuarioId) return;
+    usuarioPrevio.current = usuarioId;
+    olvidarSessionId();
+    setSessionId(null);
+    setMessages([]);
+    empezarDeCero().catch((error) => console.error('Error al reiniciar la sesión de KOI:', error));
+  }, [usuarioId, empezarDeCero]);
 
   const sendMessage = useCallback(
     async (userText: string) => {
