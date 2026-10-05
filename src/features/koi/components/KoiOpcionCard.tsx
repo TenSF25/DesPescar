@@ -3,13 +3,7 @@ import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
 import type { KoiOpcion } from '../koi.types';
 import { botonesDeOpcion, type AccionKoi } from '../koiAcciones';
-import {
-  desgloseOpcion,
-  fechaDe,
-  resumenEstadia,
-  textoExcedente,
-  tramoVuelo,
-} from '../koiFormat';
+import { desgloseOpcion, fechaDe, resumenEstadia, textoExcedente, tramoVuelo } from '../koiFormat';
 
 interface Props {
   opcion: KoiOpcion;
@@ -44,8 +38,13 @@ export const KoiOpcionCard = ({ opcion, onAccion, ocupado = false }: Props) => {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <Estrellas cantidad={hotel.estrellas} />
-            <h4 className="text-secondary truncate text-sm font-bold">{hotel.hotelNombre}</h4>
+            {hotel.estrellas > 0 && <Estrellas cantidad={hotel.estrellas} />}
+            <h4
+              className="text-secondary line-clamp-2 text-sm font-bold break-words"
+              title={hotel.hotelNombre}
+            >
+              {hotel.hotelNombre}
+            </h4>
             <p className="text-secondary/60 truncate text-xs">{hotel.ciudad}</p>
             <p className="text-secondary/80 text-xs">{resumenEstadia(hotel)}</p>
             <p className="text-secondary/60 text-xs">
@@ -57,10 +56,13 @@ export const KoiOpcionCard = ({ opcion, onAccion, ocupado = false }: Props) => {
 
       {vuelo && (
         <div className={cn('flex gap-2 px-3 py-2 text-xs', hotel && 'border-t border-[#E2E8F0]')}>
-          <span className="material-symbols-outlined text-secondary/70 text-[18px]" aria-hidden="true">
+          <span
+            className="material-symbols-outlined text-secondary/70 shrink-0 text-[18px]"
+            aria-hidden="true"
+          >
             flight
           </span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 break-words">
             <p className="text-secondary font-bold">{vuelo.aerolinea}</p>
             <p className="text-secondary/80">
               <span className="font-semibold">Ida</span> {vuelo.numeroIda} ·{' '}
@@ -106,7 +108,7 @@ export const KoiOpcionCard = ({ opcion, onAccion, ocupado = false }: Props) => {
               disabled={ocupado}
               onClick={() => onAccion(opcion, boton.accion)}
               className={cn(
-                'min-h-9 rounded-[10px] px-3 text-xs font-bold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50',
+                'focus-visible:ring-primary/40 min-h-10 rounded-[10px] px-3 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-50',
                 boton.principal
                   ? 'bg-primary hover:bg-primary/90 basis-full text-white'
                   : 'border-secondary/20 text-secondary hover:bg-secondary/5 flex-1 border bg-white',
