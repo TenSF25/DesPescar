@@ -16,14 +16,14 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
 
   if (data.type === 'aisle') {
     return (
-      <div className="flex h-12 min-w-12 items-center justify-center text-center">
+      <div className="flex h-10 min-w-10 items-center justify-center text-center sm:h-12 sm:min-w-12">
         <h2 className="font-bold text-gray-400">{rowNumber}</h2>
       </div>
     );
   }
 
   if (data.type === 'empty') {
-    return <div className="flex h-12 min-w-12"></div>;
+    return <div className="flex h-10 min-w-10 sm:h-12 sm:min-w-12"></div>;
   }
 
   const isOccupiedByOther =
@@ -41,7 +41,7 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
   return (
     <div
       className={cn(
-        'group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg text-center transition-colors',
+        'group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-center transition-colors sm:h-12 sm:w-12',
         colorStyle.available,
         isSelectedByMe && colorStyle.select,
         isOccupiedByOther && colorStyle.occupied,
@@ -50,7 +50,7 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
     >
       <span className="material-symbols-outlined text-4xl!">chair</span>
       {!isSelectedByMe && (
-        <div className="absolute top-12 z-20 hidden flex-col gap-1 rounded-lg border border-black/20 bg-white p-2 group-hover:flex">
+        <div className="absolute top-10 z-20 hidden flex-col gap-1 rounded-lg border border-black/20 bg-white p-2 group-hover:flex sm:top-12">
           <div className="flex gap-2">
             <h4 className="text-md font-bold">{data.displayNumber}</h4>
             <span>-</span>

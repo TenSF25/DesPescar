@@ -8,13 +8,13 @@ export const AirplaneCanvas = () => {
   if (!seatsMap) return <div>Cargando avión...</div>;
 
   return (
-    <div className="plane relative mx-auto w-full max-w-full min-w-126 lg:min-w-0">
-      <div className="head bg-gray-200 px-3 [clip-path:ellipse(50%_100%_at_50%_100%)]">
-        <div className="head-plane h-100 w-120 bg-white [clip-path:ellipse(50%_100%_at_50%_100%)]"></div>
+    <div className="plane relative mx-auto w-full max-w-full">
+      <div className="head bg-gray-200 px-2 [clip-path:ellipse(50%_100%_at_50%_100%)] sm:px-3">
+        <div className="head-plane h-24 w-full bg-white [clip-path:ellipse(50%_100%_at_50%_100%)] sm:h-100 sm:w-120"></div>
       </div>
 
-      <div className="cabine bg-gray-200 px-3">
-        <div className="cabine-plane flex h-auto min-h-200 w-120 flex-col gap-6 bg-white p-4 pb-20">
+      <div className="cabine bg-gray-200 px-2 sm:px-3">
+        <div className="cabine-plane flex h-auto min-h-0 w-full flex-col gap-4 bg-white p-2 pb-12 sm:min-h-200 sm:w-120 sm:gap-6 sm:p-4 sm:pb-20">
           {seatsMap.layout.map((element, index) => {
             if (element.type === 'row') {
               return (
@@ -41,8 +41,8 @@ export const AirplaneCanvas = () => {
         </div>
       </div>
 
-      <div className="ariplane-tail h-140 bg-gray-200 px-3 [clip-path:ellipse(50%_100%_at_50%_0%)]">
-        <div className="airplane-tail h-50 w-120 bg-white [clip-path:ellipse(50%_100%_at_50%_0%)]"></div>
+      <div className="ariplane-tail h-28 bg-gray-200 px-2 [clip-path:ellipse(50%_100%_at_50%_0%)] sm:h-140 sm:px-3">
+        <div className="airplane-tail h-20 w-full bg-white [clip-path:ellipse(50%_100%_at_50%_0%)] sm:h-50 sm:w-120"></div>
       </div>
 
       <div className="airplane-wings pointer-events-none relative top-[-2230px] z-20 mx-auto hidden h-40 w-126 lg:block">
