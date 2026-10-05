@@ -62,7 +62,7 @@ export const resultadoPago = (pago: Pago, estadoReserva: EstadoCarrito): Resulta
         ? {
             tono: 'exito',
             titulo: '¡Reserva confirmada!',
-            detalle: 'Te enviamos el detalle por correo. Los lugares ya quedaron a tu nombre.',
+            detalle: 'Los lugares ya quedaron a tu nombre. Podés ver el detalle en Mis reservas.',
             seguirConsultando: false,
             reintentar: false,
           }

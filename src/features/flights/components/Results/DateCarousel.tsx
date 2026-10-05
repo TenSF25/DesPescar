@@ -62,7 +62,6 @@ export const DateCarousel = ({
                 <span className="text-sm font-semibold whitespace-nowrap capitalize">
                   {day.formatted}
                 </span>
-                <span className="text-xs whitespace-nowrap">Desde $&nbsp;1.050</span>
               </button>
             );
           })}
