@@ -34,9 +34,9 @@ export const DetailSelectionSeats = () => {
   };
 
   return (
-    <div className="fixed top-60 left-20 z-99 flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-6 lg:fixed lg:top-60 lg:left-20 lg:z-99 lg:w-auto lg:gap-8">
       <div className="flex flex-col gap-4">
-        <h2 className="text-secondary text-2xl font-bold">Tipos de asientos</h2>
+        <h2 className="text-secondary text-xl font-bold lg:text-2xl">Tipos de asientos</h2>
         <div className="flex max-w-150 flex-wrap gap-3">
           {Object.entries(seatsMap?.fareClasses ?? {})
             .sort(([, a], [, b]) => getFareClassRank(a.name) - getFareClassRank(b.name))
@@ -45,7 +45,7 @@ export const DetailSelectionSeats = () => {
 
               return (
                 <div
-                  className="border-secondary flex w-70 items-center gap-3 rounded-lg border bg-white p-3"
+                  className="border-secondary flex w-full items-center gap-3 rounded-lg border bg-white p-3 sm:w-70"
                   key={key}
                 >
                   <div
@@ -67,7 +67,7 @@ export const DetailSelectionSeats = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <h2 className="text-secondary text-2xl font-bold">Pasajeros</h2>
+        <h2 className="text-secondary text-xl font-bold lg:text-2xl">Pasajeros</h2>
         <div className="flex max-w-150 flex-wrap gap-3">
           {Array.from({ length: maxLimit ?? 0 }).map((_, index) => {
             const assignedSeatId = selectedSeats[index];
@@ -82,7 +82,7 @@ export const DetailSelectionSeats = () => {
             return (
               <div
                 key={index}
-                className="border-secondary flex w-60 gap-2 rounded-lg border bg-white p-2 px-3"
+                className="border-secondary flex w-full gap-2 rounded-lg border bg-white p-2 px-3 sm:w-60"
               >
                 <div
                   className={cn(

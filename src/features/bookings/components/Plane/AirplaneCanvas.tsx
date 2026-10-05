@@ -8,7 +8,7 @@ export const AirplaneCanvas = () => {
   if (!seatsMap) return <div>Cargando avión...</div>;
 
   return (
-    <div className="plane relative mx-auto w-full max-w-full">
+    <div className="plane relative mx-auto w-full max-w-full min-w-126 lg:min-w-0">
       <div className="head bg-gray-200 px-3 [clip-path:ellipse(50%_100%_at_50%_100%)]">
         <div className="head-plane h-100 w-120 bg-white [clip-path:ellipse(50%_100%_at_50%_100%)]"></div>
       </div>
@@ -45,7 +45,7 @@ export const AirplaneCanvas = () => {
         <div className="airplane-tail h-50 w-120 bg-white [clip-path:ellipse(50%_100%_at_50%_0%)]"></div>
       </div>
 
-      <div className="airplane-wings pointer-events-none relative top-[-2230px] z-20 mx-auto h-40 w-126">
+      <div className="airplane-wings pointer-events-none relative top-[-2230px] z-20 mx-auto hidden h-40 w-126 lg:block">
         <div className="wing-left absolute right-full z-10 -mx-1 h-200 w-180 bg-gray-200 [clip-path:polygon(0%_100%,0%_80%,100%_0%,100%_70%)]"></div>
         <div className="wing-right absolute left-full z-10 h-200 w-180 bg-gray-200 [clip-path:polygon(0%_0%,100%_80%,100%_100%,0%_70%)]"></div>
       </div>

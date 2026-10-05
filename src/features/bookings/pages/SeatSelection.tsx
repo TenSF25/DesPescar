@@ -26,20 +26,20 @@ export const SeatSelection = () => {
   };
 
   return (
-    <SectionContainer className="mt-10 mr-auto mb-10 ml-auto flex w-full max-w-312.5 flex-row items-center justify-center gap-20">
+    <SectionContainer className="mt-6 mr-auto mb-28 ml-auto flex w-full max-w-312.5 flex-col items-center justify-center gap-8 lg:mt-10 lg:mb-10 lg:flex-row lg:gap-20">
       <DetailSelectionSeats />
-      <div className="relative z-1">
+      <div className="relative z-1 w-full max-w-full min-w-0 overflow-x-auto lg:w-auto lg:overflow-visible">
         <AirplaneCanvas></AirplaneCanvas>
       </div>
       <div className="fixed bottom-0 left-0 z-2 flex w-full justify-center border-t border-[#3234392d] bg-white">
-        <div className="flex w-360 items-center justify-between p-4">
+        <div className="flex w-full max-w-360 items-center justify-between gap-3 p-3 sm:p-4">
           <div>
-            <h3 className="text-xl font-semibold text-[#323439]">Asientos</h3>
+            <h3 className="text-lg font-semibold text-[#323439] sm:text-xl">Asientos</h3>
             <p className="text-sm text-gray-600">
               {selectedSeats.length} de {passengerCount} seleccionados
             </p>
           </div>
-          <div className="flex items-center gap-12">
+          <div className="flex shrink-0 items-center gap-4 sm:gap-12">
             <Button
               variant="secondary"
               className="rounded-full px-5"
