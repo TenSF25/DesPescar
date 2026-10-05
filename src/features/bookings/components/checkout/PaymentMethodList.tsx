@@ -67,10 +67,5 @@ export const PaymentMethodList = ({ value, onChange }: PaymentMethodListProps) =
         </label>
       );
     })}
-
-    <p className="flex items-center gap-2 text-sm text-gray-600">
-      <span className="material-symbols-outlined text-[18px]!">lock</span>
-      Para terminar te llevamos a Mercado Pago, donde completás el pago de forma segura.
-    </p>
   </div>
 );

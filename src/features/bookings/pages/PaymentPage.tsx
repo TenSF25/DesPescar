@@ -7,7 +7,13 @@ import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { useFlightStore } from '@/store/useFlightStore';
 import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 import { isTrustedPaymentUrl } from '@/utils/isTrustedPaymentUrl';
+import { omitKey } from '@/utils/omitKey';
+import { emptyCard, type CardData } from '../card.types';
+import { validateCard } from '../card.validation';
+import type { FieldErrors } from '../checkout.types';
 import type { BookingDetail } from '../bookings.types';
+import { CardForm } from '../components/checkout/CardForm';
+import { MercadoPagoNotice } from '../components/checkout/MercadoPagoNotice';
 import { PaymentMethodList, type PaymentMethodId } from '../components/checkout/PaymentMethodList';
 import { CheckoutSummary } from '../components/checkout/CheckoutSummary';
 import { useBooking } from '../hooks/useBooking';
@@ -33,6 +39,10 @@ export const PaymentPage = () => {
   const [accepted, setAccepted] = useState(false);
   // Solo informa la elección: todos los medios se completan en el checkout de Mercado Pago.
   const [method, setMethod] = useState<PaymentMethodId>('credit');
+  // Datos de la tarjeta: solo en memoria (nunca al store ni a localStorage) y se descartan al salir.
+  const [card, setCard] = useState<CardData>(emptyCard);
+  const [cardErrors, setCardErrors] = useState<FieldErrors>({});
+  const cardSectionRef = useRef<HTMLDivElement>(null);
   const [payError, setPayError] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   // Al cancelar se vacía el store: sin esta marca, la guarda de abajo mandaría a elegir asientos.
@@ -81,9 +91,28 @@ export const PaymentPage = () => {
     booking?.estadoGeneral === 'CANCELADA' ||
     (secondsLeft !== null && secondsLeft <= 0 && booking?.segundosRestantes !== null);
 
+  const updateCard = <K extends keyof CardData>(field: K, value: CardData[K]) => {
+    setCard((current) => ({ ...current, [field]: value }));
+    setCardErrors((current) => omitKey(current, field));
+  };
+
   const handlePay = async () => {
     if (!bookingId) return;
     setPayError(null);
+
+    if (method !== 'mercadopago') {
+      const errors = validateCard(card, method === 'credit');
+      setCardErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        requestAnimationFrame(() => {
+          const invalid =
+            cardSectionRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+          invalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          invalid?.focus({ preventScroll: true });
+        });
+        return;
+      }
+    }
 
     const result = await startPayment(bookingId);
     if (!result.success) {
@@ -186,6 +215,20 @@ export const PaymentPage = () => {
 
           <Card title="¿Cómo deseás pagar?" icon="payments">
             <PaymentMethodList value={method} onChange={setMethod} />
+            <div ref={cardSectionRef} className="contents">
+              {method === 'mercadopago' ? (
+                <MercadoPagoNotice />
+              ) : (
+                <CardForm
+                  card={card}
+                  errors={cardErrors}
+                  credit={method === 'credit'}
+                  total={booking ? booking.montoTotal : null}
+                  currency={booking?.moneda}
+                  onChange={updateCard}
+                />
+              )}
+            </div>
           </Card>
         </div>
 
