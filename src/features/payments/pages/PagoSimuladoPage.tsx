@@ -5,6 +5,7 @@ import { leerErrorApi } from '@/features/cart/carrito';
 import { BOTON_BORDE, BOTON_LLENO, FOCO } from '@/features/cart/components/estilos';
 import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { mensajePasarela } from '../pagos';
 import type { Pago } from '../payments.types';
 import { obtenerPago, simularPago } from '../services/pagosService';
 
@@ -36,7 +37,10 @@ export const PagoSimuladoPage = () => {
         }
         setPago(p);
       } catch (err: unknown) {
-        if (activo) setError(leerErrorApi(err, 'No encontramos este pago.').mensaje);
+        if (activo) {
+          const e = leerErrorApi(err, 'No encontramos este pago.');
+          setError(mensajePasarela('carga', e.status, e.mensaje));
+        }
       } finally {
         if (activo) setCargando(false);
       }
@@ -64,7 +68,7 @@ export const PagoSimuladoPage = () => {
       setError(
         e.status === 502
           ? 'No pudimos confirmar la reserva en este momento. El pago sigue pendiente: probá de nuevo.'
-          : e.mensaje,
+          : mensajePasarela('simulacion', e.status, e.mensaje),
       );
       setEnviando(null);
     }
@@ -90,11 +94,10 @@ export const PagoSimuladoPage = () => {
           </p>
         </div>
 
-        {cargando && (
-          <p role="status" className="text-secondary/70">
-            Cargando el pago...
-          </p>
-        )}
+        <div aria-live="polite" className="flex flex-col gap-3">
+          {cargando && <p className="text-secondary/70">Cargando el pago...</p>}
+          {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        </div>
 
         {pago && (
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-xl bg-[#F8FAFC] p-4 text-sm">
@@ -107,12 +110,6 @@ export const PagoSimuladoPage = () => {
               {formatCurrency(pago.amount)}
             </dd>
           </dl>
-        )}
-
-        {error && (
-          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </p>
         )}
 
         {pago && (

@@ -1,5 +1,5 @@
 import type { EstadoCarrito } from '@/features/cart/cart.types';
-import type { Pago, ResultadoPago, RetornoPago } from './payments.types';
+import type { EstadoPago, Pago, ResultadoPago, RetornoPago } from './payments.types';
 
 const valor = (sp: URLSearchParams, clave: string) => {
   const v = sp.get(clave);
@@ -24,12 +24,15 @@ export const leerRetornoPago = (sp: URLSearchParams): RetornoPago | null => {
 
 /** El pago más reciente de una reserva (GET /api/payments/reservation/{id} trae todos). */
 export const ultimoPago = (pagos: Pago[]): Pago | null =>
-  pagos.reduce<Pago | null>(
-    (ultimo, p) => (!ultimo || p.createdAt > ultimo.createdAt ? p : ultimo),
-    null,
-  );
+  pagos.reduce<Pago | null>((ultimo, p) => {
+    if (!ultimo) return p;
+    const a = Date.parse(p.createdAt);
+    const b = Date.parse(ultimo.createdAt);
+    if (a !== b) return a > b ? p : ultimo;
+    return p.id > ultimo.id ? p : ultimo;
+  }, null);
 
-const carritoVigente = (estado: EstadoCarrito) =>
+export const carritoVigente = (estado: EstadoCarrito) =>
   estado === 'INICIADA' || estado === 'PENDIENTE_PAGO';
 
 /** Qué mostrar según el estado del pago y el de la reserva. */
@@ -98,3 +101,35 @@ export const ESPERA_MAXIMA_MS = 2 * 60 * 1000;
 /** Si hay que programar otra consulta: el estado sigue pendiente y no se pasó el máximo. */
 export const seguirConsultando = (pendiente: boolean, inicio: number, ahora: number) =>
   pendiente && ahora - inicio < ESPERA_MAXIMA_MS;
+
+/** Concilia con Mercado Pago en cada consulta mientras el pago no tenga estado final. */
+export const debeConciliar = (estado: EstadoPago | null, mpPaymentId: string | null) =>
+  Boolean(mpPaymentId) && (estado === null || estado === 'PENDING' || estado === 'AUTHORIZED');
+
+const VENTANA_LIMPIEZA_MS = 30 * 60 * 1000;
+
+/**
+ * Si al confirmarse hay que olvidar la compra de vuelos y recargar el carrito. Solo si se vio
+ * el pago pasar de pendiente a aprobado en esta visita o si el pago es reciente: recargar un
+ * resultado viejo no debe borrar una compra nueva.
+ */
+export const limpiarAlConfirmar = (vistoPendiente: boolean, creadoEn: string, ahora: number) => {
+  if (vistoPendiente) return true;
+  const t = Date.parse(creadoEn);
+  return Number.isFinite(t) && ahora - t < VENTANA_LIMPIEZA_MS;
+};
+
+/** Texto en castellano para los errores de la pasarela de prueba (nunca el inglés de Spring). */
+export const mensajePasarela = (
+  fase: 'carga' | 'simulacion',
+  status: number | null,
+  mensaje: string,
+) => {
+  if (fase === 'simulacion' && status === 404) {
+    return 'La pasarela de prueba no está disponible en este entorno.';
+  }
+  if (fase === 'carga' && (status === 403 || status === 404)) {
+    return 'Este pago no existe o no es tuyo.';
+  }
+  return mensaje;
+};
