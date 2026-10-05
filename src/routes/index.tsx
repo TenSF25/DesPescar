@@ -30,6 +30,7 @@ import { HotelDashboardPage } from '@/features/admin/hotel/dashboard/pages/Hotel
 import { HotelManagementPage } from '@/features/admin/hotel/management/pages/HotelManagementPage';
 import { HotelReportsPage } from '@/features/admin/hotel/reports/pages/HotelReportsPage';
 import { HotelReservationsPage } from '@/features/admin/hotel/reservations/pages/HotelReservationsPage';
+import { HotelResultsPage } from '@/features/hotels/pages/HotelResultsPage';
 import { createBrowserRouter } from 'react-router';
 
 export const router = createBrowserRouter([
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
           {
             path: '/vuelos',
             element: <ResultsPage />,
+          },
+          {
+            path: '/hoteles',
+            element: <HotelResultsPage />,
           },
         ],
       },
