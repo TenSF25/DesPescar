@@ -23,20 +23,25 @@ export const useHotelResults = () => {
 
   useEffect(() => {
     let activo = true;
-    // Reinicio del estado de carga al cambiar la busqueda (sincronizacion con sistema externo).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    setError(null);
-    buscarHoteles(params)
-      .then((data) => activo && setHoteles(data))
-      .catch((err: unknown) => {
-        if (!activo) return;
-        const mensaje = axios.isAxiosError(err)
-          ? (err.response?.data as { error?: string })?.error
-          : undefined;
-        setError(mensaje ?? 'No pudimos buscar hoteles. Probá de nuevo en unos minutos.');
-      })
-      .finally(() => activo && setIsLoading(false));
+    const cargar = async () => {
+      setIsLoading(true);
+      setError(null);
+      setFiltros(FILTROS_INICIALES);
+      try {
+        const data = await buscarHoteles(params);
+        if (activo) setHoteles(data);
+      } catch (err: unknown) {
+        if (activo) {
+          const mensaje = axios.isAxiosError(err)
+            ? (err.response?.data as { error?: string })?.error
+            : undefined;
+          setError(mensaje ?? 'No pudimos buscar hoteles. Probá de nuevo en unos minutos.');
+        }
+      } finally {
+        if (activo) setIsLoading(false);
+      }
+    };
+    cargar();
     return () => {
       activo = false;
     };

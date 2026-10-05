@@ -12,12 +12,14 @@ interface Props {
 const toggle = <T,>(lista: T[], valor: T) =>
   lista.includes(valor) ? lista.filter((v) => v !== valor) : [...lista, valor];
 
+const PASO = 1000;
+
 const CALIFICACIONES = [0, 3, 4, 4.5];
 
 export const HotelFiltersPanel = ({ hoteles, filtros, onChange }: Props) => {
   const precios = hoteles.map(precioDeReferencia).filter((p): p is number => p !== null);
   const precioTope = precios.length ? Math.max(...precios) : 0;
-  const precioMax = filtros.precioMax ?? precioTope;
+  const tope = Math.ceil(precioTope / PASO) * PASO;
 
   return (
     <aside className="flex w-full flex-col gap-6 rounded-2xl border border-[#E2E8F0] bg-white p-6 shadow-sm lg:w-80 lg:shrink-0">
@@ -50,16 +52,21 @@ export const HotelFiltersPanel = ({ hoteles, filtros, onChange }: Props) => {
           <input
             type="range"
             min={0}
-            max={precioTope}
-            step={1000}
-            value={precioMax}
+            max={tope}
+            step={PASO}
+            aria-label="Precio máximo"
+            value={filtros.precioMax ?? tope}
             onChange={(e) => {
               const v = Number(e.target.value);
-              onChange({ ...filtros, precioMax: v >= precioTope ? null : v });
+              onChange({ ...filtros, precioMax: v >= tope ? null : v });
             }}
             className="accent-secondary w-full cursor-pointer"
           />
-          <span className="text-secondary/70 text-sm">Hasta {formatCurrency(precioMax)}</span>
+          <span className="text-secondary/70 text-sm">
+            {filtros.precioMax === null
+              ? 'Sin límite'
+              : `Hasta ${formatCurrency(filtros.precioMax)}`}
+          </span>
         </div>
       )}
 
