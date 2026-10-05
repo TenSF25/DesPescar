@@ -141,4 +141,10 @@ describe('mensajeErrorCarrito', () => {
     expect(mensajeErrorCarrito(503)).toMatch(/en un ratito/);
     expect(mensajeErrorCarrito(undefined)).toMatch(/No pude agregarlo/);
   });
+
+  it('explica el carrito vencido y el carrito en uso', () => {
+    expect(mensajeErrorCarrito(410, 'CARRITO_EXPIRADO')).toMatch(/venció/);
+    expect(mensajeErrorCarrito(409, 'CARRITO_EN_USO')).toMatch(/otro pedido/);
+    expect(mensajeErrorCarrito(409, 'CARRITO_YA_TIENE_VUELO')).toMatch(/ya tiene un vuelo/);
+  });
 });

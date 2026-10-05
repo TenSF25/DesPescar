@@ -93,6 +93,15 @@ export const mensajeErrorCarrito = (status: number | undefined, codigo?: string)
   if (codigo === 'SIN_DISPONIBILIDAD_HOTEL' || codigo === 'SIN_DISPONIBILIDAD') {
     return 'Uy, no quedan habitaciones de ese tipo para esas fechas. Pedime otra opción y la busco.';
   }
+  if (codigo === 'CARRITO_EXPIRADO' || status === 410) {
+    return 'Tu carrito venció. Volvé a elegir la opción y lo armo de nuevo.';
+  }
+  if (codigo === 'CARRITO_EN_USO') {
+    return 'Tu carrito está procesando otro pedido. Probá de nuevo en unos segundos.';
+  }
+  if (codigo === 'CARRITO_YA_TIENE_VUELO') {
+    return 'Tu carrito ya tiene un vuelo. Volvé a elegir la opción para reemplazarlo.';
+  }
   if (codigo === 'HOTEL_NO_ENCONTRADO' || status === 404) {
     return 'Ese hotel ya no está disponible. Pedime otra opción y la busco.';
   }

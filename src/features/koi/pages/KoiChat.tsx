@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router';
 import { useKoiChat } from '../services/useKoiService';
 import KoiAvatar from '../components/KoiAvatar';
 import { KoiOpcionCard } from '../components/KoiOpcionCard';
+import { useKoiCarrito } from '../hooks/useKoiCarrito';
+import { debeReabrirChat } from '../koiSesion';
 
 export default function KoiChat() {
   const { messages, sendMessage, loading, isReady } = useKoiChat();
@@ -9,6 +12,19 @@ export default function KoiChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDizzy, setIsDizzy] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const cerrarChat = useCallback(() => setIsOpen(false), []);
+  const carrito = useKoiCarrito(cerrarChat);
+
+  // Volviendo del login que pidió un botón de KOI: se reabre la ventana (una sola vez).
+  // El timeout evita el setState sincrónico dentro del efecto y StrictMode lo limpia.
+  useEffect(() => {
+    if (location.pathname === '/login') return;
+    const id = window.setTimeout(() => {
+      if (debeReabrirChat()) setIsOpen(true);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,7 +32,7 @@ export default function KoiChat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, loading]);
+  }, [messages, loading, carrito.estado]);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,7 +216,12 @@ export default function KoiChat() {
               {msg.opciones.length > 0 && (
                 <div className="flex w-full flex-col gap-3">
                   {msg.opciones.map((opcion) => (
-                    <KoiOpcionCard key={opcion.optionId} opcion={opcion} />
+                    <KoiOpcionCard
+                      key={opcion.optionId}
+                      opcion={opcion}
+                      onAccion={(o, accion) => void carrito.ejecutar(o, accion)}
+                      ocupado={carrito.estado.tipo === 'ocupado'}
+                    />
                   ))}
                 </div>
               )}
@@ -216,6 +237,86 @@ export default function KoiChat() {
                   <div className="h-2 w-2 animate-bounce rounded-full bg-blue-400" />
                 </div>
               </div>
+            </div>
+          )}
+          {carrito.estado.tipo === 'ocupado' && (
+            <p className="text-center text-xs text-gray-500" role="status">
+              Agregando al carrito…
+            </p>
+          )}
+
+          {carrito.estado.tipo === 'confirmarReemplazo' && (
+            <div
+              role="alertdialog"
+              aria-label="Reemplazar el vuelo del carrito"
+              className="rounded-2xl rounded-bl-none border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
+            >
+              <p>
+                Tu carrito ya tiene un vuelo. ¿Lo reemplazo por este? Los asientos que habías
+                elegido se liberan.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={carrito.confirmarReemplazo}
+                  className="bg-primary hover:bg-primary/90 min-h-10 flex-1 rounded-[10px] px-3 text-xs font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Reemplazar vuelo
+                </button>
+                <button
+                  type="button"
+                  onClick={carrito.descartar}
+                  className="border-secondary/20 text-secondary min-h-10 flex-1 rounded-[10px] border bg-white px-3 text-xs font-bold focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  Dejar el que tengo
+                </button>
+              </div>
+            </div>
+          )}
+
+          {carrito.estado.tipo === 'agregado' && (
+            <div
+              role="status"
+              className="flex items-center justify-between gap-3 rounded-2xl rounded-bl-none border border-green-200 bg-green-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
+            >
+              <span>
+                Agregado al carrito ·{' '}
+                <Link
+                  to="/carrito"
+                  onClick={() => {
+                    carrito.descartar();
+                    setIsOpen(false);
+                  }}
+                  className="text-primary font-bold underline-offset-2 hover:underline"
+                >
+                  Ir al carrito
+                </Link>
+              </span>
+              <button
+                type="button"
+                onClick={carrito.descartar}
+                aria-label="Cerrar aviso"
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+          )}
+
+          {carrito.estado.tipo === 'error' && (
+            <div
+              role="alert"
+              className="flex items-start justify-between gap-3 rounded-2xl rounded-bl-none border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-800 shadow-sm"
+            >
+              <span>{carrito.estado.texto}</span>
+              <button
+                type="button"
+                onClick={carrito.descartar}
+                aria-label="Cerrar aviso"
+                className="text-red-400 hover:text-red-600"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
             </div>
           )}
           <div ref={messagesEndRef} />
