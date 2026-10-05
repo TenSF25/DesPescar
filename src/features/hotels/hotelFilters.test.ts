@@ -132,7 +132,7 @@ describe('contarFiltrosActivos', () => {
     expect(
       contarFiltrosActivos({
         estrellas: [4, 5],
-        servicios: ['wifi' as never],
+        servicios: ['WIFI'],
         precioMax: 50000,
         calificacionMin: 4,
         soloAllInclusive: true,
