@@ -56,7 +56,7 @@ export const ResultsPage = () => {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        navigate(`/booking/baggage?id=${vuelo.id}`);
+        navigate(`/booking/baggage?id=${vuelo.id}&passengers=${metadatos?.passengers ?? 1}`);
       }
     } else {
       setSelectedReturnFlight(vuelo.id);

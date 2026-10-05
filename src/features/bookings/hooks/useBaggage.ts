@@ -10,7 +10,8 @@ export const useBaggage = () => {
 
   const departureId = searchParams.get('departureId') || searchParams.get('id') || '';
   const returnId = searchParams.get('returnId') || '';
-  const passengers = searchParams.get('passengers') || '';
+  // Sin el parámetro (búsqueda de solo ida) se asume 1 pasajero; antes daba precio 0
+  const passengers = String(Math.max(1, Number(searchParams.get('passengers')) || 1));
   const hasReturn = Boolean(returnId);
 
   const { flightById: flightDepartureId } = useFlightId(departureId);
@@ -63,10 +64,14 @@ export const useBaggage = () => {
       if (hasReturn) {
         setStep('VUELTA');
       } else {
+        // Solo ida: se borra la vuelta y los asientos que hubieran quedado de una compra anterior
         useFlightStore.setState({
           selectedDepartureFlight: departureId,
+          selectedReturnFlight: null,
           selectedDepartureFare: selectedOutboundFareId,
+          selectedReturnFare: null,
           passengers: Number(passengers),
+          selectedSeats: [],
         });
         navigate(`/booking/seats`);
       }
