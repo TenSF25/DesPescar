@@ -133,7 +133,7 @@ export default function KoiChat() {
             <button
               onClick={pokeKoi}
               title="No me toques la pecera"
-              className="flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
+              className="flex h-[4.5rem] w-[4.5rem] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
             >
               <KoiAvatar working={loading} dizzy={isDizzy} />
             </button>

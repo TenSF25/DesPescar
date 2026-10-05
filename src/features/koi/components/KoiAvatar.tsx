@@ -29,11 +29,11 @@ const AVATAR_STYLES = `
   .koi-avatar-bob { animation: koi-typing-bob 0.7s steps(2, jump-none) infinite; }
   .koi-avatar-spark {
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
     border-radius: 9999px;
     background: #fbbf24;
-    box-shadow: 0 0 4px 1px #f97316;
+    box-shadow: 0 0 5px 1px #f97316;
     opacity: 0;
     animation: koi-spark 0.9s ease-in-out infinite;
   }
@@ -41,8 +41,8 @@ const AVATAR_STYLES = `
     position: absolute;
     left: 50%;
     top: 90%;
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border: 1.5px solid #fde68a;
     border-radius: 9999px;
     opacity: 0;
@@ -64,7 +64,7 @@ export default function KoiAvatar({ working = false, dizzy = false }: KoiAvatarP
     <>
       <style>{AVATAR_STYLES}</style>
       <span
-        className={`relative block aspect-360/325 w-11 ${working ? 'koi-avatar-working' : ''} ${
+        className={`relative block aspect-360/325 w-16 ${working ? 'koi-avatar-working' : ''} ${
           dizzy ? 'koi-avatar-dizzy' : 'koi-avatar-bob'
         }`}
       >
