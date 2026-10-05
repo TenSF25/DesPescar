@@ -1,6 +1,7 @@
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { BaggageCard } from '../components/BaggageCard';
 import { Button } from '@/components/ui/Button';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { formatDate } from '@/utils/formatDate';
 import { useBarraInferior } from '@/hooks/useBarraInferior';
 import { useBaggage } from '../hooks/useBaggage';
@@ -92,7 +93,7 @@ export const Baggage = () => {
               key={tarifa.id}
               name={tarifa.name}
               type={tarifa.type}
-              price={String(tarifa.price.transparentFinalPrice)}
+              price={tarifa.price.transparentFinalPrice}
               serviciosIncluidos={tarifa.includedServices}
               isSelect={activeFareId === tarifa.id}
               onSelect={() => handleCardSelect(tarifa.id)}
@@ -110,10 +111,7 @@ export const Baggage = () => {
               <h5 className="text-xs font-semibold">Precio final</h5>
               <div className="flex gap-0.5">
                 <span className="material-symbols-outlined text-primary">info</span>
-                <h6 className="flex items-end gap-0.5 text-xl">
-                  <span className="text-sm text-[#323439]">$</span>
-                  {priceTotal}
-                </h6>
+                <h6 className="text-xl">{formatCurrency(priceTotal)}</h6>
               </div>
             </div>
             <Button variant="secondary" className="rounded-full px-5" onClick={handleNextStep}>

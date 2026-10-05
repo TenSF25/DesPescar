@@ -1,3 +1,4 @@
+import { precioAsiento } from '../../precios';
 import { useAuthStore } from '@/store/useAuthStore';
 import { cn } from '../../../../utils/cn';
 import type { FareClassDetail, LayoutItem } from '../../bookings.types';
@@ -54,7 +55,7 @@ export const Seats = ({ data, fareClass, rowNumber, colorStyle }: SeatsProps) =>
           <div className="flex gap-2">
             <h4 className="text-md font-bold">{data.displayNumber}</h4>
             <span>-</span>
-            <h4 className="font-medium">${fareClass.price}</h4>
+            <h4 className="font-medium">{precioAsiento(fareClass.price)}</h4>
           </div>
           <h4 className="font-semibold text-nowrap">{fareClass.name}</h4>
         </div>

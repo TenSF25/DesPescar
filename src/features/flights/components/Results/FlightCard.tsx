@@ -144,7 +144,7 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
             {formatCurrency(price.transparentFinalPrice)}
           </p>
           <p className="text-secondary/50 text-[10px] font-bold tracking-wider uppercase">
-            Precio final transparente
+            Por persona · tarifa más económica
           </p>
         </div>
         <Button

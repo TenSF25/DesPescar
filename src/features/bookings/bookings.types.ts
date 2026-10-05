@@ -10,6 +10,7 @@ export interface SeatsWebSockets {
 export interface FareClassDetail {
   id?: string;
   name: string;
+  /** Siempre 0: elegir asiento no se cobra (D3). Se muestra con precioAsiento. */
   price: number;
   colorKey: string;
 }

@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/Button';
+import { textoTarifa } from '../precios';
 import type { IncludedServices } from '@/features/flights/flights.types';
 
 interface BaggageProps {
   name: string;
   type: string;
-  price: string;
+  /** Lo que suma la tarifa por persona y tramo, en ARS. */
+  price: number;
   isSelect: boolean;
   serviciosIncluidos: IncludedServices;
   onSelect: () => void;
@@ -18,6 +20,7 @@ export const BaggageCard = ({
   serviciosIncluidos,
   onSelect,
 }: BaggageProps) => {
+  const { principal, aclaracion } = textoTarifa(price);
   return (
     <div
       className={`${isSelect ? 'border-primary/30 hover:border-primary border-2' : 'border border-slate-300 shadow-sm hover:shadow-xl'} flex h-full min-h-75 w-full max-w-200 flex-col overflow-hidden rounded-2xl bg-white transition-all duration-300`}
@@ -28,8 +31,8 @@ export const BaggageCard = ({
       </div>
 
       <div className="flex flex-col items-center justify-center bg-linear-to-b from-white to-slate-50/30 py-6">
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">+ $ {price}</h2>
-        <p className="mt-1 text-xs font-medium text-slate-400">Por persona</p>
+        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">{principal}</h2>
+        <p className="mt-1 text-xs font-medium text-slate-400">{aclaracion}</p>
       </div>
 
       <hr className="mx-4 border-black/20" />

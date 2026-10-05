@@ -1,3 +1,4 @@
+import { precioAsiento } from '../precios';
 import { cn } from '@/utils/cn';
 import { useSeats } from '../hooks/useSeats';
 import { getColorSettings } from './Plane/ColorSettings';
@@ -59,7 +60,7 @@ export const DetailSelectionSeats = () => {
                   </div>
                   <div className={cn('flex flex-col', colorStyle.text)}>
                     <h4 className="text-[18px] font-semibold text-nowrap">{value.name}</h4>
-                    <h5 className="text-[18px]">${value.price}</h5>
+                    <h5 className="text-[18px]">{precioAsiento(value.price)}</h5>
                   </div>
                 </div>
               );
