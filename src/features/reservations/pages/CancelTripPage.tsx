@@ -4,6 +4,8 @@ import { cn } from '@/utils/cn';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useReservation, useReservations } from '@/features/reservations/hooks/useReservations';
+import { cancelBooking } from '@/features/bookings/services/bookingsService';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 import { BackButton } from '@/features/reservations/components/BackButton';
 
 const reasons = [
@@ -28,6 +30,26 @@ export const CancelTripPage = () => {
   const flight = useReservation(id);
   const [motivo, setMotivo] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const handleConfirmCancel = async () => {
+    if (!flight) return;
+    setIsCancelling(true);
+    setCancelError(null);
+    try {
+      // Las reservas de ejemplo no existen en el backend: solo las reales se cancelan allá.
+      if (flight.remote) await cancelBooking(flight.id);
+      cancelReservation(flight.id);
+      setConfirmed(true);
+    } catch (error) {
+      setCancelError(
+        getApiErrorMessage(error, 'No se pudo cancelar la reserva. Intentá de nuevo.'),
+      );
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   if (!flight) {
     return (
@@ -199,6 +221,12 @@ export const CancelTripPage = () => {
               </div>
             </div>
 
+            {cancelError && (
+              <p role="alert" className="mb-3 text-sm font-semibold text-[#b91c1c]">
+                {cancelError}
+              </p>
+            )}
+
             <div className="flex gap-3">
               <button
                 type="button"
@@ -209,19 +237,16 @@ export const CancelTripPage = () => {
               </button>
               <button
                 type="button"
-                disabled={!motivo}
-                onClick={() => {
-                  cancelReservation(flight.id);
-                  setConfirmed(true);
-                }}
+                disabled={!motivo || isCancelling}
+                onClick={handleConfirmCancel}
                 className={cn(
                   'flex-1 rounded-lg py-3.5 text-sm font-bold text-white transition-opacity',
-                  motivo
+                  motivo && !isCancelling
                     ? 'cursor-pointer bg-[#e53935] hover:opacity-90'
                     : 'cursor-not-allowed bg-[#e53935] opacity-50',
                 )}
               >
-                Confirmar cancelación
+                {isCancelling ? 'Cancelando…' : 'Confirmar cancelación'}
               </button>
             </div>
           </>

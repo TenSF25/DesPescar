@@ -73,18 +73,18 @@ export const ManageTripPage = () => {
       <BackButton />
 
       <div className="mb-6 overflow-hidden rounded-[14px] border border-gray-200 bg-white">
-        <div className="bg-secondary flex items-center gap-5 px-7 py-5">
+        <div className="bg-secondary flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-5 sm:px-7">
           <div>
             <div className="mb-1 text-[11px] font-bold tracking-wide text-white/50 uppercase">
               Vuelo seleccionado
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="text-2xl font-extrabold text-white">{origin.iata}</span>
               <span className="material-symbols-outlined text-[20px]! text-white/60">
                 flight_takeoff
               </span>
               <span className="text-2xl font-extrabold text-white">{destination.iata}</span>
-              <span className="ml-2 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white">
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white sm:ml-2">
                 {flightNumber} · Reserva {reservationCode}
               </span>
             </div>
@@ -93,7 +93,7 @@ export const ManageTripPage = () => {
               {seats}
             </div>
           </div>
-          <div className="ml-auto text-right">
+          <div className="sm:ml-auto sm:text-right">
             <div className="text-[11px] font-semibold text-white/50">Estado</div>
             <div className="mt-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-[#22c55e]" />

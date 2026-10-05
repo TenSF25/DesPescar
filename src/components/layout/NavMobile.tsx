@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import { logoutSession } from '@/features/auth/logout';
 import { Button } from '../ui/Button';
 import { userMenuItems } from './userMenuItems';
 
@@ -10,10 +11,9 @@ interface NavMobile {
 export const NavMobile = ({ open }: NavMobile) => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
 
   const cerrarSesion = () => {
-    logout();
+    logoutSession();
     navigate('/');
   };
 
@@ -26,7 +26,7 @@ export const NavMobile = ({ open }: NavMobile) => {
               VUELOS
             </li>
             <li className="hover:bg-secondary border-b p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
-              INSPIRACIONES
+              HOTELES
             </li>
             <li className="hover:bg-secondary p-1 underline-offset-4 hover:cursor-pointer hover:font-bold hover:text-white">
               OFERTAS

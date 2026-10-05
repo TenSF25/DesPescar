@@ -13,33 +13,33 @@ export const OffersDay = () => {
         </h2>
         <p className="text-[#44474E]">Vuelos seleccionados con descuentos exclusivos para hoy.</p>
       </div>
-      <div className="gird-cols-1 mx-auto grid w-full gap-5 md:grid-cols-3">
+      <div className="mx-auto grid w-full grid-cols-1 gap-5 md:grid-cols-3">
         <CardFlight
-          country="Londres, Reino Unido"
-          priceOffer={1630000}
-          price={1125000}
+          country="San Carlos de Bariloche, Río Negro"
+          priceOffer={240000}
+          price={185000}
           scale="direct"
-          timeFly={16}
+          timeFly={2}
           variant="preview"
-          imageUrl="/ru.webp"
+          imageUrl="/bariloche.jpg"
         />
         <CardFlight
-          country="Kioto, Japón"
-          priceOffer={4200000}
-          price={3425000}
-          scale="2 Escalas"
-          timeFly={32}
+          country="Ushuaia, Tierra del Fuego"
+          priceOffer={310000}
+          price={248000}
+          scale="direct"
+          timeFly={3}
           variant="preview"
-          imageUrl="/kioto.webp"
+          imageUrl="/ushuaia.jpg"
         />
         <CardFlight
-          country="Maldivas"
-          priceOffer={2800000}
-          price={2350000}
+          country="El Calafate, Santa Cruz"
+          priceOffer={330000}
+          price={269000}
           scale="1 Escala"
-          timeFly={26}
+          timeFly={5}
           variant="preview"
-          imageUrl="/maldivas.webp"
+          imageUrl="/calafate.jpg"
         />
       </div>
     </SectionContainer>

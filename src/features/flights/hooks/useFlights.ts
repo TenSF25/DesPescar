@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useVuelos } from '@/hooks/useAPI'; // Tu hook que hace el fetch al backend
 import type { FiltroEscala, Flight } from '../flights.types';
+import { getDurationMinutes } from '../utils/flightDuration';
 // Ajustá la importación del tipo de tu DTO si es necesario
 // import type { DetailedFlightResponseDto } from '../flights.types';
 
@@ -109,10 +110,15 @@ export const useFlights = () => {
         lista = lista.filter((v) => aerolineasFiltro.includes(v.airline.name));
       }
 
+      // `includedServices` del vuelo es el de su tarifa más barata (sin equipaje despachado): el filtro
+      // considera que un vuelo ofrece el equipaje si alguna de sus tarifas lo incluye.
+      const ofrece = (v: Flight, equipaje: 'carryOn' | 'checkedBaggage') =>
+        v.includedServices[equipaje] || v.fares.some((fare) => fare.includedServices[equipaje]);
+
       if (equipajeFiltro === 'mano') {
-        lista = lista.filter((v) => v.includedServices.carryOn);
+        lista = lista.filter((v) => ofrece(v, 'carryOn'));
       } else if (equipajeFiltro === 'bodega') {
-        lista = lista.filter((v) => v.includedServices.checkedBaggage);
+        lista = lista.filter((v) => ofrece(v, 'checkedBaggage'));
       }
 
       lista = lista.filter((v) => {
@@ -126,7 +132,7 @@ export const useFlights = () => {
           case 'precio_desc':
             return b.price.transparentFinalPrice - a.price.transparentFinalPrice;
           case 'duracion':
-            return a.itinerary.durationMinutes - b.itinerary.durationMinutes;
+            return getDurationMinutes(a.itinerary) - getDurationMinutes(b.itinerary);
           case 'precio_asc':
           case 'mejor':
           default:

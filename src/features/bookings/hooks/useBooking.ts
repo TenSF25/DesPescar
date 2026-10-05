@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import axios from 'axios';
-import { api, gatewayBaseUrl } from '@/config/api';
+import { api } from '@/config/api';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useFlightStore } from '@/store/useFlightStore';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 import type { BookingInitResponse, PaymentCreateResponse } from '../bookings.types';
 
+/** Lo que reservation-service guarda hoy de cada pasajero: nombre completo y documento. */
 export type PassengerFormInput = {
   nombreCompleto: string;
   dniPasaporte: string;
@@ -14,13 +15,6 @@ export type PassengerFareDetails = {
   id: string;
   name: string;
   pricePerPassenger: number;
-};
-
-const getRequestErrorMessage = (error: unknown, fallback: string) => {
-  if (axios.isAxiosError<{ message?: string }>(error)) {
-    return error.response?.data?.message || error.message || fallback;
-  }
-  return error instanceof Error ? error.message : fallback;
 };
 
 export const useBooking = () => {
@@ -37,14 +31,6 @@ export const useBooking = () => {
     selectedReturnFare,
     setPassengersAssignedBookingId,
   } = useFlightStore();
-
-  const getAuthHeaders = () => {
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-  };
 
   const initBooking = async (hotelId?: string) => {
     setIsLoading(true);
@@ -72,14 +58,9 @@ export const useBooking = () => {
         paymentType: 'SINGLE_PAYMENT',
         hotelId: hotelId || null,
         baggageIds,
-        packageId: null,
       };
 
-      const initResponse = await api.post<BookingInitResponse>(
-        '/api/bookings/init',
-        initPayload,
-        getAuthHeaders(),
-      );
+      const initResponse = await api.post<BookingInitResponse>('/api/bookings/init', initPayload);
 
       const reservationId = initResponse.data.bookingId;
 
@@ -90,10 +71,7 @@ export const useBooking = () => {
       return { success: true, reservationId };
     } catch (err: unknown) {
       console.error('Error inicializando la reserva:', err);
-      const message = getRequestErrorMessage(
-        err,
-        'Ha ocurrido un error al inicializar la reserva.',
-      );
+      const message = getApiErrorMessage(err, 'Ha ocurrido un error al inicializar la reserva.');
       setError(message);
       return { success: false, error: message };
     } finally {
@@ -101,7 +79,8 @@ export const useBooking = () => {
     }
   };
 
-  const finalizeBookingAndPay = async (
+  /** Paso de datos: asigna pasajeros y asientos a la reserva (queda PENDIENTE_PAGO). */
+  const savePassengers = async (
     reservationId: number,
     formData: PassengerFormInput[],
     selectedSeats: string[],
@@ -130,36 +109,44 @@ export const useBooking = () => {
         precioTarifa: fareDetails.pricePerPassenger,
       }));
 
-      // 1. Guardar pasajeros inyectando el token
+      // reservation-service acepta la asignación de pasajeros una sola vez por reserva (un segundo PUT da 400).
       if (useFlightStore.getState().passengersAssignedBookingId !== reservationId) {
-        await api.put(
-          `/api/bookings/${reservationId}/passengers`,
-          {
-            pasajeros: pasajerosPayload,
-          },
-          getAuthHeaders(),
-        );
+        // El token lo agrega el interceptor de `api`.
+        await api.put(`/api/bookings/${reservationId}/passengers`, { pasajeros: pasajerosPayload });
         setPassengersAssignedBookingId(reservationId);
       }
+      return { success: true as const };
+    } catch (err: unknown) {
+      console.error('Error guardando los pasajeros:', err);
+      const message = getApiErrorMessage(err, 'No se pudieron guardar los datos de los pasajeros.');
+      setError(message);
+      return { success: false as const, error: message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      // El backend obtiene el importe y la moneda desde la reserva.
-      const paymentResponse = await api.post<PaymentCreateResponse>(
-        `${gatewayBaseUrl}/api/payments`,
-        {
-          reservationId: reservationId,
-        },
-        getAuthHeaders(),
-      );
+  /** Paso de pago: crea el pago (el importe lo toma el backend de la reserva) y devuelve el link de Mercado Pago. */
+  const startPayment = async (reservationId: number) => {
+    setIsLoading(true);
+    setError(null);
 
+    try {
+      if (!token) throw new Error('No hay sesión activa.');
+      if (!reservationId) throw new Error('Falta la reserva.');
+
+      const paymentResponse = await api.post<PaymentCreateResponse>('/api/payments', {
+        reservationId,
+      });
       const paymentUrl = paymentResponse.data.checkoutUrl;
       if (!paymentUrl) throw new Error('No se pudo generar el enlace de pago.');
 
-      return { success: true, paymentUrl, payment: paymentResponse.data };
+      return { success: true as const, paymentUrl, payment: paymentResponse.data };
     } catch (err: unknown) {
-      console.error('Error finalizando la reserva:', err);
-      const message = getRequestErrorMessage(err, 'Ha ocurrido un error al procesar el pago.');
+      console.error('Error iniciando el pago:', err);
+      const message = getApiErrorMessage(err, 'Ha ocurrido un error al procesar el pago.');
       setError(message);
-      return { success: false, error: message };
+      return { success: false as const, error: message };
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +154,8 @@ export const useBooking = () => {
 
   return {
     initBooking,
-    finalizeBookingAndPay,
+    savePassengers,
+    startPayment,
     isLoading,
     error,
   };

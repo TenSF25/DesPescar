@@ -1,10 +1,11 @@
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Button } from '@/components/ui/Button';
 import type { IncludedServices } from '@/features/flights/flights.types';
 
 interface BaggageProps {
   name: string;
   type: string;
-  price: string;
+  price: number;
   isSelect: boolean;
   serviciosIncluidos: IncludedServices;
   onSelect: () => void;
@@ -28,7 +29,9 @@ export const BaggageCard = ({
       </div>
 
       <div className="flex flex-col items-center justify-center bg-linear-to-b from-white to-slate-50/30 py-6">
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">+ $ {price}</h2>
+        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
+          + {formatCurrency(price)}
+        </h2>
         <p className="mt-1 text-xs font-medium text-slate-400">Por persona</p>
       </div>
 

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Button } from '../../../../components/ui/Button';
 import { formatCurrency } from '../../../../utils/formatCurrency';
 import type { Flight } from '../../flights.types';
+import { getDurationMinutes } from '../../utils/flightDuration';
 
 interface FlightCardProps {
   vuelo: Flight;
@@ -10,7 +11,7 @@ interface FlightCardProps {
 
 const formatearHora = (isoString: string) => {
   const fecha = new Date(isoString);
-  return fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  return fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
 const formatearDuracion = (minutos: number) => {
@@ -30,7 +31,7 @@ export const FlightCard = memo(({ vuelo, onSeleccionar }: FlightCardProps) => {
 
   const horaSalida = formatearHora(itinerary.departure.dateTime);
   const horaLlegada = formatearHora(itinerary.arrival.dateTime);
-  const duracionFormateada = formatearDuracion(itinerary.durationMinutes);
+  const duracionFormateada = formatearDuracion(getDurationMinutes(itinerary));
   const llegaOtroDia = llegaAlDiaSiguiente(
     itinerary.departure.dateTime,
     itinerary.arrival.dateTime,

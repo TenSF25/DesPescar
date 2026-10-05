@@ -54,6 +54,7 @@ export const LoginForm = () => {
           name="password"
           icon="password"
           type="password"
+          autoComplete="new-password"
           className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
           fontColor="text-black"
           focusColor="text-white"

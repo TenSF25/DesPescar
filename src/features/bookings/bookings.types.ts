@@ -76,3 +76,27 @@ export interface PaymentCreateResponse {
   status: string;
   checkoutUrl: string | null;
 }
+
+export type BookingStatus =
+  'INICIADA' | 'PENDIENTE_PAGO' | 'ESPERANDO_PAGADORES' | 'CONFIRMADA' | 'EXPIRADA' | 'CANCELADA';
+
+/** Respuesta de GET /api/bookings/{id} (ReservationResponse en reservation-service). */
+export interface BookingDetail {
+  idCarrito: number;
+  vueloCodigo: string;
+  hotelId: string | null;
+  estadoGeneral: BookingStatus;
+  segundosRestantes: number | null;
+  montoTotal: number;
+  moneda: string;
+  asientos: Array<{
+    asientoIda: string | null;
+    asientoVuelta: string | null;
+    pagadorId: number | null;
+    precioCobrado: number | null;
+    estadoPago: string | null;
+    nombrePasajero: string | null;
+    dniPasaporte: string | null;
+    tarifaNombre: string | null;
+  }>;
+}

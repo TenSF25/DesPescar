@@ -7,6 +7,9 @@ export const gatewayBaseUrl = (import.meta.env.VITE_GATEWAY_URL || 'http://local
   '',
 );
 
+/** La plataforma solo opera vuelos nacionales: se ofrecen únicamente aeropuertos de este país. */
+export const NATIONAL_COUNTRY = 'Argentina';
+
 export const wsBrokerUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8085/ws-despescar';
 
 export const api = axios.create({

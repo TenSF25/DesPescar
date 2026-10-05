@@ -72,7 +72,8 @@ export const useDateCarousel = (selectedDate: string) => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (containerDates.current) {
-      const scrollAmount = 128 * 7;
+      // Se avanza una "página" visible (3, 5 o 7 fechas según el ancho).
+      const scrollAmount = containerDates.current.clientWidth;
       containerDates.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',

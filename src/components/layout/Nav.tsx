@@ -42,7 +42,7 @@ export const Nav = () => {
               VUELOS
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
-              INSPIRACIONES
+              HOTELES
             </li>
             <li className="hover:text-primary underline-offset-4 hover:cursor-pointer hover:font-bold hover:underline">
               OFERTAS

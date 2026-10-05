@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
+import { MobileCollapse } from '@/components/ui/MobileCollapse';
 import { SectionContainer } from '@/components/ui/SectionContainer';
 import { DateCarousel } from '../components/Results/DateCarousel';
 import { FlightList } from '../components/Results/FlightList';
@@ -108,6 +109,9 @@ export const ResultsPage = () => {
             <DateCarousel
               activeDate={pasoActual === 'IDA' ? formatDepartureDate : formatReturnDate}
               paramKey={pasoActual === 'IDA' ? 'departureDate' : 'returnDate'}
+              origin={pasoActual === 'IDA' ? origin : destination}
+              destination={pasoActual === 'IDA' ? destination : origin}
+              passengers={metadatos?.passengers ?? (Number(searchParams.get('passengers')) || 1)}
             />
 
             {isLoading ? (
@@ -132,7 +136,7 @@ export const ResultsPage = () => {
             )}
           </div>
 
-          <aside className="w-full">
+          <MobileCollapse label="Filtros" icon="tune" className="w-full">
             <FlightFilters
               escalaFiltro={escalaFiltro as FiltroEscala}
               onEscalaChange={setEscalaFiltro}
@@ -147,7 +151,7 @@ export const ResultsPage = () => {
               onHorarioMaxChange={setHorarioMax}
               onLimpiar={handleLimpiarFiltros}
             />
-          </aside>
+          </MobileCollapse>
         </div>
       </SectionContainer>
 

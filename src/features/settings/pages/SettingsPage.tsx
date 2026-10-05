@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
-import { useAuthStore } from '@/store/useAuthStore';
+import { logoutSession } from '@/features/auth/logout';
 import { Card } from '@/features/profile/components/FormParts';
 import { profileStore } from '@/features/profile/store/useProfileStore';
 import { reservationsStore } from '@/features/reservations/store/useReservationsStore';
@@ -83,7 +83,6 @@ const descargarDatos = () => {
 
 export const SettingsPage = () => {
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
   const { settings, updateSettings } = useSettingsStore();
 
   // TODO(backend): cambiar contraseña y eliminar cuenta se habilitan cuando existan los endpoints.
@@ -95,7 +94,7 @@ export const SettingsPage = () => {
   };
 
   const cerrarSesion = () => {
-    logout();
+    logoutSession();
     navigate('/');
   };
 

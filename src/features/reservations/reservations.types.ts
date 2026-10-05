@@ -23,4 +23,6 @@ export interface FlightReservation {
   totalPaid?: number;
   /** Correo de quien compró el vuelo (al que se envían confirmaciones y cancelaciones). */
   contactEmail?: string;
+  /** true si la reserva existe en reservation-service; false para los datos de ejemplo. */
+  remote?: boolean;
 }

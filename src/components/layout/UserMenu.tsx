@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { useAuthStore } from '@/store/useAuthStore';
+import { logoutSession } from '@/features/auth/logout';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { ProfileAvatar } from '@/features/profile/components/ProfileAvatar';
 import { Button } from '../ui/Button';
@@ -19,7 +19,6 @@ export const UserMenu = () => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     if (!open) return;
@@ -39,7 +38,7 @@ export const UserMenu = () => {
 
   const cerrarSesion = () => {
     setOpen(false);
-    logout();
+    logoutSession();
     navigate('/');
   };
 

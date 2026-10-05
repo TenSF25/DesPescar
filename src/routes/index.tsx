@@ -13,6 +13,8 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { Baggage } from '@/features/bookings/pages/Baggage';
 import { Booking } from '@/features/bookings/pages/Booking';
+import { PaymentPage } from '@/features/bookings/pages/PaymentPage';
+import { PaymentResultPage } from '@/features/bookings/pages/PaymentResultPage';
 import { SeatSelection } from '@/features/bookings/pages/SeatSelection';
 import { HomePage } from '@/features/flights/pages/HomePage';
 import { ResultsPage } from '@/features/flights/pages/ResultsPage';
@@ -65,7 +67,8 @@ export const router = createBrowserRouter([
       },
       {
         path: '/booking',
-        element: <ProtectedRoute />,
+        // Solo el cliente (USER) puede reservar y pagar: los roles admin reciben 403 del backend.
+        element: <ProtectedRoute allow={['USER']} />,
         children: [
           {
             path: 'baggage',
@@ -80,8 +83,20 @@ export const router = createBrowserRouter([
             element: <Booking />,
           },
           {
-            path: 'checkout/travelers-data',
-            element: <h1>HOLA</h1>,
+            path: 'payment',
+            element: <PaymentPage />,
+          },
+          {
+            path: 'payment/success',
+            element: <PaymentResultPage result="success" />,
+          },
+          {
+            path: 'payment/pending',
+            element: <PaymentResultPage result="pending" />,
+          },
+          {
+            path: 'payment/failure',
+            element: <PaymentResultPage result="failure" />,
           },
         ],
       },

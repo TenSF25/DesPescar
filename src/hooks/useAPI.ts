@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Airport, RutaBuscada } from '../types/Interfaces';
 import type { MetadataSearch, Flight, FlightById } from '@/features/flights/flights.types';
-import { api } from '@/config/api';
+import { api, NATIONAL_COUNTRY } from '@/config/api';
 
 export const useAeropuerto = () => {
   const [aeropuertos, setAero] = useState<Airport[]>([]);
@@ -9,8 +9,8 @@ export const useAeropuerto = () => {
   useEffect(() => {
     const fetchAeropuertos = async () => {
       try {
-        const res = await api.get('/api/airports');
-        setAero(res.data);
+        const res = await api.get<Airport[]>('/api/airports');
+        setAero(res.data.filter((airport) => airport.country === NATIONAL_COUNTRY));
       } catch {
         console.error('ERROR');
       }
@@ -28,7 +28,10 @@ export const useVuelos = (filtros?: RutaBuscada) => {
   const [departureFlights, setDepartureFlights] = useState<Flight[]>([]);
   const [returnFlights, setReturnFlights] = useState<Flight[]>([]);
   const [metadatos, setMetadatos] = useState<MetadataSearch | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Arranca cargando si ya hay una búsqueda armada: evita mostrar un instante "0 vuelos encontrados".
+  const [isLoading, setIsLoading] = useState(() =>
+    Boolean(filtros?.origin && filtros.destination && filtros.departureDate && filtros.passengers),
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -124,26 +127,34 @@ export const useFlightId = (id: string) => {
 };
 
 export const useSearchAirportByCode = (code: string) => {
-  const [airport, setAirport] = useState('');
+  const [airport, setAirport] = useState<Airport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!code) return;
+
+    let activo = true;
+
     const fetchAirport = async () => {
+      setIsLoading(true);
+      setError('');
       try {
-        setIsLoading(true);
         const res = await api.get(`/api/airports/code/${code}`);
-        setAirport(res.data);
+        if (activo) setAirport(res.data);
       } catch {
-        console.warn('ERROR');
-        setError('Ocurrio un error al tratar de buscar el Aeropuerto.');
+        if (activo) setError('Ocurrio un error al tratar de buscar el Aeropuerto.');
       } finally {
-        setIsLoading(false);
+        if (activo) setIsLoading(false);
       }
     };
 
     fetchAirport();
-  });
+
+    return () => {
+      activo = false;
+    };
+  }, [code]);
 
   return {
     airport,

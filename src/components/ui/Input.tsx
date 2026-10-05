@@ -39,6 +39,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               type="text"
               ref={ref}
               placeholder=" "
+              // Sin sugerencias del navegador con lo escrito antes; quien lo necesite lo pisa con `autoComplete`.
+              autoComplete="off"
               className={cn(
                 `peer w-full bg-transparent pt-3 pb-0 text-[15px] font-semibold text-white transition-all outline-none placeholder:text-transparent focus-within:${focusColor}`,
                 error && 'text-red-100',

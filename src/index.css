@@ -36,3 +36,54 @@ body {
 .rdp-day_range_middle {
   border-radius: 0 !important;
 }
+
+/* El avión del mapa de asientos mide ~504px de ancho: se achica por tramos para entrar en celulares. */
+@media (max-width: 540px) {
+  .fit-plane {
+    zoom: 0.9;
+  }
+}
+@media (max-width: 500px) {
+  .fit-plane {
+    zoom: 0.8;
+  }
+}
+@media (max-width: 440px) {
+  .fit-plane {
+    zoom: 0.72;
+  }
+}
+@media (max-width: 400px) {
+  .fit-plane {
+    zoom: 0.65;
+  }
+}
+@media (max-width: 360px) {
+  .fit-plane {
+    zoom: 0.58;
+  }
+}
+@media (max-width: 320px) {
+  .fit-plane {
+    zoom: 0.5;
+  }
+}
+
+/* Con una barra de acciones fija abajo (alta ~77px en escritorio y ~117px en celular), el chat flotante
+   sube por encima de ella para no tapar su botón; el panel abierto sube con él. */
+html[data-sticky-bar] .koi-fab {
+  bottom: 6.5rem;
+}
+html[data-sticky-bar] .koi-panel {
+  bottom: 13rem;
+  height: min(34.375rem, calc(100dvh - 14rem));
+}
+@media (max-width: 639px) {
+  html[data-sticky-bar] .koi-fab {
+    bottom: 9rem;
+  }
+  html[data-sticky-bar] .koi-panel {
+    bottom: 14.5rem;
+    height: min(34.375rem, calc(100dvh - 15.5rem));
+  }
+}

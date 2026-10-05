@@ -1,4 +1,5 @@
 import { api } from '@/config/api';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 import { useEffect, useState, useCallback } from 'react';
 import type { KoiSession } from '../koi.types';
 
@@ -56,7 +57,10 @@ export const useKoiChat = () => {
           ...prev,
           {
             role: 'bot',
-            text: 'Disculpa, tuve un error al procesar tu mensaje. ¿Podrías repetirlo?',
+            text: getApiErrorMessage(
+              error,
+              'Disculpa, tuve un error al procesar tu mensaje. ¿Podrías repetirlo?',
+            ),
           },
         ]);
       } finally {
