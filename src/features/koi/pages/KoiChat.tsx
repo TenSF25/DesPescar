@@ -16,6 +16,12 @@ export default function KoiChat() {
   const cerrarChat = useCallback(() => setIsOpen(false), []);
   const carrito = useKoiCarrito(cerrarChat);
 
+  const dialogoRef = useRef<HTMLDivElement>(null);
+  const confirmando = carrito.estado.tipo === 'confirmarReemplazo';
+  useEffect(() => {
+    if (confirmando) dialogoRef.current?.focus();
+  }, [confirmando]);
+
   // Volviendo del login que pidió un botón de KOI: se reabre la ventana (una sola vez).
   // El timeout evita el setState sincrónico dentro del efecto y StrictMode lo limpia.
   useEffect(() => {
@@ -37,6 +43,7 @@ export default function KoiChat() {
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
+    carrito.limpiarAvisos();
     sendMessage(input);
     setInput('');
   };
@@ -239,21 +246,35 @@ export default function KoiChat() {
               </div>
             </div>
           )}
+          <p className="sr-only" role="status" aria-live="polite">
+            {carrito.estado.tipo === 'ocupado' && 'Agregando al carrito'}
+            {carrito.estado.tipo === 'agregado' && 'Agregado al carrito'}
+            {carrito.estado.tipo === 'error' && carrito.estado.texto}
+          </p>
           {carrito.estado.tipo === 'ocupado' && (
-            <p className="text-center text-xs text-gray-500" role="status">
+            <p className="text-center text-xs text-gray-500" aria-hidden="true">
               Agregando al carrito…
             </p>
           )}
 
           {carrito.estado.tipo === 'confirmarReemplazo' && (
             <div
+              ref={dialogoRef}
+              tabIndex={-1}
               role="alertdialog"
               aria-label="Reemplazar el vuelo del carrito"
+              aria-describedby="koi-reemplazo-texto"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  carrito.descartar();
+                }
+              }}
               className="rounded-2xl rounded-bl-none border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
             >
-              <p>
-                Tu carrito ya tiene un vuelo. ¿Lo reemplazo por este? Los asientos que habías
-                elegido se liberan.
+              <p id="koi-reemplazo-texto">
+                Tu carrito ya tiene un vuelo. ¿Lo reemplazo por este? Se quita el vuelo actual y
+                elegís asientos del nuevo.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -276,7 +297,6 @@ export default function KoiChat() {
 
           {carrito.estado.tipo === 'agregado' && (
             <div
-              role="status"
               className="flex items-center justify-between gap-3 rounded-2xl rounded-bl-none border border-green-200 bg-green-50 px-4 py-3 text-[14px] text-gray-800 shadow-sm"
             >
               <span>
@@ -298,14 +318,13 @@ export default function KoiChat() {
                 aria-label="Cerrar aviso"
                 className="text-gray-400 hover:text-gray-600"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
           )}
 
           {carrito.estado.tipo === 'error' && (
             <div
-              role="alert"
               className="flex items-start justify-between gap-3 rounded-2xl rounded-bl-none border border-red-200 bg-red-50 px-4 py-3 text-[14px] text-red-800 shadow-sm"
             >
               <span>{carrito.estado.texto}</span>
@@ -315,7 +334,7 @@ export default function KoiChat() {
                 aria-label="Cerrar aviso"
                 className="text-red-400 hover:text-red-600"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
           )}

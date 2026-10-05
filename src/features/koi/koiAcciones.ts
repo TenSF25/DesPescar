@@ -101,7 +101,7 @@ export const mensajeErrorCarrito = (status: number | undefined, codigo?: string)
   if (codigo === 'CARRITO_YA_TIENE_VUELO') {
     return 'Tu carrito ya tiene un vuelo. Volvé a elegir la opción para reemplazarlo.';
   }
-  if (codigo === 'HOTEL_NO_ENCONTRADO' || status === 404) {
+  if (codigo === 'HOTEL_NO_ENCONTRADO') {
     return 'Ese hotel ya no está disponible. Pedime otra opción y la busco.';
   }
   if (status === 401) {

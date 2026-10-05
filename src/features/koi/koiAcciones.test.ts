@@ -141,6 +141,7 @@ describe('mensajeErrorCarrito', () => {
   it('explica los errores conocidos del carrito', () => {
     expect(mensajeErrorCarrito(409, 'SIN_DISPONIBILIDAD_HOTEL')).toMatch(/no quedan habitaciones/i);
     expect(mensajeErrorCarrito(404, 'HOTEL_NO_ENCONTRADO')).toMatch(/ya no está disponible/);
+    expect(mensajeErrorCarrito(404, 'SIN_VUELO')).not.toMatch(/hotel/);
     expect(mensajeErrorCarrito(401)).toMatch(/iniciá sesión/i);
     expect(mensajeErrorCarrito(503)).toMatch(/en un ratito/);
     expect(mensajeErrorCarrito(undefined)).toMatch(/No pude agregarlo/);

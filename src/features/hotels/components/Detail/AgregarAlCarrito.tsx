@@ -15,7 +15,7 @@ interface Props {
 
 /** Texto en castellano para lo que puede responder POST /carrito/estadias. */
 const mensajeError = (e: ErrorApi): string => {
-  if (e.status === 403) return 'Solo las cuentas de cliente pueden reservar.';
+  if (e.status === 403) return e.mensaje || 'Solo las cuentas de cliente pueden reservar.';
   if (e.codigo === 'CARRITO_EN_USO')
     return 'Tu carrito se está actualizando en este momento. Probá de nuevo en unos segundos.';
   if (e.codigo === 'ESTADO_INVALIDO')
@@ -43,7 +43,21 @@ export const AgregarAlCarrito = ({ hotelId, habitacion: h, params }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const selectId = useId();
 
-  if (!params.checkIn || !params.checkOut || opciones.length === 0) return null;
+  if (!params.checkIn || !params.checkOut) return null;
+  if (user && user.role !== 'USER') {
+    return (
+      <p className="text-secondary/70 text-sm md:text-right">
+        Solo las cuentas de cliente pueden reservar.
+      </p>
+    );
+  }
+  if (opciones.length === 0) {
+    return (
+      <p role="status" className="text-secondary/70 text-sm md:text-right">
+        No hay suficientes habitaciones libres para {params.huespedes} huéspedes
+      </p>
+    );
+  }
   const { checkIn, checkOut } = params;
   // Si cambian las fechas o los huéspedes, la cantidad elegida puede quedar fuera de rango.
   const cantidadValida = opciones.includes(cantidad) ? cantidad : necesarias;
@@ -84,7 +98,10 @@ export const AgregarAlCarrito = ({ hotelId, habitacion: h, params }: Props) => {
             id={selectId}
             value={cantidadValida}
             disabled={enviando}
-            onChange={(e) => setCantidad(Number(e.target.value))}
+            onChange={(e) => {
+              setCantidad(Number(e.target.value));
+              setError(null);
+            }}
             className="text-secondary h-10 rounded-lg border border-[#E2E8F0] bg-white px-2 font-semibold"
           >
             {opciones.map((n) => (
@@ -102,7 +119,7 @@ export const AgregarAlCarrito = ({ hotelId, habitacion: h, params }: Props) => {
         aria-busy={enviando}
         className="bg-primary hover:bg-primary/90 focus-visible:outline-primary flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-5 font-bold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-wait disabled:opacity-60"
       >
-        <span className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+        <span aria-hidden="true" className="material-symbols-outlined text-[20px]">add_shopping_cart</span>
         {enviando ? 'Agregando...' : 'Agregar al carrito'}
       </button>
       {cantidadValida !== necesarias && h.precioTotal !== null && (

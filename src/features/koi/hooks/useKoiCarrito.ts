@@ -1,17 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { leerErrorApi } from '@/features/cart/carrito';
-import { agregarEstadia, obtenerCarrito, quitarVuelo } from '@/features/cart/services/carritoService';
 import { useCarritoStore } from '@/store/useCarritoStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useFlightStore } from '@/store/useFlightStore';
 import type { KoiOpcion } from '../koi.types';
-import {
-  estadoDeAsientos,
-  mensajeErrorCarrito,
-  planDeCarrito,
-  type AccionKoi,
-} from '../koiAcciones';
+import { estadoDeAsientos, type AccionKoi } from '../koiAcciones';
+import { ejecutarFlujoCarrito, type DepsCarrito, type EstadiaAgregada } from '../koiCarritoFlujo';
 import { marcarChatAbierto } from '../koiSesion';
 
 export type EstadoKoiCarrito =
@@ -21,22 +15,35 @@ export type EstadoKoiCarrito =
   | { tipo: 'agregado' }
   | { tipo: 'error'; texto: string };
 
-/** Al reemplazar, si el vuelo ya no está (404) o el carrito venció (410) no hay nada que quitar. */
-const yaNoHayVuelo = (status: number | null, codigo: string | null) =>
-  status === 410 || (status === 404 && (codigo === 'SIN_VUELO' || codigo === 'CARRITO_NO_ENCONTRADO'));
+// Acciones del store: descartan lo que llega después de cerrar sesión (generación)
+const depsDelStore = (): DepsCarrito => {
+  const s = useCarritoStore.getState();
+  return {
+    recargar: s.recargar,
+    leer: () => {
+      const { carrito, error } = useCarritoStore.getState();
+      return { carrito, error };
+    },
+    agregarEstadia: s.agregarEstadia,
+    quitarVuelo: s.quitarVuelo,
+  };
+};
 
 /**
- * Ejecuta los botones de las opciones de KOI contra el carrito. Lo que se agrega y a dónde
- * se navega lo decide planDeCarrito (puro, con tests); acá solo van las llamadas y la navegación.
+ * Ejecuta los botones de las opciones de KOI contra el carrito. El orden y los errores los
+ * decide ejecutarFlujoCarrito (con tests); acá solo van el estado de pantalla y la navegación.
  */
 export const useKoiCarrito = (alSalirDelChat: () => void) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const [estado, setEstado] = useState<EstadoKoiCarrito>({ tipo: 'libre' });
+  const enCurso = useRef(false);
+  const agregada = useRef<EstadiaAgregada>({ clave: null });
 
   const ejecutar = useCallback(
-    async (opcion: KoiOpcion, accion: AccionKoi, reemplazarVuelo = false) => {
+    async (opcion: KoiOpcion, accion: AccionKoi, reemplazar = false) => {
+      if (enCurso.current) return; // doble clic
       if (!user) {
         // Sin sesión: al login y de vuelta a esta página con el chat abierto (spec 4.9)
         marcarChatAbierto();
@@ -45,49 +52,42 @@ export const useKoiCarrito = (alSalirDelChat: () => void) => {
         return;
       }
 
-      const plan = planDeCarrito(opcion, accion);
+      enCurso.current = true;
       setEstado({ tipo: 'ocupado' });
       try {
-        if (plan.vuelo) {
-          if (reemplazarVuelo) {
-            try {
-              useCarritoStore.getState().setCarrito(await quitarVuelo());
-            } catch (error) {
-              const { status, codigo } = leerErrorApi(error, '');
-              if (!yaNoHayVuelo(status, codigo)) throw error;
-            }
-          } else {
-            const carrito = await obtenerCarrito();
-            if (carrito?.vuelo) {
-              setEstado({ tipo: 'confirmarReemplazo', opcion, accion });
-              return;
-            }
-          }
+        const salida = await ejecutarFlujoCarrito(
+          opcion,
+          accion,
+          reemplazar,
+          depsDelStore(),
+          agregada.current,
+        );
+        switch (salida.tipo) {
+          case 'confirmarReemplazo':
+            setEstado({ tipo: 'confirmarReemplazo', opcion, accion });
+            break;
+          case 'asientos':
+            useFlightStore.setState(estadoDeAsientos(salida.vuelo));
+            setEstado({ tipo: 'libre' });
+            alSalirDelChat();
+            navigate(salida.destino);
+            break;
+          case 'agregado':
+            setEstado({ tipo: 'agregado' });
+            break;
+          case 'descartado':
+            setEstado({ tipo: 'libre' });
+            break;
+          case 'error':
+            setEstado({ tipo: 'error', texto: salida.texto });
+            void useCarritoStore.getState().recargar();
+            break;
         }
-
-        if (plan.estadia) {
-          // La respuesta es el carrito completo: se guarda y el ícono del Nav se actualiza
-          useCarritoStore.getState().setCarrito(await agregarEstadia(plan.estadia));
-        }
-
-        if (plan.vuelo && plan.navegarA) {
-          useFlightStore.setState(estadoDeAsientos(plan.vuelo));
-          setEstado({ tipo: 'libre' });
-          alSalirDelChat();
-          navigate(plan.navegarA);
-          return;
-        }
-
-        setEstado({ tipo: 'agregado' });
       } catch (error) {
-        const { status, codigo } = leerErrorApi(error, '');
-        console.error('KOI: no se pudo agregar al carrito', status, codigo);
-        setEstado({
-          tipo: 'error',
-          texto: mensajeErrorCarrito(status ?? undefined, codigo ?? undefined),
-        });
-        // El carrito pudo cambiar (vencer, quedar sin vuelo): se vuelve a consultar
-        void useCarritoStore.getState().recargar();
+        console.error('KOI: no se pudo agregar al carrito', error);
+        setEstado({ tipo: 'error', texto: 'No pude agregarlo al carrito. Probá de nuevo.' });
+      } finally {
+        enCurso.current = false;
       }
     },
     [user, navigate, location, alSalirDelChat],
@@ -101,5 +101,12 @@ export const useKoiCarrito = (alSalirDelChat: () => void) => {
 
   const descartar = useCallback(() => setEstado({ tipo: 'libre' }), []);
 
-  return { estado, ejecutar, confirmarReemplazo, descartar };
+  /** Al mandar un mensaje nuevo se borran los avisos de agregado y de error. */
+  const limpiarAvisos = useCallback(
+    () =>
+      setEstado((e) => (e.tipo === 'agregado' || e.tipo === 'error' ? { tipo: 'libre' } : e)),
+    [],
+  );
+
+  return { estado, ejecutar, confirmarReemplazo, descartar, limpiarAvisos };
 };
