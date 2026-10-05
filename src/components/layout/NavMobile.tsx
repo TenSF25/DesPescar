@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router';
+import { logoutSession } from '@/features/auth/logout';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button } from '../ui/Button';
 import { userMenuItems } from './userMenuItems';
@@ -10,10 +11,9 @@ interface NavMobile {
 export const NavMobile = ({ open }: NavMobile) => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
 
   const cerrarSesion = () => {
-    logout();
+    logoutSession();
     navigate('/');
   };
 

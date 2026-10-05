@@ -6,15 +6,29 @@ interface SelectFieldProps {
   value: string;
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
+  error?: string | null;
+  disabled?: boolean;
 }
 
-export const SelectField = ({ label, value, options, onChange }: SelectFieldProps) => (
+export const SelectField = ({
+  label,
+  value,
+  options,
+  onChange,
+  error,
+  disabled,
+}: SelectFieldProps) => (
   <label className="flex w-full flex-col gap-2 font-semibold text-[#1A2B4C]">
     {label}
     <select
       value={value}
+      aria-invalid={error ? true : undefined}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-xl border border-black/20 bg-white p-2 font-normal text-black"
+      className={cn(
+        'w-full rounded-xl border border-black/20 bg-white p-2 font-normal text-black disabled:bg-gray-100 disabled:text-gray-500',
+        error && 'border-alert',
+      )}
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -22,6 +36,7 @@ export const SelectField = ({ label, value, options, onChange }: SelectFieldProp
         </option>
       ))}
     </select>
+    {error && <span className="text-alert text-sm font-normal">{error}</span>}
   </label>
 );
 
@@ -86,8 +101,9 @@ export const TextField = ({
       <input
         id={id}
         type={type}
+        aria-invalid={error ? true : undefined}
         className={cn(
-          'w-full rounded-xl border border-black/20 p-2',
+          'w-full rounded-xl border border-black/20 p-2 disabled:bg-gray-100 disabled:text-gray-500',
           error && 'border-alert',
           className,
         )}

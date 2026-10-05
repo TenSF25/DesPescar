@@ -16,7 +16,7 @@ const getFareClassRank = (name: string) => {
 export const DetailSelectionSeats = () => {
   const { seatsMap, selectedSeats } = useSeats();
 
-  const maxLimit = seatsMap?.totalSelectedLimit;
+  const total = seatsMap?.totalSelectedLimit ?? 0;
 
   const getSeatDetails = (seatId: string) => {
     if (!seatsMap?.layout) return null;
@@ -35,10 +35,11 @@ export const DetailSelectionSeats = () => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 lg:fixed lg:top-60 lg:left-20 lg:z-99 lg:w-auto lg:gap-8">
-      <div className="flex flex-col gap-4">
-        <h2 className="text-secondary text-xl font-bold lg:text-2xl">Tipos de asientos</h2>
-        <div className="flex max-w-150 flex-wrap gap-3">
+    // Siempre a la vista: panel fijo a la izquierda en escritorio y franja compacta pegada bajo el menú en celular/tablet.
+    <div className="sticky top-18 z-30 -mx-4 flex min-w-0 flex-col gap-3 self-stretch border-b border-black/10 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:fixed lg:top-28 lg:left-6 lg:m-0 lg:w-72 lg:gap-3 lg:self-auto lg:rounded-2xl lg:border lg:bg-white lg:p-3 lg:shadow-lg">
+      <div className="flex flex-col gap-2 lg:gap-2">
+        <h2 className="text-secondary text-sm font-bold lg:text-lg">Tipos de asientos</h2>
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
           {Object.entries(seatsMap?.fareClasses ?? {})
             .sort(([, a], [, b]) => getFareClassRank(a.name) - getFareClassRank(b.name))
             .map(([key, value]) => {
@@ -46,74 +47,84 @@ export const DetailSelectionSeats = () => {
 
               return (
                 <div
-                  className="border-secondary flex w-full items-center gap-3 rounded-lg border bg-white p-3 sm:w-70"
+                  className="border-secondary flex shrink-0 items-center gap-2 rounded-lg border bg-white p-2 lg:w-full lg:px-2 lg:py-1"
                   key={key}
                 >
                   <div
                     className={cn(
-                      `flex h-full max-h-10 w-full max-w-10 items-center justify-center rounded-lg`,
+                      `flex h-full max-h-10 w-full max-w-8 items-center justify-center rounded-lg`,
                     )}
                   >
-                    <span className={cn('material-symbols-outlined text-4xl!', colorStyle.text)}>
+                    <span className={cn('material-symbols-outlined text-2xl!', colorStyle.text)}>
                       chair
                     </span>
                   </div>
-                  <div className={cn('flex flex-col', colorStyle.text)}>
-                    <h4 className="text-[18px] font-semibold text-nowrap">{value.name}</h4>
-                    <h5 className="text-[18px]">{precioAsiento(value.price)}</h5>
+                  <div
+                    className={cn(
+                      'flex flex-col lg:flex-1 lg:flex-row lg:items-center lg:justify-between lg:gap-2',
+                      colorStyle.text,
+                    )}
+                  >
+                    <h4 className="text-sm font-semibold whitespace-nowrap">{value.name}</h4>
+                    <h5 className="text-sm">{precioAsiento(value.price)}</h5>
                   </div>
                 </div>
               );
             })}
         </div>
       </div>
-      <div className="flex flex-col gap-4">
-        <h2 className="text-secondary text-xl font-bold lg:text-2xl">Pasajeros</h2>
-        <div className="flex max-w-150 flex-wrap gap-3">
-          {Array.from({ length: maxLimit ?? 0 }).map((_, index) => {
-            const assignedSeatId = selectedSeats[index];
+      <div className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-secondary text-sm font-bold lg:text-lg">Asientos elegidos</h2>
+          <span className="text-secondary text-lg font-bold lg:text-2xl">
+            {selectedSeats.length}
+            <span className="text-secondary/50 text-sm font-semibold"> / {total}</span>
+          </span>
+        </div>
 
-            const seatDetails = assignedSeatId ? getSeatDetails(assignedSeatId) : null;
-            const visibleSeatNumber = seatDetails ? seatDetails.displayNumber : null;
+        <div
+          role="progressbar"
+          aria-label="Asientos elegidos"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={selectedSeats.length}
+          className="h-2 w-full overflow-hidden rounded-full bg-gray-200"
+        >
+          <div
+            className="bg-primary h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${total > 0 ? Math.min(100, (selectedSeats.length / total) * 100) : 0}%`,
+            }}
+          />
+        </div>
 
-            const seatCategoryKey = seatDetails?.fareClass;
-            const fareClassData = seatCategoryKey ? seatsMap?.fareClasses?.[seatCategoryKey] : null;
-            const colorStyle = fareClassData ? getColorSettings(fareClassData.colorKey) : null;
+        {selectedSeats.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible lg:pb-0">
+            {selectedSeats.map((seatId) => {
+              const seat = getSeatDetails(seatId);
+              if (!seat) return null;
+              const fareClass = seatsMap?.fareClasses?.[seat.fareClass];
+              const colorStyle = fareClass ? getColorSettings(fareClass.colorKey) : null;
 
-            return (
-              <div
-                key={index}
-                className="border-secondary flex w-full gap-2 rounded-lg border bg-white p-2 px-3 sm:w-60"
-              >
-                <div
+              return (
+                <span
+                  key={seatId}
+                  title={fareClass?.name}
                   className={cn(
-                    'flex h-12 w-12 items-center justify-center rounded-lg',
-                    colorStyle ? colorStyle.select : 'bg-gray-200 text-gray-400',
+                    'shrink-0 rounded-md px-2 py-1 text-sm font-bold text-white',
+                    colorStyle ? colorStyle.select : 'bg-gray-400',
                   )}
                 >
-                  {assignedSeatId ? (
-                    <span className={cn('text-md font-semibold text-white')}>
-                      {visibleSeatNumber}
-                    </span>
-                  ) : (
-                    <span className="material-symbols-outlined">close</span>
-                  )}
-                </div>
-                <div className="flex flex-col justify-center">
-                  <h4 className="text-secondary font-semibold">Pasajero {index + 1}</h4>
-                  <h5
-                    className={cn(
-                      'text-sm text-nowrap',
-                      colorStyle ? colorStyle.text : 'text-black/40',
-                    )}
-                  >
-                    {fareClassData ? fareClassData.name : 'Asiento sin seleccionar'}
-                  </h5>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  {seat.displayNumber}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        {total > 0 && selectedSeats.length >= total && (
+          <p className="text-success text-xs font-semibold">Ya elegiste todos los asientos.</p>
+        )}
       </div>
     </div>
   );

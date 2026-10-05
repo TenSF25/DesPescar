@@ -1,6 +1,6 @@
-import { Input } from './Input';
+import { AirportSelect } from './AirportSelect';
 import { DateRangePicker } from '@/components/ui/DateRangePicker';
-import { useSearchFly } from '@/hooks/useSearchFly';
+import { useSearchFly, type ValoresIniciales } from '@/hooks/useSearchFly';
 import { useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { useNavigate } from 'react-router';
@@ -10,33 +10,27 @@ import { useFlightStore } from '@/store/useFlightStore';
 interface moodleSearch {
   moodle: boolean;
   onClose?: () => void;
+  /** Búsqueda actual (la de la URL): el formulario arranca con esos datos y el usuario cambia lo que quiera. */
+  initialValues?: ValoresIniciales & { departureDate?: string; returnDate?: string };
 }
 
-export const Search = ({ moodle, onClose }: moodleSearch) => {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+/** 'YYYY-MM-DD' -> Date en hora local (new Date('YYYY-MM-DD') lo tomaría como UTC y correría un día). */
+const parsearFecha = (fecha?: string) => {
+  const [anio, mes, dia] = (fecha ?? '').split('-').map(Number);
+  return anio && mes && dia ? new Date(anio, mes - 1, dia) : undefined;
+};
+
+export const Search = ({ moodle, onClose, initialValues }: moodleSearch) => {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const from = parsearFecha(initialValues?.departureDate);
+    return from ? { from, to: parsearFecha(initialValues?.returnDate) } : undefined;
+  });
   const [origenError, setOrigenError] = useState<string | null>();
   const [destinoError, setDestinoError] = useState<string | null>();
   const [fechaError, setFechaError] = useState<string | null>();
   const clearSearch = useFlightStore((state) => state.clearSearch);
 
-  const {
-    setOrigen,
-    setDestino,
-    origenSelect,
-    origenInput,
-    destinoSelect,
-    destinoInput,
-    setOrigenSelect,
-    setDestinoSelect,
-    origen,
-    destino,
-    seleccionarOrigen,
-    seleccionarDestino,
-    setPasajeros,
-    pasajeros,
-    contenedorDestinoRef,
-    contenedorOrigenRef,
-  } = useSearchFly();
+  const { origen, destino, pasajeros, setPasajeros } = useSearchFly(initialValues);
 
   const navigate = useNavigate();
 
@@ -60,15 +54,15 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
       setFechaError(null);
     }
 
-    if (origenInput.trim() === '') {
-      setOrigenError('Por favor, ingrese un origen.');
+    if (!origen.seleccionado) {
+      setOrigenError('Por favor, elegí un aeropuerto de origen de la lista.');
       errores = true;
     } else {
       setOrigenError(null);
     }
 
-    if (!destinoInput.trim()) {
-      setDestinoError('Por favor, ingrese un destino.');
+    if (!destino.seleccionado) {
+      setDestinoError('Por favor, elegí un aeropuerto de destino de la lista.');
       errores = true;
     } else {
       setDestinoError(null);
@@ -77,12 +71,12 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
     if (errores) return;
 
     const formatedDateDeparture = formatearFechaAString(dateRange!.from!);
-    const formatedDateReturn = formatearFechaAString(dateRange!.to!);
+    const formatedDateReturn = dateRange!.to ? formatearFechaAString(dateRange!.to) : '';
 
     clearSearch();
 
     navigate(
-      `/vuelos?origin=${origen[0].code}&destination=${destino[0].code}&passengers=${pasajeros}&departureDate=${formatedDateDeparture}&returnDate=${formatedDateReturn}`,
+      `/vuelos?origin=${origen.seleccionado!.code}&destination=${destino.seleccionado!.code}&passengers=${pasajeros}&departureDate=${formatedDateDeparture}${formatedDateReturn ? `&returnDate=${formatedDateReturn}` : ''}`,
     );
     if (moodle && onClose) {
       onClose();
@@ -95,75 +89,45 @@ export const Search = ({ moodle, onClose }: moodleSearch) => {
       className="@container relative z-40 mx-auto flex w-full flex-col rounded-3xl border border-white/20 bg-black/40 p-3 text-white shadow-2xl backdrop-blur-xl sm:p-5 @xs:p-4"
     >
       <div className="grid w-full grid-cols-1 gap-3 @md:grid-cols-2 @xl:grid-cols-[1fr_1fr_1fr_1fr_0.5fr]">
-        <div className="relative flex w-full flex-col" ref={contenedorOrigenRef}>
-          <Input
-            id="origen-input"
-            icon="flight_takeoff"
-            label="Origen"
-            value={origenInput}
-            onChange={(e) => {
-              setOrigen(e.target.value);
-              setOrigenSelect(false);
-              if (e.target.value.trim() !== '') setOrigenError(null);
-            }}
-            className="h-16"
-            error={origenError || undefined}
-          />
-          {origenInput.trim() !== '' && !origenSelect && origen.length > 0 && (
-            <ul className="absolute top-[calc(100%+8px)] z-50 flex max-h-56 w-full flex-col overflow-y-auto rounded-xl border border-white/10 bg-slate-900/95 text-white shadow-xl backdrop-blur-xl">
-              <li className="sticky top-0 z-10 flex items-center gap-2 bg-slate-900/95 p-3 text-[11px] font-bold tracking-wider text-white/50 uppercase backdrop-blur-md">
-                <span className="material-symbols-outlined text-[16px]">travel</span> Aeropuertos
-              </li>
-              {origen.map((aero) => (
-                <li
-                  key={aero.id}
-                  className="cursor-pointer border-t border-white/5 p-3 text-sm transition-colors hover:bg-white/10"
-                  onClick={() => {
-                    seleccionarOrigen(aero);
-                    setOrigenError(null);
-                  }}
-                >
-                  {aero.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <AirportSelect
+          id="origen-input"
+          label="Origen"
+          icon="flight_takeoff"
+          texto={origen.texto}
+          abierto={origen.abierto}
+          opciones={origen.opciones}
+          error={origenError}
+          onFocus={origen.abrir}
+          onChange={(valor) => {
+            origen.escribir(valor);
+            setOrigenError(null);
+          }}
+          onSelect={(aero) => {
+            origen.seleccionar(aero);
+            setOrigenError(null);
+          }}
+          onClose={origen.cerrar}
+        />
 
-        <div className="relative flex w-full flex-col" ref={contenedorDestinoRef}>
-          <Input
-            id="destino-input"
-            icon="flight_land"
-            label="Destino"
-            value={destinoInput}
-            onChange={(e) => {
-              setDestino(e.target.value);
-              setDestinoSelect(false);
-              if (e.target.value.trim() !== '') setDestinoError(null);
-            }}
-            className="h-16"
-            error={destinoError || undefined}
-          />
-          {destinoInput.trim() !== '' && !destinoSelect && destino.length > 0 && (
-            <ul className="absolute top-[calc(100%+8px)] z-50 flex max-h-56 w-full flex-col overflow-y-auto rounded-xl border border-white/10 bg-slate-900/95 text-white shadow-xl backdrop-blur-xl">
-              <li className="sticky top-0 z-10 flex items-center gap-2 bg-slate-900/95 p-3 text-[11px] font-bold tracking-wider text-white/50 uppercase backdrop-blur-md">
-                <span className="material-symbols-outlined text-[16px]">travel</span> Aeropuertos
-              </li>
-              {destino.map((aero) => (
-                <li
-                  key={aero.id}
-                  className="cursor-pointer border-t border-white/5 p-3 text-sm transition-colors hover:bg-white/10"
-                  onClick={() => {
-                    seleccionarDestino(aero);
-                    setDestinoError(null);
-                  }}
-                >
-                  {aero.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <AirportSelect
+          id="destino-input"
+          label="Destino"
+          icon="flight_land"
+          texto={destino.texto}
+          abierto={destino.abierto}
+          opciones={destino.opciones}
+          error={destinoError}
+          onFocus={destino.abrir}
+          onChange={(valor) => {
+            destino.escribir(valor);
+            setDestinoError(null);
+          }}
+          onSelect={(aero) => {
+            destino.seleccionar(aero);
+            setDestinoError(null);
+          }}
+          onClose={destino.cerrar}
+        />
 
         <div className="relative flex w-full min-w-0 flex-col gap-1">
           <DateRangePicker

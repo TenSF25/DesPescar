@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { type DateRange } from 'react-day-picker';
 import { es } from 'date-fns/locale';
+import { isScrollbarClick } from '@/utils/isScrollbarClick';
 
 interface DateRangePickerProps {
   range: DateRange | undefined;
@@ -37,13 +38,15 @@ export const useDateRangePicker = ({ range, onRangeChange }: DateRangePickerProp
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Solo con el calendario abierto, y sin contar la barra de scroll de la página o del modal.
+      if (!isOpen || isScrollbarClick(event)) return;
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         handleApply();
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [handleApply]);
+  }, [handleApply, isOpen]);
 
   const handleClear = () => {
     setTempRange(undefined);

@@ -1,6 +1,7 @@
 import { useMemo, memo } from 'react';
 import { FlightCard } from './FlightCard';
 import type { Flight } from '../../flights.types';
+import { getDurationMinutes } from '../../utils/flightDuration';
 
 type Orden = 'mejor' | 'precio_asc' | 'precio_desc' | 'duracion';
 
@@ -28,7 +29,7 @@ export const FlightList = memo(
           );
         case 'duracion':
           return listaCopia.sort(
-            (a, b) => a.itinerary.durationMinutes - b.itinerary.durationMinutes,
+            (a, b) => getDurationMinutes(a.itinerary) - getDurationMinutes(b.itinerary),
           );
         case 'mejor':
         default:
@@ -42,7 +43,8 @@ export const FlightList = memo(
       <div className="flex w-full flex-col gap-4">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <p className="text-secondary font-semibold">
-            {vuelosOrdenados.length} vuelos encontrados
+            {vuelosOrdenados.length}{' '}
+            {vuelosOrdenados.length === 1 ? 'vuelo encontrado' : 'vuelos encontrados'}
           </p>
 
           <div className="flex w-full items-center gap-2 sm:w-auto">

@@ -15,7 +15,7 @@ export const SearchFly = () => {
   const [pestana, setPestana] = useState<Pestana>('vuelos');
 
   return (
-    <div className="flex h-200 w-full items-center justify-center gap-12 bg-[url(/bgSearch.webp)] bg-cover bg-center bg-no-repeat">
+    <div className="flex min-h-150 w-full items-center justify-center gap-12 bg-[url(/bgSearch.webp)] bg-cover bg-center bg-no-repeat md:min-h-200">
       <SectionContainer className="gap-10">
         <div className="w-max-180 flex w-full flex-col gap-6 text-center text-white">
           <h1 className="text-2xl font-extrabold sm:text-4xl md:text-6xl">

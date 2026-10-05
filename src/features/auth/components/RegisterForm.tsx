@@ -81,6 +81,7 @@ export const RegisterForm = () => {
         <Input
           label="Contraseña"
           name="password"
+          autoComplete="new-password"
           icon="password"
           type="password"
           className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"

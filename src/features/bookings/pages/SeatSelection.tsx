@@ -8,6 +8,7 @@ import { useFlightStore } from '@/store/useFlightStore';
 import { AirplaneCanvas } from '../components/Plane/AirplaneCanvas';
 import { DetailSelectionSeats } from '../components/DetailSelectionSeats';
 import { useBooking, type ResultadoInit } from '../hooks/useBooking';
+import { SeatsProvider } from '../context/SeatsProvider';
 import { useSeats } from '../hooks/useSeats';
 
 const FOCO =
@@ -16,7 +17,7 @@ const FOCO =
 const BOTON_BORDE =
   'border-secondary text-secondary hover:bg-secondary flex min-h-11 w-full items-center justify-center gap-2 rounded-full border px-5 font-bold transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50';
 
-export const SeatSelection = () => {
+const SeatSelectionContent = () => {
   useBarraInferior();
   const { initBooking, reemplazarVuelo, isLoading, error } = useBooking();
   const { seatsMap, selectedSeats, isLoading: seatsLoading, error: seatsError } = useSeats();
@@ -70,9 +71,9 @@ export const SeatSelection = () => {
   };
 
   return (
-    <SectionContainer className="mt-6 mr-auto mb-28 ml-auto flex w-full max-w-312.5 flex-col items-center justify-center gap-8 lg:mt-10 lg:mb-10 lg:flex-row lg:gap-20">
+    <SectionContainer className="mx-auto mb-28 flex w-full max-w-312.5 flex-col items-center gap-6 lg:pl-84">
       <DetailSelectionSeats />
-      <div className="relative z-1 w-full max-w-full min-w-0 overflow-x-auto lg:w-auto lg:overflow-visible">
+      <div className="relative z-1 w-full">
         <AirplaneCanvas></AirplaneCanvas>
       </div>
       <div className="fixed bottom-0 left-0 z-2 flex w-full justify-center border-t border-[#3234392d] bg-white">
@@ -177,3 +178,10 @@ export const SeatSelection = () => {
     </SectionContainer>
   );
 };
+
+/** Una sola instancia del estado de asientos (pedidos y WebSocket) para toda la pantalla. */
+export const SeatSelection = () => (
+  <SeatsProvider>
+    <SeatSelectionContent />
+  </SeatsProvider>
+);

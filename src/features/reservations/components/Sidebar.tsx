@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router';
-import { useAuthStore } from '@/store/useAuthStore';
+import { logoutSession } from '@/features/auth/logout';
 import { cn } from '@/utils/cn';
 
 const links = [
@@ -10,10 +10,9 @@ const links = [
 
 export const Sidebar = () => {
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
 
   const cerrarSesion = () => {
-    logout();
+    logoutSession();
     navigate('/');
   };
 

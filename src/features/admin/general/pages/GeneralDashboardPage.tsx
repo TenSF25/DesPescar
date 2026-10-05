@@ -86,7 +86,6 @@ export const GeneralDashboardPage = () => {
             data={[
               { label: 'Vuelos', value: 48, color: '#1f3051' },
               { label: 'Hoteles', value: 27, color: '#3457a6' },
-              { label: 'Paquetes', value: 7, color: '#c85300' },
             ]}
           />
         </ChartCard>

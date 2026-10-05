@@ -11,30 +11,30 @@ export const TrendFly = () => {
         </div>
         <div className="grid grid-cols-1 gap-10 md:h-200 md:grid-cols-2 md:gap-20">
           <CardImage
-            country="Venecia"
-            city="Italia"
-            imageUrl="/venecia.webp"
-            description="Experimenta la mágia de las calles flotantes."
+            country="Salta"
+            city="Salta"
+            imageUrl="/salta.jpg"
+            description="Recorré la Salta la Linda y sus paisajes de colores."
           />
           <div className="grid gap-10 md:grid-cols-2">
             <CardImage
-              country="Suiza"
-              city="Zermatt"
-              imageUrl="/suiza.webp"
-              description="Descubri la mágia de los Alpes suizos."
+              country="Mendoza"
+              city="Mendoza"
+              imageUrl="/mendoza.jpg"
+              description="Viñedos, vino y la cordillera de los Andes."
             />
             <CardImage
-              country="Florida"
-              city="Miami"
-              imageUrl="/miami.webp"
-              description="Viví el ritmo, las playas y la energía de miami."
+              country="Córdoba"
+              city="Córdoba"
+              imageUrl="/cordoba.jpg"
+              description="Sierras, historia y mucha vida cultural."
             />
             <div className="col-span-full">
               <CardImage
-                country="Noruega"
-                city="Fiordos"
-                imageUrl="/fiordos.webp"
-                description="Donde la naturaleza se convierte en espectáculo."
+                country="Cataratas del Iguazú"
+                city="Misiones"
+                imageUrl="/iguazu.jpg"
+                description="Una de las maravillas naturales del mundo, en plena selva."
               />
             </div>
           </div>

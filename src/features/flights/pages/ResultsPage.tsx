@@ -135,6 +135,9 @@ export const ResultsPage = () => {
             <DateCarousel
               activeDate={pasoActual === 'IDA' ? formatDepartureDate : formatReturnDate}
               paramKey={pasoActual === 'IDA' ? 'departureDate' : 'returnDate'}
+              origin={pasoActual === 'IDA' ? origin : destination}
+              destination={pasoActual === 'IDA' ? destination : origin}
+              passengers={metadatos?.passengers ?? (Number(searchParams.get('passengers')) || 1)}
             />
 
             {isLoading ? (

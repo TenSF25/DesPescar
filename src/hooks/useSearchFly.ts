@@ -1,106 +1,93 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useAeropuerto } from './useAPI';
 import type { Airport } from '../types/Interfaces';
-import type { SearchProps } from '../types/Interfaces';
 
-export const useSearchFly = (valoresIniciales?: SearchProps) => {
-  const { aeropuertos } = useAeropuerto();
+/** Cómo se muestra un aeropuerto elegido en el campo: corto, y distingue Aeroparque de Ezeiza. */
+export const etiquetaAeropuerto = (aero: Airport) => `${aero.city} (${aero.code})`;
 
-  const contenedorOrigenRef = useRef<HTMLDivElement>(null);
-  const contenedorDestinoRef = useRef<HTMLDivElement>(null);
+/** Minúsculas y sin tildes, para que "cord" encuentre "Córdoba". */
+const normalizar = (texto: string) =>
+  texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
-  const [origenInput, setOrigen] = useState(valoresIniciales?.origen?.name ?? '');
-  const [origenSelect, setOrigenSelect] = useState(Boolean(valoresIniciales?.origen));
-  const [origenSeleccionado, setOrigenSeleccionado] = useState<Airport | null>(
-    valoresIniciales?.origen ?? null,
+const coincide = (aero: Airport, busqueda: string) =>
+  [aero.name, aero.city, aero.country, aero.code].some((campo) =>
+    normalizar(campo).includes(busqueda),
   );
 
-  const [destinoInput, setDestino] = useState(valoresIniciales?.destino?.name ?? '');
-  const [destinoSelect, setDestinoSelect] = useState(Boolean(valoresIniciales?.destino));
-  const [destinoSeleccionado, setDestinoSeleccionado] = useState<Airport | null>(
-    valoresIniciales?.destino ?? null,
-  );
+/** Búsqueda previa con la que se precarga el formulario (códigos IATA, como viajan en la URL). */
+export interface ValoresIniciales {
+  origin?: string;
+  destination?: string;
+  passengers?: number;
+}
 
-  const origen = aeropuertos
-    .filter((aero) => !destinoSeleccionado || aero.code !== destinoSeleccionado.code)
-    .filter((aero) => {
-      const busqueda = origenInput.toLowerCase();
-      return (
-        aero.name.toLowerCase().includes(busqueda) ||
-        aero.city.toLowerCase().includes(busqueda) ||
-        aero.country.toLowerCase().includes(busqueda) ||
-        aero.code.toLowerCase().includes(busqueda)
-      );
-    });
+/**
+ * Estado de un campo de aeropuerto (origen o destino). Solo vale un aeropuerto elegido de la lista:
+ * lo que se escribe sirve para filtrar y se descarta al salir del campo si no se eligió nada.
+ * La elección vive en el padre para que cada campo pueda excluir la del otro.
+ */
+const useAirportField = (
+  aeropuertos: Airport[],
+  excluido: Airport | null,
+  seleccionado: Airport | null,
+  setEleccion: (aero: Airport | null) => void,
+) => {
+  // null = no se está escribiendo: el campo muestra el aeropuerto elegido (o queda vacío).
+  const [escrito, setEscrito] = useState<string | null>(null);
+  const [abierto, setAbierto] = useState(false);
 
-  const destino = aeropuertos
-    .filter((aero) => !origenSeleccionado || aero.code !== origenSeleccionado.code)
-    .filter((aero) => {
-      const busqueda = destinoInput.toLowerCase();
-      return (
-        aero.name.toLowerCase().includes(busqueda) ||
-        aero.city.toLowerCase().includes(busqueda) ||
-        aero.country.toLowerCase().includes(busqueda) ||
-        aero.code.toLowerCase().includes(busqueda)
-      );
-    });
-  const [pasajeros, setPasajeros] = useState(valoresIniciales?.pasajeros ?? 1);
-
-  const seleccionarOrigen = (aero: Airport) => {
-    if (destinoSeleccionado && aero.code === destinoSeleccionado.code) {
-      setDestino('');
-      setDestinoSeleccionado(null);
-    }
-    setOrigen(aero.name);
-    setOrigenSeleccionado(aero);
-    setOrigenSelect(true);
-  };
-
-  const seleccionarDestino = (aero: Airport) => {
-    if (origenSeleccionado && aero.code === origenSeleccionado.code) {
-      setOrigen('');
-      setOrigenSeleccionado(null);
-    }
-    setDestino(aero.name);
-    setDestinoSeleccionado(aero);
-    setDestinoSelect(true);
-  };
-
-  useEffect(() => {
-    const clickExterno = (e: MouseEvent) => {
-      if (contenedorOrigenRef.current && !contenedorOrigenRef.current.contains(e.target as Node)) {
-        setOrigenSelect(true);
-      }
-      if (
-        contenedorDestinoRef.current &&
-        !contenedorDestinoRef.current.contains(e.target as Node)
-      ) {
-        setDestinoSelect(true);
-      }
-    };
-
-    window.addEventListener('mousedown', clickExterno);
-    return () => window.removeEventListener('mousedown', clickExterno);
-  }, [setDestinoSelect, setOrigenSelect]);
+  const texto = escrito ?? (seleccionado ? etiquetaAeropuerto(seleccionado) : '');
+  // Sin escribir se muestran todas las opciones, no solo el aeropuerto ya elegido.
+  const busqueda = escrito === null ? '' : normalizar(escrito.trim());
+  const opciones = aeropuertos
+    .filter((aero) => aero.code !== excluido?.code)
+    .filter((aero) => coincide(aero, busqueda));
 
   return {
-    origen,
-    destino,
-    setDestino,
-    setDestinoSelect,
-    setOrigen,
-    setOrigenSelect,
-    origenSelect,
-    origenInput,
-    destinoSelect,
-    destinoInput,
-    origenSeleccionado,
-    destinoSeleccionado,
-    seleccionarOrigen,
-    seleccionarDestino,
-    setPasajeros,
-    pasajeros,
-    contenedorOrigenRef,
-    contenedorDestinoRef,
+    texto,
+    seleccionado,
+    abierto,
+    opciones,
+    abrir: () => setAbierto(true),
+    escribir: (valor: string) => {
+      setEscrito(valor);
+      setEleccion(null);
+      setAbierto(true);
+    },
+    seleccionar: (aero: Airport) => {
+      setEscrito(null);
+      setEleccion(aero);
+      setAbierto(false);
+    },
+    // Al salir del campo se cierra la lista y se descarta lo escrito que no se eligió.
+    cerrar: () => {
+      setAbierto(false);
+      setEscrito(null);
+    },
   };
+};
+
+export const useSearchFly = (iniciales?: ValoresIniciales) => {
+  const { aeropuertos } = useAeropuerto();
+  const [pasajeros, setPasajeros] = useState(iniciales?.passengers ?? 1);
+
+  // undefined = el usuario todavía no tocó el campo: vale la búsqueda previa (cuando cargan los aeropuertos).
+  const [origenEleccion, setOrigenEleccion] = useState<Airport | null | undefined>(undefined);
+  const [destinoEleccion, setDestinoEleccion] = useState<Airport | null | undefined>(undefined);
+
+  const resolver = (eleccion: Airport | null | undefined, code?: string) =>
+    eleccion !== undefined
+      ? eleccion
+      : (aeropuertos.find((aero) => aero.code === code?.toUpperCase()) ?? null);
+  const origenElegido = resolver(origenEleccion, iniciales?.origin);
+  const destinoElegido = resolver(destinoEleccion, iniciales?.destination);
+
+  // Cada campo excluye el aeropuerto elegido en el otro, para no armar un vuelo de A a A.
+  const origen = useAirportField(aeropuertos, destinoElegido, origenElegido, setOrigenEleccion);
+  const destino = useAirportField(aeropuertos, origenElegido, destinoElegido, setDestinoEleccion);
+
+  return { origen, destino, pasajeros, setPasajeros };
 };

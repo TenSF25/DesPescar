@@ -37,6 +37,38 @@ body {
   border-radius: 0 !important;
 }
 
+/* El avión del mapa de asientos mide ~504px de ancho: se achica por tramos para entrar en celulares. */
+@media (max-width: 540px) {
+  .fit-plane {
+    zoom: 0.9;
+  }
+}
+@media (max-width: 500px) {
+  .fit-plane {
+    zoom: 0.8;
+  }
+}
+@media (max-width: 440px) {
+  .fit-plane {
+    zoom: 0.72;
+  }
+}
+@media (max-width: 400px) {
+  .fit-plane {
+    zoom: 0.65;
+  }
+}
+@media (max-width: 360px) {
+  .fit-plane {
+    zoom: 0.58;
+  }
+}
+@media (max-width: 320px) {
+  .fit-plane {
+    zoom: 0.5;
+  }
+}
+
 .filtros-drawer {
   animation: filtros-drawer-in 0.25s ease-out;
 }
