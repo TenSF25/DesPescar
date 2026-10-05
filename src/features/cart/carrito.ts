@@ -200,6 +200,18 @@ export const leerErrorApi = (err: unknown, porDefecto: string): ErrorApi => {
       mensaje: texto(cuerpo.mensaje) ?? 'Tu carrito venció. Armalo de nuevo para seguir.',
     };
   }
+  // 401/403 pueden venir de Spring en inglés ({error:"Unauthorized"}): solo se respeta `mensaje`.
+  if (status === 401 || status === 403) {
+    return {
+      status,
+      codigo: texto(cuerpo.codigo),
+      mensaje:
+        texto(cuerpo.mensaje) ??
+        (status === 401
+          ? 'Tu sesión venció. Iniciá sesión de nuevo para seguir.'
+          : 'No tenés permiso para hacer esta acción.'),
+    };
+  }
   if (status >= 502 && status <= 504 && !texto(cuerpo.mensaje)) {
     return {
       status,

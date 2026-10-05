@@ -294,6 +294,21 @@ describe('leerErrorApi', () => {
     expect(leerErrorApi(axiosError(410, { error: 'Gone' }), 'x').codigo).toBe('CARRITO_EXPIRADO');
   });
 
+  it('401 y 403 no muestran el texto en inglés de Spring', () => {
+    expect(
+      leerErrorApi(axiosError(401, { error: 'Unauthorized', message: 'x' }), 'x').mensaje,
+    ).toBe('Tu sesión venció. Iniciá sesión de nuevo para seguir.');
+    expect(leerErrorApi(axiosError(403, { error: 'Forbidden' }), 'x').mensaje).toBe(
+      'No tenés permiso para hacer esta acción.',
+    );
+    expect(
+      leerErrorApi(
+        axiosError(403, { codigo: 'ACCESO_DENEGADO', mensaje: 'No es tu carrito.' }),
+        'x',
+      ),
+    ).toEqual({ status: 403, codigo: 'ACCESO_DENEGADO', mensaje: 'No es tu carrito.' });
+  });
+
   it('usa mensajes propios cuando el servicio no responde o no hay cuerpo', () => {
     expect(leerErrorApi(axiosError(503, ''), 'x').mensaje).toBe(
       'El servicio no está respondiendo. Probá de nuevo en unos minutos.',
