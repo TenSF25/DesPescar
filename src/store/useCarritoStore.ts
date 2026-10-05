@@ -1,0 +1,85 @@
+import { create } from 'zustand';
+import type {
+  AgregarEstadiaRequest,
+  Carrito,
+  ErrorApi,
+  TitularRequest,
+} from '@/features/cart/cart.types';
+import { leerErrorApi } from '@/features/cart/carrito';
+import * as carritoService from '@/features/cart/services/carritoService';
+
+type Resultado = { ok: true } | { ok: false; error: ErrorApi };
+
+interface CarritoState {
+  carrito: Carrito | null;
+  /** Momento (ms) en que vence el carrito, calculado al recibirlo con segundosRestantes. */
+  venceEn: number | null;
+  /** Ya se consultó GET /carrito al menos una vez en esta sesión. */
+  cargado: boolean;
+  cargando: boolean;
+  error: string | null;
+  /** Guarda un carrito recibido de cualquier endpoint (o null si quedó vacío). */
+  setCarrito: (carrito: Carrito | null) => void;
+  recargar: () => Promise<void>;
+  agregarEstadia: (pedido: AgregarEstadiaRequest) => Promise<Resultado>;
+  quitarEstadia: (estadiaId: number) => Promise<Resultado>;
+  quitarVuelo: () => Promise<Resultado>;
+  cargarTitulares: (titulares: TitularRequest[]) => Promise<Resultado>;
+  limpiar: () => void;
+}
+
+const vencimiento = (c: Carrito | null) => (c ? Date.now() + c.segundosRestantes * 1000 : null);
+
+/**
+ * Carrito del usuario (D25): vive en memoria, sin persistir, y se recarga con GET /carrito.
+ * Lo usan el ícono del Nav, el detalle del hotel, el flujo de vuelos y /carrito.
+ */
+export const useCarritoStore = create<CarritoState>()((set, get) => {
+  const accion = async (
+    llamada: () => Promise<Carrito | null>,
+    porDefecto: string,
+  ): Promise<Resultado> => {
+    try {
+      get().setCarrito(await llamada());
+      return { ok: true };
+    } catch (err: unknown) {
+      return { ok: false, error: leerErrorApi(err, porDefecto) };
+    }
+  };
+
+  return {
+    carrito: null,
+    venceEn: null,
+    cargado: false,
+    cargando: false,
+    error: null,
+    setCarrito: (carrito) =>
+      set({ carrito, venceEn: vencimiento(carrito), cargado: true, error: null }),
+    recargar: async () => {
+      set({ cargando: true, error: null });
+      try {
+        get().setCarrito(await carritoService.obtenerCarrito());
+      } catch (err: unknown) {
+        set({ error: leerErrorApi(err, 'No pudimos cargar tu carrito.').mensaje });
+      } finally {
+        set({ cargando: false });
+      }
+    },
+    agregarEstadia: (pedido) =>
+      accion(() => carritoService.agregarEstadia(pedido), 'No pudimos agregar la estadía.'),
+    quitarEstadia: (estadiaId) =>
+      accion(() => carritoService.quitarEstadia(estadiaId), 'No pudimos quitar la estadía.'),
+    quitarVuelo: () => accion(() => carritoService.quitarVuelo(), 'No pudimos quitar el vuelo.'),
+    cargarTitulares: async (titulares) => {
+      const c = get().carrito;
+      if (!c)
+        return { ok: false, error: { status: null, codigo: null, mensaje: 'No hay carrito.' } };
+      return accion(
+        () => carritoService.cargarTitulares(c.idCarrito, titulares),
+        'No pudimos guardar los titulares.',
+      );
+    },
+    limpiar: () =>
+      set({ carrito: null, venceEn: null, cargado: false, cargando: false, error: null }),
+  };
+});

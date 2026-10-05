@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { Button } from '../ui/Button';
+import { CartButton } from './CartButton';
 import { useNav } from './hooks/useNav';
 import { Marca } from './Marca';
 import { NavMobile } from './NavMobile';
@@ -51,20 +52,29 @@ export const Nav = () => {
               OFERTAS
             </li>
           </ul>
-          {user ? (
-            <UserMenu />
-          ) : (
-            <Link to={path}>
-              <Button
-                variant="secondary"
-                className="hidden w-40 justify-center text-[14px] md:flex"
-              >
-                {label}
-              </Button>
-            </Link>
-          )}
-          <div className="flex cursor-pointer justify-center md:hidden" onClick={toggleMenu}>
-            <span className="material-symbols-outlined">{isOpen ? 'close' : 'menu'}</span>
+          <div className="flex items-center gap-2 md:gap-4">
+            {user?.role === 'USER' && <CartButton />}
+            {user ? (
+              <UserMenu />
+            ) : (
+              <Link to={path}>
+                <Button
+                  variant="secondary"
+                  className="hidden w-40 justify-center text-[14px] md:flex"
+                >
+                  {label}
+                </Button>
+              </Link>
+            )}
+            <button
+              type="button"
+              className="flex h-11 w-11 cursor-pointer items-center justify-center md:hidden"
+              onClick={toggleMenu}
+              aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={isOpen}
+            >
+              <span className="material-symbols-outlined">{isOpen ? 'close' : 'menu'}</span>
+            </button>
           </div>
         </nav>
       </header>
