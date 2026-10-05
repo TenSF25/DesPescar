@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Carrito, EstadiaCarrito, VueloCarrito } from './cart.types';
 import {
+  esperaParaReconsultar,
   armarPasajeros,
   armarTitulares,
   cantidadEnCarrito,
@@ -320,5 +321,16 @@ describe('leerErrorApi', () => {
     });
     expect(leerErrorApi(axiosError(409, {}), 'Por defecto').mensaje).toBe('Por defecto');
     expect(leerErrorApi(new Error('boom'), 'Por defecto').mensaje).toBe('Por defecto');
+  });
+});
+
+describe('esperaParaReconsultar', () => {
+  it('espera hasta el vencimiento más un segundo', () => {
+    expect(esperaParaReconsultar(10_000, 4_000)).toBe(7_000);
+  });
+
+  it('si el carrito llegó ya vencido espera al menos 5 segundos', () => {
+    expect(esperaParaReconsultar(4_000, 4_000)).toBe(5_000);
+    expect(esperaParaReconsultar(1_000, 4_000)).toBe(5_000);
   });
 });

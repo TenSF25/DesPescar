@@ -25,6 +25,18 @@ export const formatCuentaRegresiva = (segundos: number) => {
 export const segundosHasta = (venceEn: number, ahora: number) =>
   Math.max(0, Math.ceil((venceEn - ahora) / 1000));
 
+/** Espera mínima para volver a consultar un carrito que llegó ya vencido (evita un bucle de 1 s). */
+const ESPERA_MINIMA_VENCIDO = 5000;
+
+/**
+ * Cuánto esperar (ms) para volver a pedir el carrito: un segundo después de que venza. Si el
+ * servidor lo devolvió ya vencido, al menos 5 segundos.
+ */
+export const esperaParaReconsultar = (venceEn: number, ahora: number) => {
+  const falta = venceEn - ahora;
+  return falta > 0 ? falta + 1000 : ESPERA_MINIMA_VENCIDO;
+};
+
 export type Urgencia = 'normal' | 'aviso' | 'vencido';
 
 export const urgencia = (segundos: number): Urgencia =>

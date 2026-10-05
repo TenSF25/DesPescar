@@ -28,6 +28,12 @@ interface CarritoState {
   limpiar: () => void;
 }
 
+const SESION_CAMBIADA: ErrorApi = {
+  status: null,
+  codigo: 'SESION_CAMBIADA',
+  mensaje: 'Tu sesión cambió. Volvé a intentarlo.',
+};
+
 const vencimiento = (c: Carrito | null) => (c ? Date.now() + c.segundosRestantes * 1000 : null);
 
 /**
@@ -35,14 +41,24 @@ const vencimiento = (c: Carrito | null) => (c ? Date.now() + c.segundosRestantes
  * Lo usan el ícono del Nav, el detalle del hotel, el flujo de vuelos y /carrito.
  */
 export const useCarritoStore = create<CarritoState>()((set, get) => {
+  /**
+   * Sube con cada limpiar() (cierre de sesión o cambio de usuario). Una respuesta que llega con
+   * otra generación es de la sesión anterior y se descarta.
+   */
+  let generacion = 0;
+
   const accion = async (
     llamada: () => Promise<Carrito | null>,
     porDefecto: string,
   ): Promise<Resultado> => {
+    const g = generacion;
     try {
-      get().setCarrito(await llamada());
+      const carrito = await llamada();
+      if (g !== generacion) return { ok: false, error: SESION_CAMBIADA };
+      get().setCarrito(carrito);
       return { ok: true };
     } catch (err: unknown) {
+      if (g !== generacion) return { ok: false, error: SESION_CAMBIADA };
       return { ok: false, error: leerErrorApi(err, porDefecto) };
     }
   };
@@ -56,13 +72,17 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
     setCarrito: (carrito) =>
       set({ carrito, venceEn: vencimiento(carrito), cargado: true, error: null }),
     recargar: async () => {
+      const g = generacion;
       set({ cargando: true, error: null });
       try {
-        get().setCarrito(await carritoService.obtenerCarrito());
+        const carrito = await carritoService.obtenerCarrito();
+        if (g === generacion) get().setCarrito(carrito);
       } catch (err: unknown) {
-        set({ error: leerErrorApi(err, 'No pudimos cargar tu carrito.').mensaje });
+        if (g === generacion) {
+          set({ error: leerErrorApi(err, 'No pudimos cargar tu carrito.').mensaje });
+        }
       } finally {
-        set({ cargando: false });
+        if (g === generacion) set({ cargando: false });
       }
     },
     agregarEstadia: (pedido) =>
@@ -79,7 +99,9 @@ export const useCarritoStore = create<CarritoState>()((set, get) => {
         'No pudimos guardar los titulares.',
       );
     },
-    limpiar: () =>
-      set({ carrito: null, venceEn: null, cargado: false, cargando: false, error: null }),
+    limpiar: () => {
+      generacion += 1;
+      set({ carrito: null, venceEn: null, cargado: false, cargando: false, error: null });
+    },
   };
 });
