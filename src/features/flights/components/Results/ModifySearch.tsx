@@ -1,7 +1,13 @@
 import { Search } from '@/components/ui/Search';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
-export const ModifySearch = ({ onClose }: { onClose: () => void }) => {
+export const ModifySearch = ({
+  onClose,
+  children,
+}: {
+  onClose: () => void;
+  children?: ReactNode;
+}) => {
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
@@ -31,7 +37,7 @@ export const ModifySearch = ({ onClose }: { onClose: () => void }) => {
             close
           </span>
         </div>
-        <Search moodle={true} onClose={onClose} />
+        {children ?? <Search moodle={true} onClose={onClose} />}
       </div>
     </div>
   );
