@@ -104,7 +104,7 @@ export const MyDataPage = () => {
   return (
     <form onSubmit={guardar} noValidate className="flex flex-col gap-5">
       <div className="bg-secondary relative flex min-h-32 flex-col justify-center overflow-hidden rounded-2xl px-6 py-8 sm:min-h-40 sm:px-11 sm:py-10">
-        <div className="pointer-events-none absolute top-1/2 right-[-30px] h-85 w-85 -translate-y-1/2 rounded-full bg-white/3" />
+        <div className="pointer-events-none absolute top-1/2 -right-7.5 h-85 w-85 -translate-y-1/2 rounded-full bg-white/3" />
         <h1 className="relative z-10 mb-2 text-2xl font-extrabold text-white sm:text-3xl">
           Mis datos
         </h1>

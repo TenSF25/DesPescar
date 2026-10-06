@@ -251,7 +251,7 @@ export const FlightCard = ({
             <button
               type="button"
               onClick={handleViewDetails}
-              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-[9px] text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
+              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-2.25 text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
             >
               Ver detalles
             </button>
@@ -268,7 +268,7 @@ export const FlightCard = ({
             <button
               type="button"
               onClick={handleViewDetails}
-              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-[9px] text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
+              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-2.25 text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
             >
               Ver detalles
             </button>
@@ -287,7 +287,7 @@ export const FlightCard = ({
             <button
               type="button"
               onClick={handleViewDetails}
-              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-[9px] text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
+              className="text-secondary hover:border-secondary min-h-10 cursor-pointer rounded-lg border-[1.5px] border-gray-200 px-4 py-2.25 text-center text-[13px] font-bold whitespace-nowrap transition-colors hover:bg-gray-100"
             >
               Ver detalles
             </button>

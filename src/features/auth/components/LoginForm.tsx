@@ -50,36 +50,38 @@ export const LoginForm = () => {
             <span className="material-symbols-outlined">error</span> {errorAuth?.message}
           </h3>
         )}
+
         <Input
           label="Correo electrónico"
           name="email"
           type="email"
           icon="alternate_email"
           defaultValue={cuentaCreada ?? ''}
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="h-15"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.email : ''}
           onChange={handleInputChange}
           required
-        ></Input>
+        />
+
         <Input
           label="Contraseña"
           name="password"
           icon="password"
           type="password"
           autoComplete="current-password"
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="h-15"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.password : ''}
           onChange={handleInputChange}
           required
-        ></Input>
-        <Button type="submit" className="h-12 border-2">
+        />
+
+        <Button type="submit" className="h-12 border-3">
           Iniciar Sesión
         </Button>
       </div>
+
       <div className="flex w-full flex-col items-center gap-4">
         <p className="text-sm font-semibold">O</p>
         <GoogleSignIn onCredential={(credential) => void executeGoogleLogin(credential)} />

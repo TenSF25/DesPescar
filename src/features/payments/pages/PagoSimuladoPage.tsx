@@ -184,7 +184,7 @@ export const PagoSimuladoPage = () => {
             {/* Vista previa de la tarjeta (decorativa: repite lo que se escribe abajo). */}
             <div
               aria-hidden="true"
-              className="bg-secondary mx-auto w-full max-w-xs rounded-xl p-5 text-white shadow-md"
+              className="bg-secondary mx-auto w-full max-w-37.5 rounded-xl p-5 text-white shadow-md"
             >
               <div className="mb-6 flex items-center justify-between">
                 <div className="flex h-6 w-9 items-center justify-center rounded bg-amber-200/80">

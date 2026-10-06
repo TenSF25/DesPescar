@@ -112,7 +112,7 @@ export default function KoiChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         title={isOpen ? 'Cerrar ventana' : '¡Haz blup para hablar con KOI!'}
-        className={`koi-fab group fixed right-4 bottom-4 z-[500] flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none sm:right-6 sm:bottom-6 sm:h-24 sm:w-24 ${
+        className={`koi-fab group fixed right-4 bottom-4 z-500 flex h-20 w-20 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 focus:outline-none sm:right-6 sm:bottom-6 sm:h-24 sm:w-24 ${
           isOpen
             ? 'right-10! h-16! w-16! bg-red-500 shadow-2xl hover:bg-red-600'
             : 'fish-bowl border-2 border-white/40 bg-linear-to-br from-blue-100 via-blue-200 to-blue-400 backdrop-blur-sm'
@@ -150,7 +150,7 @@ export default function KoiChat() {
       </button>
 
       <div
-        className={`fixed right-4 bottom-32 left-4 z-[500] flex h-137.5 max-h-[calc(100dvh-9rem)] w-auto origin-bottom-right flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 sm:right-6 sm:left-auto sm:w-95 ${
+        className={`fixed right-4 bottom-32 left-4 z-500 flex h-137.5 max-h-[calc(100dvh-9rem)] w-auto origin-bottom-right flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 sm:right-6 sm:left-auto sm:w-95 ${
           isOpen ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'
         }`}
       >
@@ -159,7 +159,7 @@ export default function KoiChat() {
             <button
               onClick={pokeKoi}
               title="No me toques la pecera"
-              className="flex h-[4.5rem] w-[4.5rem] shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
+              className="flex h-18 w-18 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white/40 bg-white/20 shadow-inner transition-transform hover:bg-white/30"
             >
               <KoiAvatar working={loading} dizzy={isDizzy} />
             </button>

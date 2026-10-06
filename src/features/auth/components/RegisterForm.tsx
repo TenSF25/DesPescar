@@ -53,9 +53,8 @@ export const RegisterForm = () => {
           name="firstName"
           type="text"
           icon="id_card"
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="border-secondary focus-within:bg-primary h-15 bg-white"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.firstName : ''}
           onChange={handleInputChange}
         ></Input>
@@ -64,9 +63,8 @@ export const RegisterForm = () => {
           name="lastName"
           type="text"
           icon="id_card"
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="border-secondary focus-within:bg-primary h-15 bg-white"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.lastName : ''}
           onChange={handleInputChange}
         ></Input>
@@ -75,9 +73,8 @@ export const RegisterForm = () => {
           name="email"
           icon="email"
           type="email"
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="border-secondary focus-within:bg-primary h-15 bg-white"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.email : ''}
           onChange={handleInputChange}
         ></Input>
@@ -87,9 +84,8 @@ export const RegisterForm = () => {
           autoComplete="new-password"
           icon="password"
           type="password"
-          className="border-secondary focus-within:bg-primary h-15 border-2 bg-white"
-          fontColor="text-black"
-          focusColor="text-white"
+          className="border-secondary focus-within:bg-primary h-15 bg-white"
+          variant="auth"
           error={errorAuth?.errors ? errorAuth.errors.password : ''}
           onChange={handleInputChange}
         ></Input>
@@ -104,7 +100,7 @@ export const RegisterForm = () => {
             type="checkbox"
           />
         </div>
-        <Button type="submit" className="h-12 border-2">
+        <Button type="submit" className="h-12 border-3">
           Registrarse
         </Button>
       </div>
